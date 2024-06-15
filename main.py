@@ -1,10 +1,11 @@
+from typing import get_args
+
 import pyxel
 from pyxelgrid import PyxelGrid
-from PlayerController import PlayerController
-from Tank import Tank
 
-def clamp(v, l, h):
-    return max(l, min(h, v))
+from objects.util import Direction
+from objects.Tank import Tank
+from objects.PlayerController import PlayerController
 
 '''
 GameField
@@ -15,13 +16,19 @@ GameField
 
 '''
 
+FPS = 60
+
 class GameField(PyxelGrid[int]):
-    def __init__(self, r: int = 5, c: int = 5, dim: int = 5):
+    def __init__(self, r: int = 15, c: int = 15, dim: int = 9):
         super().__init__(r, c, dim=dim)
 
     def init(self) -> None:
+        # internals
+        self.FPS = FPS
+        pyxel.load("sprites/tank_player.pyxres")
+        
         # spawn tanks
-        self.player = PlayerController(tank=Tank())
+        self.player = PlayerController(game=self, tank=Tank(game=self))
         self.tanks = list[Tank]()
 
         # TEST
@@ -30,29 +37,22 @@ class GameField(PyxelGrid[int]):
         
 
     def update(self) -> None:
-        # input
-        self.player.check_inputs()
-
-        # sanity check
-        for tank in [self.player.tank] + self.tanks:
-            tank.force_update(
-                x = clamp(tank.x, 0, self.c-1),
-                y = clamp(tank.y, 0, self.r-1),
-            )
+        # player actions
+        self.player.update()
 
 
     def draw_cell(self, r: int, c: int, x: int, y: int) -> None:
 
         # draw player tank
-        pyxel.load("my_resource.pyxres")
         pyxel.bltm(
             x=self.player.tank.x*self.dim,
             y=self.player.tank.y*self.dim,
-            w=self.dim-1,
-            h=self.dim-1,
+            w=8,
+            h=8,
             tm=0,
-            u=0,
+            u=8 * get_args(Direction).index(self.player.tank.direction),
             v=0,
+            colkey=0
         )
         #pyxel.rect(self.player.tank.x*self.dim, , self.dim-1, self.dim-1, 254)
 
@@ -66,11 +66,11 @@ class GameField(PyxelGrid[int]):
 
         for r in range(self.r):
             for c in range(self.c):
-                pyxel.rect(r*self.dim, c*self.dim, self.dim-1, self.dim-1, 5)
+                pyxel.rectb(r*self.dim, c*self.dim, self.dim-1, self.dim-1, 1)
 
     def post_draw_grid(self) -> None:
         ...
 
 
 game = GameField()
-game.run(title="Battle Tanks Bootleg:tm:", fps=60)
+game.run(title="Battle Tanks Bootleg:tm:", fps=FPS)
