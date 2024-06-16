@@ -46,6 +46,7 @@ class GameObject():
         self._game = game
         self._cell = game[x, y]
         self._cell.add_object(self)
+        self.move_to(x, y) # immediately trigger collision check on creation
     
     def get_cell(self) -> Cell:
         return self._cell
@@ -60,6 +61,8 @@ class GameObject():
         target_cell: Cell = self._game[x, y]
         
         for obj in target_cell.get_objects():
+            if obj == self:
+                continue
             if obj.can_collide(self) and self.can_collide(obj):
                 self.collided_with(obj)
                 obj.collided_with(self)
