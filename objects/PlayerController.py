@@ -22,7 +22,9 @@ PlayerController:
 '''
 
 class PlayerController():
-    def __init__(self, game: PyxelGrid[int], tank: Tank):
+    from objects.Cell import Cell
+    
+    def __init__(self, game: PyxelGrid[Cell], tank: Tank):
         self._game = game
 
         self.tank = tank

@@ -1,16 +1,11 @@
 import pyxel
 from pyxelgrid import PyxelGrid
 
+from objects.GameObject import GameObject
 from objects.util import Direction, clamp
 
 '''
 Tank
-    x: int
-        - the X position on grid
-
-    y: int
-        - the Y position on grid
-
     direction: "north" // "south" // "east" // "west"
         - where the tank is currently facing
     
@@ -26,17 +21,15 @@ Tank
 
 '''
 
-class Tank():
-    def __init__(self, game = PyxelGrid[int], x: int = 0, y: int = 0, dir: Direction = "east"):
-        self._game = game
-        self._last_move_frame = 0
+class Tank(GameObject):
+    from objects.Cell import Cell
 
-        self.x = x
-        self.y = y
+    def __init__(self, game: PyxelGrid[Cell], x: int, y: int, dir: Direction = "east"):
+        super().__init__(game, x, y)
+        
+        self._last_move_frame = 0
         self.direction = dir
         self.speed = 5
-    
-    # TODO bullet
 
     def move(self, dir: Direction) -> bool:
         # movement cap
@@ -50,15 +43,17 @@ class Tank():
         y_move = 1 if dir == "south" else -1 if dir == "north" else 0
         
         # sanity check
-        new_x = clamp(self.x + x_move, 0, self._game.c-1)
-        new_y = clamp(self.y + y_move, 0, self._game.c-1)
-        if self.x == new_x and self.y == new_y:
+        current_cell = self.get_cell()
+        new_x = clamp(current_cell.x + x_move, 0, self._game.c-1)
+        new_y = clamp(current_cell.y + y_move, 0, self._game.c-1)
+        if current_cell.x == new_x and current_cell.y == new_y:
             return False
 
 
 
         # update
-        self.x = new_x
-        self.y = new_y
-        return True
+        return self.move_to(new_x, new_y)
+
+    def fire(self):
+        
         
