@@ -55,5 +55,5 @@ class Tank(GameObject):
         return self.move_to(new_x, new_y)
 
     def fire(self):
-        
+        pass
         
