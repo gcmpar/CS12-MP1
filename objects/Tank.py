@@ -1,20 +1,26 @@
 import pyxel
 from pyxelgrid import PyxelGrid
 
+from objects.Cell import Cell
 from objects.GameObject import GameObject
-from objects.util import Direction, clamp
+from objects.Bullet import Bullet
+from objects.util import Orientation, Team
 
 '''
 Tank
-    direction: "north" // "south" // "east" // "west"
+    team: Team
+
+    orientation: "north" // "south" // "east" // "west"
         - where the tank is currently facing
     
     speed: int
-    - how many cells the tank can move per second
+        - how many cells the tank can move per second
+    fire_rate: int
+        - how many bullets the tank can fire per second
 
     
-    move(dir: Direction) -> bool
-        - change pos according to direction
+    move(ori: Orientation) -> bool
+        - change pos according to orientation
         - limited by speed
         - returns True if moved to cell successfully
 
@@ -22,38 +28,48 @@ Tank
 '''
 
 class Tank(GameObject):
-    from objects.Cell import Cell
-
-    def __init__(self, game: PyxelGrid[Cell], x: int, y: int, dir: Direction = "east"):
+    def __init__(self, game: PyxelGrid[Cell], x: int, y: int, ori: Orientation = "east", team: Team = "enemy"):
         super().__init__(game, x, y)
-        
         self._last_move_frame = 0
-        self.direction = dir
-        self.speed = 5
+        self._last_fire_frame = 0
 
-    def move(self, dir: Direction) -> bool:
+        self.team = team
+        self.orientation = ori
+        self.speed = 5
+        self.fire_rate = 1
+
+    def move(self, ori: Orientation) -> bool:
         # movement cap
         if pyxel.frame_count < (self._last_move_frame + (self._game.FPS / self.speed)):
             return False
         self._last_move_frame = pyxel.frame_count
-        self.direction = dir
+        self.orientation = ori
 
-
-        x_move = 1 if dir == "east" else -1 if dir == "west" else 0
-        y_move = 1 if dir == "south" else -1 if dir == "north" else 0
-        
-        # sanity check
-        current_cell = self.get_cell()
-        new_x = clamp(current_cell.x + x_move, 0, self._game.c-1)
-        new_y = clamp(current_cell.y + y_move, 0, self._game.c-1)
-        if current_cell.x == new_x and current_cell.y == new_y:
-            return False
-
-
+        x_move = 1 if ori == "east" else -1 if ori == "west" else 0
+        y_move = 1 if ori == "south" else -1 if ori == "north" else 0
 
         # update
-        return self.move_to(new_x, new_y)
-
+        return self.move_to(self.get_cell().x + x_move, self.get_cell().y + y_move)
+    
     def fire(self):
-        pass
+        # fire cap
+        if pyxel.frame_count < (self._last_fire_frame + (self._game.FPS / self.fire_rate)):
+            return
+        self._last_fire_frame = pyxel.frame_count
+
+        ori = self.orientation
+        x_move = 1 if ori == "east" else -1 if ori == "west" else 0
+        y_move = 1 if ori == "south" else -1 if ori == "north" else 0
+
+        Bullet(
+            game=self._game,
+            x=self.get_cell().x + x_move,
+            y=self.get_cell().y + y_move,
+            owner=self,
+            ori=self.orientation,
+            )
+
+    def collided_with(self, other: GameObject):
+        if isinstance(other, Bullet):
+            self.delete()
         

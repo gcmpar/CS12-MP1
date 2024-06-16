@@ -1,6 +1,7 @@
 from typing import Literal
 
-Direction = Literal["east", "north", "west", "south"]
+Orientation = Literal["east", "north", "west", "south"]
+Team = Literal["player", "enemy"]
 
 def clamp(v, l, h):
     return max(l, min(h, v))

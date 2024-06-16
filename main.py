@@ -3,16 +3,17 @@ from typing import get_args
 import pyxel
 from pyxelgrid import PyxelGrid
 
-from objects.util import Direction
+from objects.util import Orientation
 from objects.Tank import Tank
+from objects.Bullet import Bullet
 from objects.PlayerController import PlayerController
 from objects.Cell import Cell
 
 '''
 GameField
+    FPS: int
     player: PlayerController
-    tanks: list[Tank]
-        - the enemy tanks
+    entities: dict
 
 
 '''
@@ -20,7 +21,7 @@ GameField
 FPS = 60
 
 class GameField(PyxelGrid[Cell]):
-    def __init__(self, r: int = 15, c: int = 15, dim: int = 9):
+    def __init__(self, r: int = 15, c: int = 15, dim: int = 8):
         super().__init__(r, c, dim=dim)
 
     def init(self) -> None:
@@ -33,49 +34,47 @@ class GameField(PyxelGrid[Cell]):
             for c in range(self.c):
                 Cell(game=self, x=r, y=c)
 
-        # spawn tanks
-        self.player = PlayerController(game=self, tank=Tank(game=self, x=0, y=0))
-        self.enemies = list[Tank]()
-
-        # TEST
-        self.enemies.append(Tank(game=self,x=1,y=1))
-        self.enemies.append(Tank(game=self,x=2,y=2))
-        
+        # spawn
+        self.player = PlayerController(game=self, tank=Tank(game=self, x=0, y=0, team="player"))
 
     def update(self) -> None:
         # player actions
         self.player.update()
+        for r in range(self.r):
+            for c in range(self.c):
+                cell = game[r, c]
+                for obj in cell.get_objects():
+                    obj.update()
 
 
     def draw_cell(self, r: int, c: int, x: int, y: int) -> None:
 
-        # draw player tank
-        pyxel.bltm(
-            x=self.player.tank.get_cell().x*self.dim,
-            y=self.player.tank.get_cell().y*self.dim,
-            w=8,
-            h=8,
-            tm=0,
-            u=8 * get_args(Direction).index(self.player.tank.direction),
-            v=0,
-            colkey=0
-        )
-        #pyxel.rect(self.player.tank.x*self.dim, , self.dim-1, self.dim-1, 254)
+        cell = game[r, c]
+        for obj in cell.get_objects():
+            u = 0
+            v = 0
+            if type(obj) == Tank:
+                u_offset = 0 if obj == self.player.tank else self.dim * 4
+                u = u_offset + (self.dim * get_args(Orientation).index(obj.orientation))
+            elif type(obj) == Bullet:
+                u_offset = self.dim * 8
+                u = u_offset + (self.dim * get_args(Orientation).index(obj.orientation))
 
-        # draw other tanks
-        for tank in self.enemies:
-            pyxel.rect(tank.get_cell().x*self.dim, tank.get_cell().y*self.dim, self.dim-1, self.dim-1, 128)
+            pyxel.bltm(
+                x=y,
+                y=x,
+                w=8,
+                h=8,
+                tm=0,
+                u=u,
+                v=v,
+                colkey=0
+            )
+        
 
     def pre_draw_grid(self) -> None:
         # background
         pyxel.rect(0, 0, self.c*self.dim, self.r*self.dim, 0)
-
-        for r in range(self.r):
-            for c in range(self.c):
-                pass#pyxel.rectb(r*self.dim, c*self.dim, self.dim-1, self.dim-1, 1)
-
-    def post_draw_grid(self) -> None:
-        ...
 
 
 game = GameField()

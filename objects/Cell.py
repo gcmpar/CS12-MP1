@@ -12,7 +12,7 @@ from pyxelgrid import PyxelGrid
 Cell:
     _game: PyxelGrid[Cell]
         - reference to game
-    _objects: set[GameObject]
+    _objects: list[GameObject]
     - the GameObjects currently occupying the cell
 
     x: int
@@ -20,19 +20,19 @@ Cell:
     y: int
         - the Y position on grid
     
-    get_objects(): set[GameObject]
+    get_objects(): list[GameObject]
         - returns all GameObjects currently occupying the cell
     
-    add_object(object: GameObject):
+    add_object(obj: GameObject):
         - adds a GameObject to cell
     
-    remove_object(object: GameObject):
+    remove_object(obj: GameObject):
         - removes a GameObject from cell
 
 '''
 
 class Cell():
-    _objects: set[GameObject]
+    _objects: list[GameObject]
     def __init__(self, game: PyxelGrid[Cell], x: int, y: int):
         self._game = game
         self.x = x
@@ -40,16 +40,20 @@ class Cell():
 
         game[x, y] = self
 
-        self._objects = set()
+        self._objects = list()
 
-    def get_objects(self) -> set[GameObject]:
+    def get_objects(self) -> list[GameObject]:
         return self._objects
     
-    def add_object(self, object: GameObject):
-        self._objects.add(object)
+    def add_object(self, obj: GameObject):
+        if obj in self._objects:
+            return
+        self._objects.append(obj)
     
-    def remove_object(self, object: GameObject):
-        self._objects.remove(object)
+    def remove_object(self, obj: GameObject):
+        if obj not in self._objects:
+            return
+        self._objects.remove(obj)
 
 
     
