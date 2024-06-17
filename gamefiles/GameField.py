@@ -1,4 +1,3 @@
-from typing import get_args
 
 import pyxel
 from pyxelgrid import PyxelGrid
@@ -6,10 +5,9 @@ from gamefiles.Cell import Cell
 from gamefiles.PlayerController import PlayerController
 from gamefiles.PhysicsManager import PhysicsManager
 from gamefiles.Renderer import Renderer
-from misc.util import Orientation
+
 
 from objects.Tank import Tank
-from objects.Bullet import Bullet
 from objects.Brick import Brick
 from objects.Stone import Stone
 from objects.Mirror import Mirror
