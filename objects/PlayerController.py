@@ -1,7 +1,10 @@
-from typing import get_args
+from __future__ import annotations
+from typing import TYPE_CHECKING, get_args
 
+if TYPE_CHECKING:
+    from objects.GameField import GameField
+    
 import pyxel
-from pyxelgrid import PyxelGrid
 from objects.Tank import Tank
 from objects.util import Orientation
 
@@ -23,10 +26,8 @@ PlayerController:
 '''
 
 class PlayerController():
-    from objects.Cell import Cell
-
-    def __init__(self, game: PyxelGrid[Cell], tank: Tank):
-        self._game = game
+    def __init__(self, game: GameField, tank: Tank):
+        self.game = game
 
         self.tank = tank
     

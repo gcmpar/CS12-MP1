@@ -34,7 +34,7 @@ Cell:
 class Cell():
     _objects: list[GameObject]
     def __init__(self, game: PyxelGrid[Cell], x: int, y: int):
-        self._game = game
+        self.game = game
         self.x = x
         self.y = y
 

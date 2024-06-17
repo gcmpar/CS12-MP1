@@ -1,18 +1,22 @@
 from __future__ import annotations
+from collections.abc import Callable
 
-from pyxelgrid import PyxelGrid
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from objects.GameField import GameField
 from objects.Cell import Cell
-from objects.util import clamp
 
 # Base class for all game objects
 
 '''
 GameObject
-    _game: PyxelGrid[Cell]
+    __game: PyxelGrid[Cell]
         - reference to main game
     _cell: Cell
         - reference to the cell it's currently in
-    _deleted: bool
+    _on_destroy: list[Callable[[], None]]
+    destroyed: bool
         
     get_cell() -> Cell:
         - returns the cell it's in
@@ -21,8 +25,14 @@ GameObject
         - attempts to move to cell at (x, y)
         - returns False if unsuccessful
     
-    delete():
+    bind_to_destroy(f: Callable[[]])
+        - bind a function to destroy callback
+    unbind_from_destroy(f: Callable[[]])
+        - unbinds a function from detroy callback
+    destroy():
         - removes the object from game
+        - fires functions in _on_destroy
+
     ---------------------------------
     INTENDED TO BE OVERRIDEN:
 
@@ -42,10 +52,14 @@ GameObject
 # TODO deletion
 # TODO cell types
 class GameObject():
-    def __init__(self, game: PyxelGrid[Cell], x: int, y: int):
-        self._game = game
+    def __init__(self, game: GameField, x: int, y: int):
+        self.game = game
+        
         self._cell = game[y, x]
         self._cell.add_object(self)
+        self._on_destroy = list[Callable[[], None]]()
+        self.destroyed = False
+
         self.move_to(x, y) # immediately trigger collision check on creation
     
     def get_cell(self) -> Cell:
@@ -53,12 +67,12 @@ class GameObject():
 
     def move_to(self, x: int, y: int) -> bool:
         # sanity check
-        if not self._game.in_bounds(x, y):
+        if not self.game.in_bounds(x, y):
             self.out_of_bounds()
             return False
         
         current_cell = self._cell
-        target_cell: Cell = self._game[y, x]
+        target_cell: Cell = self.game[y, x]
         
         for obj in target_cell.get_objects():
             if obj == self:
@@ -74,9 +88,18 @@ class GameObject():
 
         return True
     
-    def delete(self):
+    def bind_to_destroy(self, f: Callable[[], None]):
+        if f in self._on_destroy:
+            return
+        self._on_destroy.append(f)
+    def unbind_from_destroy(self, f: Callable[[], None]):
+        if f not in self._on_destroy:
+            return
+        self._on_destroy.remove(f)
+    def destroy(self):
         self._cell.remove_object(self)
-        self._deleted = True
+        self.destroyed = True
+        (f() for f in self._on_destroy)
         del self
 
 
@@ -85,7 +108,7 @@ class GameObject():
     def update(self):
         pass
 
-    def can_collide(self, other: GameObject):
+    def can_collide(self, other: GameObject) -> bool:
         return True
     
     def collided_with(self, other: GameObject):

@@ -2,12 +2,10 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import pyxel
-from pyxelgrid import PyxelGrid
-
-from objects.Cell import Cell
 from objects.GameObject import GameObject
 
 if TYPE_CHECKING:
+    from objects.GameField import GameField
     from objects.Tank import Tank
 
 
@@ -26,7 +24,7 @@ Bullet:
 '''
 
 class Bullet(GameObject):
-    def __init__(self, game: PyxelGrid[Cell], x: int, y: int, owner: Tank, ori: Orientation, speed: int=15):
+    def __init__(self, game: GameField, x: int, y: int, owner: Tank, ori: Orientation, speed: int=15):
         super().__init__(game, x, y)
         self._last_move_frame = 0
 
@@ -37,8 +35,8 @@ class Bullet(GameObject):
     
     def update(self):
         # movement cap
-        if pyxel.frame_count < (self._last_move_frame + (self._game.FPS / self.speed)):
-            return False
+        if pyxel.frame_count < (self._last_move_frame + (self.game.FPS / self.speed)):
+            return
         self._last_move_frame = pyxel.frame_count
 
         ori = self.orientation
@@ -55,7 +53,7 @@ class Bullet(GameObject):
         return True
 
     def collided_with(self, other: GameObject):
-        self.delete()
+        self.destroy()
     
     def out_of_bounds(self):
-        self.delete()
+        self.destroy()
