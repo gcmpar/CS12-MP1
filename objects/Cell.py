@@ -38,7 +38,7 @@ class Cell():
         self.x = x
         self.y = y
 
-        game[x, y] = self
+        game[y, x] = self
 
         self._objects = list()
 

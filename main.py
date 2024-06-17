@@ -61,8 +61,8 @@ class GameField(PyxelGrid[Cell]):
                 u = u_offset + (self.dim * get_args(Orientation).index(obj.orientation))
 
             pyxel.bltm(
-                x=y,
-                y=x,
+                x=x,
+                y=y,
                 w=8,
                 h=8,
                 tm=0,

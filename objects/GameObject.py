@@ -44,7 +44,7 @@ GameObject
 class GameObject():
     def __init__(self, game: PyxelGrid[Cell], x: int, y: int):
         self._game = game
-        self._cell = game[x, y]
+        self._cell = game[y, x]
         self._cell.add_object(self)
         self.move_to(x, y) # immediately trigger collision check on creation
     
@@ -58,7 +58,7 @@ class GameObject():
             return False
         
         current_cell = self._cell
-        target_cell: Cell = self._game[x, y]
+        target_cell: Cell = self._game[y, x]
         
         for obj in target_cell.get_objects():
             if obj == self:
