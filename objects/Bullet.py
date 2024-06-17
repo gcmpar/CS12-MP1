@@ -1,59 +1,70 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 
-import pyxel
-from objects.GameObject import GameObject
-
 if TYPE_CHECKING:
-    from objects.GameField import GameField
+    from gamefiles.GameField import GameField
+    from misc.util import Orientation
     from objects.Tank import Tank
 
-
-from objects.util import Orientation
+from objects.GameObject import GameObject
+from objects.Entity import Entity
+from objects.Mirror import Mirror
 
 '''
 Bullet:
+    orientation: Orientation
+    speed: int
+
+
     owner: Tank
         - tank who fired the bullet
-
-    orientation: Orientation
-        - where bullet is currently facing
-    
-    speed: int
-        - how many cells the bullet can move per second
 '''
 
-class Bullet(GameObject):
+class Bullet(Entity):
+    orientation: Orientation
+    _last_mirror_hit: Mirror | None
     def __init__(self, game: GameField, x: int, y: int, owner: Tank, ori: Orientation, speed: int=15):
-        super().__init__(game, x, y)
-        self._last_move_frame = 0
+        super().__init__(game=game, x=x, y=y, ori=ori, speed=speed)
+        self._last_mirror_hit = None
 
         self.owner = owner
-        self.orientation = ori
-        self.speed = speed
-        
-    
-    def update(self):
-        # movement cap
-        if pyxel.frame_count < (self._last_move_frame + (self.game.FPS / self.speed)):
-            return
-        self._last_move_frame = pyxel.frame_count
 
-        ori = self.orientation
-        x_move = 1 if ori == "east" else -1 if ori == "west" else 0
-        y_move = 1 if ori == "south" else -1 if ori == "north" else 0
+        def on_move():
+            cell = self.get_cell()
+            if self._last_mirror_hit is not None:
+                if self._last_mirror_hit not in cell.get_objects():
+                    self._last_mirror_hit = None
 
-        self.move_to(self.get_cell().x + x_move, self.get_cell().y + y_move)
-    
+        self.bind_to_move(on_move)
+
     def can_collide(self, other: GameObject):
-        if self.owner.team == "enemy":
-            if isinstance(other, Tank) and other.team == "enemy":
-                return False
+        if isinstance(other, Mirror):
+            return False
         
         return True
 
     def collided_with(self, other: GameObject):
         self.destroy()
+    
+    def touched(self, other: GameObject):
+        if isinstance(other, Mirror) and self._last_mirror_hit != other: # debounce
+            self._last_mirror_hit = other
+
+            ref_ori = other.reflect_orientation
+            ref_map: dict[Orientation, tuple[int, int]] = {
+                "east": (1, 0),
+                "north": (0, -1),
+                "west": (-1, 0),
+                "south": (0, 1)
+            }
+            ref_map_inv: dict[tuple[int, int], Orientation] = {v: k for k, v in ref_map.items()}
+
+            c = ref_map[self.orientation]
+            c = (c[1], c[0])
+            if ref_ori == "northeast":
+                c = (-c[0], -c[1])
+            new_ori: Orientation = ref_map_inv[c]
+            self.orientation = new_ori
     
     def out_of_bounds(self):
         self.destroy()

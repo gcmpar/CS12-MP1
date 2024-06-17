@@ -2,15 +2,14 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
+    from gamefiles.GameField import GameField
     from objects.GameObject import GameObject
-
-from pyxelgrid import PyxelGrid
 
 # A container class for all GameObjects
 
 '''
 Cell:
-    _game: PyxelGrid[Cell]
+    _game: GameField
         - reference to game
     _objects: list[GameObject]
     - the GameObjects currently occupying the cell
@@ -33,7 +32,7 @@ Cell:
 
 class Cell():
     _objects: list[GameObject]
-    def __init__(self, game: PyxelGrid[Cell], x: int, y: int):
+    def __init__(self, game: GameField, x: int, y: int):
         self.game = game
         self.x = x
         self.y = y
