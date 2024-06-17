@@ -15,8 +15,10 @@ from objects.Mirror import Mirror
 '''
 GameField
     FPS: int
+    physics: PhysicsManager
+    renderer: Renderer
+    
     player: PlayerController
-    entities: dict
 
 
 '''
