@@ -33,7 +33,7 @@ GameObject
     bind_to_destroy(f: Callable[[]])
         - bind a function to destroy callback
     unbind_from_destroy(f: Callable[[]])
-        - unbinds a function from detroy callback
+        - unbind a function from detroy callback
     destroy()
         - removes the object from game
         - fires functions in _on_destroy
