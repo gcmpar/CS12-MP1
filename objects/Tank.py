@@ -21,8 +21,9 @@ Tank
     fire_rate: int
         - how many bullets the tank can fire per second
     
-    fire()
+    fire() --> bool
         - fires bullet
+        - returns True if successful
 
 '''
 
@@ -37,9 +38,9 @@ class Tank(Entity):
         self._last_fire_frame = 0
         self._bullet_iframes = dict[Bullet, int]()
     
-    def fire(self):
+    def fire(self) -> bool:
         if self.is_destroyed():
-            return
+            return False
 
         cell = self.get_cell()
         ori = self.orientation
@@ -49,11 +50,11 @@ class Tank(Entity):
         bullet_y = cell.y + y_move
 
         if not self.game.in_bounds(bullet_y, bullet_x):
-            return
+            return False
 
         # fire cap
         if pyxel.frame_count < (self._last_fire_frame + (self.game.FPS / self.fire_rate)):
-            return
+            return False
         self._last_fire_frame = pyxel.frame_count
 
         bullet = Bullet(
@@ -65,6 +66,8 @@ class Tank(Entity):
             speed=15
             )
         self._bullet_iframes[bullet] = 0
+
+        return True
     
     def update(self, frame_count: int):
         for bullet in list(self._bullet_iframes):
