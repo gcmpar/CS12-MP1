@@ -20,6 +20,17 @@ Bullet:
         - tank who fired the bullet
 '''
 
+# maps Orientation to vector
+ref_map: dict[Orientation, tuple[int, int]] = {
+                "east": (1, 0),
+                "north": (0, -1),
+                "west": (-1, 0),
+                "south": (0, 1)
+}
+# maps vector to Orientation (inverse of above)
+ref_map_inv: dict[tuple[int, int], Orientation] = {v: k for k, v in ref_map.items()}
+
+
 class Bullet(Entity):
     orientation: Orientation
     _last_mirror_hit: Mirror | None
@@ -51,18 +62,12 @@ class Bullet(Entity):
             self._last_mirror_hit = other
 
             ref_ori = other.reflect_orientation
-            ref_map: dict[Orientation, tuple[int, int]] = {
-                "east": (1, 0),
-                "north": (0, -1),
-                "west": (-1, 0),
-                "south": (0, 1)
-            }
-            ref_map_inv: dict[tuple[int, int], Orientation] = {v: k for k, v in ref_map.items()}
-
+            
             c = ref_map[self.orientation]
             c = (c[1], c[0])
             if ref_ori == "northeast":
                 c = (-c[0], -c[1])
+                
             new_ori: Orientation = ref_map_inv[c]
             self.orientation = new_ori
     

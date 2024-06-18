@@ -5,9 +5,10 @@ if TYPE_CHECKING:
     from gamefiles.GameField import GameField
 
 from objects.GameObject import GameObject
+from objects.CellObject import CellObject
 from objects.Bullet import Bullet
 
-class Brick(GameObject):
+class Brick(CellObject):
     def __init__(self, game: GameField, x: int, y: int):
         super().__init__(game, x, y)
     

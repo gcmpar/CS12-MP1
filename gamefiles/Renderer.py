@@ -13,7 +13,7 @@ from objects.Mirror import Mirror
 
 from misc.util import Orientation
 
-import assetindex
+import resources.assetindex as assetindex
 
 class Renderer:
     def __init__(self, game: GameField):

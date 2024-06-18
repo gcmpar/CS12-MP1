@@ -82,10 +82,11 @@ class PhysicsManager:
                             continue
                         if other.is_destroyed():
                             continue
-
-                        if obj not in caught.keys():
+                        
+                        keys = caught.keys()
+                        if obj not in keys:
                             caught[obj] = []
-                        if other not in caught.keys():
+                        if other not in keys:
                             caught[other] = []
                             
                         if obj in caught[other] or other in caught[obj]:
@@ -95,12 +96,6 @@ class PhysicsManager:
 
                             obj.main_collided_with(other)
                             other.main_collided_with(obj)
-
-                            keys = caught.keys()
-                            if obj not in keys:
-                                caught[obj] = []
-                            if other not in keys:
-                                caught[other] = []
                         
                         obj.main_touched(other)
                         other.main_touched(obj)

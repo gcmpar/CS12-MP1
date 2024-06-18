@@ -72,3 +72,4 @@ class PlayerController():
         # fire
         if pyxel.btn(controls["fire"]):
             self.tank.fire()
+            

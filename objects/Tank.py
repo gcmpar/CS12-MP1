@@ -32,7 +32,7 @@ class Tank(Entity):
         super().__init__(game, x, y, ori=ori)
         self.team = team
         self.fire_rate = 1
-
+        self.ori = self.orientation
 
         self._last_fire_frame = 0
         self._bullet_iframes = dict[Bullet, int]()
@@ -67,7 +67,7 @@ class Tank(Entity):
         self._bullet_iframes[bullet] = 0
     
     def update(self, frame_count: int):
-        for bullet in self._bullet_iframes.copy().keys():
+        for bullet in list(self._bullet_iframes):
             if self._bullet_iframes[bullet] > 2:
                 del self._bullet_iframes[bullet]
 
@@ -77,6 +77,8 @@ class Tank(Entity):
                 return False
             if self.team == "enemy" and other.owner.team == "enemy":
                 return False
+            # if self.team == "player" and other.owner.team == "player":
+            #     return False
                 
         return True
 
