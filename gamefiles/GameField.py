@@ -57,7 +57,7 @@ class GameField(PyxelGrid[Cell]):
         # 2 physics
         self.physics.update(pyxel.frame_count)
 
-        # game objects
+        # 3 game objects
         [obj.main_update(pyxel.frame_count) for r in range(self.r) for c in range(self.c) for obj in self[r, c].get_objects()]
 
         # TODO 3 enemy
