@@ -83,8 +83,6 @@ class Tank(Entity):
 
     def can_collide(self, other: GameObject):
         if isinstance(other, Bullet):
-            if other in self._bullet_iframes:
-                return False
             if self.team == "enemy" and other.owner.team == "enemy":
                 return False
             # if self.team == "player" and other.owner.team == "player":
@@ -94,6 +92,8 @@ class Tank(Entity):
 
     def collided_with(self, other: GameObject):
         if isinstance(other, Bullet):
-                self.destroy()
+            if other in self._bullet_iframes:
+                return
+            self.destroy()
                     
         
