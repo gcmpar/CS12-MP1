@@ -71,8 +71,10 @@ class Tank(Entity):
     
     def update(self, frame_count: int):
         for bullet in list(self._bullet_iframes):
-            if self._bullet_iframes[bullet] > 2:
+            if self._bullet_iframes[bullet] > self.game.FPS/10:
                 del self._bullet_iframes[bullet]
+                continue
+            self._bullet_iframes[bullet] += 1
 
     def can_collide(self, other: GameObject):
         if isinstance(other, Bullet):
