@@ -23,13 +23,16 @@ Cell:
     y: int
         - the Y position on grid
     
-    get_objects(): list[GameObject]
+    get_cell_object() -> CellObject | None
+        - returns current CellObject
+    
+    get_objects() -> list[GameObject]
         - returns all GameObjects currently occupying the cell
     
-    add_object(obj: GameObject):
+    add_object(obj: GameObject)
         - adds a GameObject to cell
     
-    remove_object(obj: GameObject):
+    remove_object(obj: GameObject)
         - removes a GameObject from cell
 
 '''
