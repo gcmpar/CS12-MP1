@@ -47,6 +47,9 @@ class Cell():
         self._type = None
         self._objects = list()
 
+    def get_cell_object(self) -> CellObject | None:
+        return self._type
+
     def get_objects(self) -> list[GameObject]:
         return self._objects
     
