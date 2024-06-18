@@ -67,7 +67,7 @@ class Tank(Entity):
         self._bullet_iframes[bullet] = 0
     
     def update(self, frame_count: int):
-        for bullet in self._bullet_iframes.copy().keys():
+        for bullet in list(self._bullet_iframes):
             if self._bullet_iframes[bullet] > 2:
                 del self._bullet_iframes[bullet]
 
