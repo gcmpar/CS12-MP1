@@ -68,7 +68,7 @@ class Bullet(Entity):
             if ref_ori == "northeast":
                 c = (-c[0], -c[1])
 
-            new_ori: Orientation = ref_map_inv[c]
+            new_ori = ref_map_inv[c]
             self.orientation = new_ori
     
     def out_of_bounds(self):
