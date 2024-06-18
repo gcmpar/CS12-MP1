@@ -5,7 +5,7 @@ if TYPE_CHECKING:
     from gamefiles.GameField import GameField
     from objects.GameObject import GameObject
 
-from objects.CellObject import CellObject
+from objects.Item import Item
 
 # A container class for all GameObjects
 
@@ -13,7 +13,7 @@ from objects.CellObject import CellObject
 Cell:
     game: GameField
         - reference to game
-    _type: CellObject
+    _type: Item
         - object that determines cell's type (only one)
     _objects: list[GameObject]
         - the GameObjects currently occupying the cell
@@ -23,8 +23,8 @@ Cell:
     y: int
         - the Y position on grid
     
-    get_cell_object() -> CellObject | None
-        - returns current CellObject
+    get_item() -> Item | None
+        - returns current Item
     
     get_objects() -> list[GameObject]
         - returns all GameObjects currently occupying the cell
@@ -38,7 +38,7 @@ Cell:
 '''
 
 class Cell():
-    _type: CellObject | None
+    _type: Item | None
     def __init__(self, game: GameField, x: int, y: int):
         self.game = game
         self.x = x
@@ -49,16 +49,16 @@ class Cell():
         self._type = None
         self._objects = list[GameObject]()
 
-    def get_cell_object(self) -> CellObject | None:
+    def get_item(self) -> Item | None:
         return self._type
 
     def get_objects(self) -> list[GameObject]:
         return self._objects
     
     def add_object(self, obj: GameObject):
-        if isinstance(obj, CellObject):
+        if isinstance(obj, Item):
             if self._type is not None:
-                raise ValueError("Cell can only have one CellObject type!")
+                raise ValueError("Cell can only have one Item type!")
             self._type = obj
 
         if obj in self._objects:

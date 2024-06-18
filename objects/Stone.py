@@ -1,4 +1,4 @@
-from objects.CellObject import CellObject
+from objects.Item import Item
 
-class Stone(CellObject):
+class Stone(Item):
     pass
