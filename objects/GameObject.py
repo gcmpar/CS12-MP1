@@ -46,8 +46,6 @@ GameObject
         - basically middlemen before the actual overriden method is called
 
     main_update(frame_count: int)
-    main_out_of_bounds()
-
     main_collided_with(other: GameObject)
     main_touched(other: GameObject)
     
@@ -57,8 +55,6 @@ GameObject
 
     update(frame_count: int)
         - called every game loop
-    out_of_bounds()
-        - called whenever the object attempted to move out of bounds
 
     i love decoupling
     can_collide(other: GameObject) -> bool = True
@@ -129,16 +125,13 @@ class GameObject():
         return self._destroyed
     
     
-    
+    # ---------------------------------
+    # internal
+
     def main_update(self, frame_count: int):
         if self.is_destroyed():
             return
         self.update(frame_count)
-
-    def main_out_of_bounds(self):
-        if self.is_destroyed():
-            return
-        self.out_of_bounds()
     def main_collided_with(self, other: GameObject):
         if self.is_destroyed():
             return
@@ -154,9 +147,7 @@ class GameObject():
 
     def update(self, frame_count: int):
         pass
-    
-    def out_of_bounds(self):
-        pass
+
     def can_collide(self, other: GameObject) -> bool:
         return True
     def collided_with(self, other: GameObject):

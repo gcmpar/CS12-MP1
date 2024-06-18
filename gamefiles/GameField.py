@@ -1,6 +1,5 @@
 
 import pyxel
-import random
 import enum
 from pyxelgrid import PyxelGrid
 from gamefiles.Cell import Cell
@@ -61,10 +60,10 @@ class GameField(PyxelGrid[Cell]):
         Mirror(game=self, x=12, y=4, ref_ori="southeast")
 
         # spawn enemies
-        self.enemies = []
-        enemy1 = EnemyController(game=self, tank=Tank(game=self, x=0, y=0) if self[0,0].get_objects == [] else Tank(game=self, x=self.c - 1, y=0, ori="north"))
+        self.enemies = list[EnemyController]()
+        enemy1 = EnemyController(game=self, tank=Tank(game=self, x=0, y=0) if self[0,0].get_objects() == [] else Tank(game=self, x=self.c - 1, y=0, ori="north"))
         self.enemies.append(enemy1)
-        enemy2 = EnemyController(game=self, tank=Tank(game=self, x=0, y=0) if self[0,0].get_objects == [] else Tank(game=self, x=self.c - 1, y=3, ori="north"))
+        enemy2 = EnemyController(game=self, tank=Tank(game=self, x=0, y=0) if self[0,0].get_objects() == [] else Tank(game=self, x=self.c - 1, y=3, ori="north"))
         self.enemies.append(enemy2)
 
         self.currentGameState = GameState.READY
