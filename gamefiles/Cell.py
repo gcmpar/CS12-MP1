@@ -11,7 +11,7 @@ from objects.CellObject import CellObject
 
 '''
 Cell:
-    _game: GameField
+    game: GameField
         - reference to game
     _type: CellObject
         - object that determines cell's type (only one)
@@ -39,7 +39,6 @@ Cell:
 
 class Cell():
     _type: CellObject | None
-    _objects: list[GameObject]
     def __init__(self, game: GameField, x: int, y: int):
         self.game = game
         self.x = x
@@ -48,7 +47,7 @@ class Cell():
         game[y, x] = self
 
         self._type = None
-        self._objects = list()
+        self._objects = list[GameObject]()
 
     def get_cell_object(self) -> CellObject | None:
         return self._type
