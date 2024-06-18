@@ -5,9 +5,9 @@ if TYPE_CHECKING:
     from gamefiles.GameField import GameField
     from misc.util import ReflectOrientation
 
-from objects.GameObject import GameObject
+from objects.CellObject import CellObject
 
-class Mirror(GameObject):
+class Mirror(CellObject):
     def __init__(self, game: GameField, x: int, y: int, ref_ori: ReflectOrientation):
         super().__init__(game, x, y)
         self.reflect_orientation = ref_ori

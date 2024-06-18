@@ -91,7 +91,7 @@ class GameObject():
         if self.is_destroyed():
             return
         
-        current_cell = self._cell
+        current_cell = self.get_cell()
         target_cell = self.game[y, x]
         
         current_cell.remove_object(self)

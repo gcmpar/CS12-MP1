@@ -1,4 +1,4 @@
-from objects.GameObject import GameObject
+from objects.CellObject import CellObject
 
-class Stone(GameObject):
+class Stone(CellObject):
     pass
