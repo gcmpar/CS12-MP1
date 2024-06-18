@@ -67,6 +67,11 @@ class Tank(Entity):
             )
         self._bullet_iframes[bullet] = 0
 
+        def cancel_iframes():
+            del self._bullet_iframes[bullet]
+            bullet.unbind_from_move(cancel_iframes)
+        bullet.bind_to_move(cancel_iframes)
+
         return True
     
     def update(self, frame_count: int):
