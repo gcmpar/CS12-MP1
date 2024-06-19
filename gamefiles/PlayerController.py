@@ -36,7 +36,7 @@ class PlayerController():
         self._movement_held: dict[str, int] = {}
         for c in get_args(Orientation):
             self._movement_held[c] = 0
-        self._movement_last_ori = "east"
+        self._movement_last_ori = "north"
     
     def update(self, frame_count: int):
         for c, btn in controls.items():

@@ -1,6 +1,7 @@
 
 import pyxel
 import enum
+
 from pyxelgrid import PyxelGrid
 from gamefiles.Cell import Cell
 from gamefiles.PlayerController import PlayerController
@@ -8,6 +9,7 @@ from gamefiles.EnemyController import EnemyController
 from gamefiles.PhysicsManager import PhysicsManager
 from gamefiles.Renderer import Renderer
 
+from resources.StageFile import Stage
 
 from objects.Tank import Tank
 from objects.Brick import Brick
@@ -44,20 +46,26 @@ class GameField(PyxelGrid[Cell]):
         self.physics = PhysicsManager(self)
         self.renderer = Renderer(self)
         pyxel.load("spritesheet.pyxres")
+
+        self.StageFile = Stage(game=self)
+        self.currStage = self.StageFile.stage1
+        self.StageFile.generate_stage(self.currStage)
+        # print(type((self.StageFile.stage1)))
         
         # fill cells
-        for r in range(self.r):
-            for c in range(self.c):
-                Cell(game=self, x=c, y=r)
+        # for r in range(self.r):
+        #     for c in range(self.c):
+        #         Cell(game=self, x=c, y=r)
 
         # spawn player
-        self.player = PlayerController(game=self, tank=Tank(game=self, x=0, y=0, team="player"))
-        Brick(game=self, x=2,y=2)
-        Stone(game=self, x=1,y=1)
-        Mirror(game=self, x=2, y=4, ref_ori="northeast")
-        Mirror(game=self, x=2, y=6, ref_ori="southeast")
-        Mirror(game=self, x=12, y=6, ref_ori="northeast")
-        Mirror(game=self, x=12, y=4, ref_ori="southeast")
+        self.player = self.StageFile.player
+        # self.player = PlayerController(game=self, tank=Tank(game=self, x=0, y=0, team="player"))
+        # Brick(game=self, x=2,y=2)
+        # Stone(game=self, x=1,y=1)
+        # Mirror(game=self, x=2, y=4, ref_ori="northeast")
+        # Mirror(game=self, x=2, y=6, ref_ori="northeast")
+        # Mirror(game=self, x=12, y=6, ref_ori="southeast")
+        # Mirror(game=self, x=12, y=4, ref_ori="southeast")
 
         # spawn enemies
         self.enemies = list[EnemyController]()

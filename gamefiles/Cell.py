@@ -47,7 +47,7 @@ class Cell():
         game[y, x] = self
 
         self._type = None
-        self._objects = list[GameObject]()
+        self._objects = list()
 
     def get_item(self) -> Item | None:
         return self._type
