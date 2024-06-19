@@ -10,6 +10,7 @@ from objects.Entity import Entity
 from objects.Tank import Tank
 from objects.Bullet import Bullet
 from objects.Mirror import Mirror
+from objects.Brick import Brick
 
 from misc.util import Orientation
 
@@ -38,6 +39,8 @@ class Renderer:
 
             elif isinstance(obj, Mirror):
                 index = index[0 if obj.reflect_orientation == "northeast" else 1]
+            elif isinstance(obj, Brick):
+                index = index[0 if not obj.cracked else 1]
             else:
                 index = index[0]
 

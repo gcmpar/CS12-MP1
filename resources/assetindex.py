@@ -6,12 +6,13 @@ from objects.Bullet import Bullet
 from objects.Brick import Brick
 from objects.Stone import Stone
 from objects.Mirror import Mirror
+from objects.Water import Water
 
 sprites: dict[Type[GameObject], Sequence[tuple[int, int]]] = {
     Tank: [(x, 0) for x in range(4)] + [(x, 1) for x in range(4)],
     Bullet: [(x, 2) for x in range(4)],
-    Brick: [(0, 3)],
+    Brick: [(0, 3), (2, 3)],
     Stone: [(1, 3)],
     Mirror: [(0, 4), (1, 4)],
-
+    Water: [(3, 3)]
 }
