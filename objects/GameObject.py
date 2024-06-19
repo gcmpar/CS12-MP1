@@ -1,11 +1,11 @@
 from __future__ import annotations
-from collections.abc import Callable
-
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from gamefiles.GameField import GameField
     from gamefiles.Cell import Cell
+
+from misc.Signal import Signal
 
 # Base class for all game objects
 
@@ -15,9 +15,10 @@ GameObject
         - reference to main game
     _cell: Cell
         - reference to the cell it's currently in
-    _on_move: list[Callable[[], None]]
-    _on_destroy: list[Callable[[], None]]
     _destroyed: bool
+
+    on_move: Signal[[], None]
+    on_destroy: Signal[[], None]
         
     get_cell() -> Cell:
         - returns the cell it's in
@@ -25,18 +26,9 @@ GameObject
     move_to(x: int, y: int):
         - moves to cell at (x, y)
 
-    bind_to_move(f: Callable[[]])
-        - bind a function to move_to callback
-    unbind_from_move(f: Callable[[]])
-        - unbind a function from move_to callback
-    
-    bind_to_destroy(f: Callable[[]])
-        - bind a function to destroy callback
-    unbind_from_destroy(f: Callable[[]])
-        - unbind a function from detroy callback
     destroy()
         - removes the object from game
-        - fires functions in _on_destroy
+        - fires functions in on_destroy
     is_destroyed() -> bool
         returns True if destroyed
 
@@ -72,13 +64,16 @@ GameObject
 class GameObject():
     _destroyed: bool
     def __init__(self, game: GameField, x: int, y: int):
+        if type(self) == GameObject:
+            raise ValueError("Superclass cannot be instantiated.")
+        
         self.game = game
-        self._destroyed = False
-        self._on_move = list[Callable[[], None]]()
-        self._on_destroy = list[Callable[[], None]]()
-
         self._cell = game[y, x]
         self._cell.add_object(self)
+        self._destroyed = False
+
+        self.on_move = Signal[[], None]()
+        self.on_destroy = Signal[[], None]()
 
     def get_cell(self) -> Cell:
         return self._cell
@@ -94,32 +89,17 @@ class GameObject():
         target_cell.add_object(self)
         self._cell = target_cell
 
-        [f() for f in self._on_move]
-    
-    def bind_to_move(self, f: Callable[[], None]):
-        if f in self._on_move:
-            return
-        self._on_move.append(f)
-    def unbind_from_move(self, f: Callable[[], None]):
-        if f not in self._on_move:
-            return
-        self._on_move.remove(f)
+        self.on_move.fire()
 
-    def bind_to_destroy(self, f: Callable[[], None]):
-        if f in self._on_destroy:
-            return
-        self._on_destroy.append(f)
-    def unbind_from_destroy(self, f: Callable[[], None]):
-        if f not in self._on_destroy:
-            return
-        self._on_destroy.remove(f)
     def destroy(self):
         if self.is_destroyed():
             return
             
         self._cell.remove_object(self)
         self._destroyed = True
-        [f() for f in self._on_destroy]
+
+        self.on_destroy.fire()
+
         del self
     def is_destroyed(self) -> bool:
         return self._destroyed

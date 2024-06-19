@@ -9,9 +9,15 @@ from objects.Item import Item
 from objects.Bullet import Bullet
 
 class Brick(Item):
+    cracked: bool
     def __init__(self, game: GameField, x: int, y: int):
         super().__init__(game, x, y)
+        self.cracked = False
     
     def collided_with(self, other: GameObject):
         if isinstance(other, Bullet):
-            self.destroy()
+            if not self.cracked:
+                self.cracked = True
+            else:
+                self.destroy()
+                return

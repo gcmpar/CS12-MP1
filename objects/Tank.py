@@ -13,34 +13,61 @@ from objects.Bullet import Bullet
 
 '''
 Tank
-    orientation: Orientation
-    speed: int
-
-
     team: Team
-    fire_rate: int
-        - how many bullets the tank can fire per second
+    is_moving: bool
+    stats: {
+        "health": float
+        "movement_speed": float
+        "fire_rate": int
+    }
+
+    turn(ori: Orientation)
+    start_moving()
+    stop_moving()
+        
     
-    fire() --> bool
+    fire_bullet() --> Bullet | None
         - fires bullet
-        - returns True if successful
+        - returns the bullet if successful
+    
+    can_fire_bullet() -> bool
 
 '''
 
 class Tank(Entity):
-    orientation: Orientation
-    def __init__(self, game: GameField, x: int, y: int, ori: Orientation = "east", team: Team = "enemy"):
-        super().__init__(game, x, y, ori=ori)
+    team: Team
+    is_moving: bool
+    def __init__(self, game: GameField, x: int, y: int, team: Team,
+                 
+                 health: float,
+                 movement_speed: float,
+                 fire_rate: float
+                
+                ):
+        
+        super().__init__(game, x, y, ori="east", speed=0)
         self.team = team
-        self.fire_rate = 1
-        self.ori = self.orientation
+        self.is_moving = False
+
+        self.stats = {
+            "health": health,
+            "movement_speed": movement_speed,
+            "fire_rate": fire_rate,
+        }
 
         self._last_fire_frame = 0
         self._bullet_iframes = dict[Bullet, int]()
     
-    def fire(self) -> bool:
+    def turn(self, ori: Orientation):
+        self.orientation = ori
+    def start_moving(self):
+        self.speed = self.stats["movement_speed"]
+    def stop_moving(self):
+        self.speed = 0
+
+    def fire_bullet(self) -> Bullet | None:
         if self.is_destroyed():
-            return False
+            return
 
         cell = self.get_cell()
         ori = self.orientation
@@ -50,11 +77,11 @@ class Tank(Entity):
         bullet_y = cell.y + y_move
 
         if not self.game.in_bounds(bullet_y, bullet_x):
-            return False
+            return
 
         # fire cap
-        if pyxel.frame_count < (self._last_fire_frame + (self.game.FPS / self.fire_rate)):
-            return False
+        if not self.can_fire_bullet():
+            return
         self._last_fire_frame = pyxel.frame_count
 
         bullet = Bullet(
@@ -69,12 +96,22 @@ class Tank(Entity):
 
         def cancel_iframes():
             del self._bullet_iframes[bullet]
-            bullet.unbind_from_move(cancel_iframes)
-        bullet.bind_to_move(cancel_iframes)
+            bullet.on_move.remove_listener(cancel_iframes)
+        bullet.on_move.add_listener(cancel_iframes)
 
+        return bullet
+    
+    def can_fire_bullet(self) -> bool:
+        if pyxel.frame_count < (self._last_fire_frame + (self.game.FPS / self.stats["fire_rate"])):
+            return False
         return True
+
     
     def update(self, frame_count: int):
+        if self.stats["health"] <= 0:
+            self.destroy()
+            return
+        
         for bullet in list(self._bullet_iframes):
             if self._bullet_iframes[bullet] > self.game.FPS/10:
                 del self._bullet_iframes[bullet]
@@ -85,8 +122,6 @@ class Tank(Entity):
         if isinstance(other, Bullet):
             if self.team == "enemy" and other.owner.team == "enemy":
                 return False
-            # if self.team == "player" and other.owner.team == "player":
-            #     return False
                 
         return True
 
@@ -94,6 +129,6 @@ class Tank(Entity):
         if isinstance(other, Bullet):
             if other in self._bullet_iframes:
                 return
-            self.destroy()
+            self.stats["health"] -= 1
                     
         

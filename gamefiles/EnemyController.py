@@ -1,8 +1,7 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING, get_args
+from typing import TYPE_CHECKING, get_args, Callable
 
-import pyxel
-import random
+import random, math
 
 if TYPE_CHECKING:
     from gamefiles.GameField import GameField
@@ -10,90 +9,63 @@ if TYPE_CHECKING:
 from objects.Tank import Tank
 from misc.util import Orientation
 
-
-controls = {
-    "east": pyxel.KEY_D,
-    "north": pyxel.KEY_W,
-    "west": pyxel.KEY_A,
-    "south": pyxel.KEY_S,
-    "fire": pyxel.KEY_SPACE,
-}
 '''
-PlayerController:
+EnemyController:
     tank: Tank
-        - the tank the player controls
-    
     update()
-        - used by the main GameField to check input presses every frame and control tank accordingly
 
 '''
+
+def random_interval(fps: int):
+    return random.randint(math.floor(fps/4), math.floor(fps/1.5))
 
 class EnemyController():
-    _movement_last_ori: Orientation
+    _moveOnce: Callable[[], None] | None
     def __init__(self, game: GameField, tank: Tank):
         self.game = game
         self.tank = tank
 
 
-        self.fireInterval = random.randint(60,120)
-        self.lastFireTime = 0
+        self._rotateInterval = random_interval(game.FPS)
+        self._lastRotateTime = 0
 
-        self.moveInterval = random.randint(60,120)
-        self.lastMoveTime = 0
+        self._moveInterval = random_interval(game.FPS)
+        self._lastMoveTime = 0
+        self._moveOnce = None
 
-        self._movement_held: dict[str, int] = {}
-        for c in get_args(Orientation):
-            self._movement_held[c] = 0
-        self._movement_last_ori = self.tank.ori
-    
+        self._fireInterval = random_interval(game.FPS)
+        self._lastFireTime = 0
+
     def update(self, frame_count: int):
-        # for c, btn in controls.items():
-        #     if pyxel.btn(btn):
-        #         self._movement_held[c] += 1
-        #     else:
-        #         self._movement_held[c] = 0
 
-        if frame_count - self.lastMoveTime > self.moveInterval:
+        # rotate
+        if frame_count - self._lastRotateTime > self._rotateInterval:
+            self._lastRotateTime = frame_count
+            self._rotateInterval = random_interval(self.game.FPS)
 
-            randomMove = random.choice(get_args(Orientation))
-            self._movement_held[randomMove] += 1
-            
-            
-            # print(self._movement_held)
+            self.tank.turn(random.choice(get_args(Orientation)))
 
-            # movement (whatever was pressed last)
-            moved = False
-            orientations = get_args(Orientation)
-            least_held: int | None = None
-            ori_priority = orientations[0]
+        # move
+        if frame_count - self._lastMoveTime > self._moveInterval:
+            self._lastMoveTime = frame_count
+            self._moveInterval = random_interval(self.game.FPS)
 
-            for ori in get_args(Orientation):
-                if self._movement_held[ori] == 0:
-                    continue
+            # just makes sure it moves one cell only each time
+            if self._moveOnce is not None:
+                self.tank.on_move.remove_listener(self._moveOnce)
+            self.tank.start_moving()
 
-                if least_held is None or self._movement_held[ori] < least_held:
-                    moved = True
-                    least_held = self._movement_held[ori]
-                    ori_priority = ori
-
-            if not moved:
-                self.tank.speed = 0
-                ori_priority = self._movement_last_ori
-            else:
-                self.tank.speed = 5
-                self._movement_last_ori = ori_priority
-            
-            self.tank.orientation = ori_priority
-            
-            for move in get_args(Orientation):
-                self._movement_held[move] = 0
-
-            self.lastMoveTime = frame_count
-            self.moveInterval = random.randint(60,120)
+            def moveOnce():
+                self.tank.stop_moving()
+                self.tank.on_move.remove_listener(moveOnce)
+                self._moveOnce = None
+            self.tank.on_move.add_listener(moveOnce)
+            self._moveOnce = moveOnce
         
         # fire
-        if frame_count - self.lastFireTime > self.fireInterval:
-            self.tank.fire()
-            self.lastFireTime = frame_count
-            self.fireInterval = random.randint(60,120)
+        if frame_count - self._lastFireTime > self._fireInterval:
+            self._lastFireTime = frame_count
+            self._fireInterval = random_interval(self.game.FPS)
+
+            self.tank.fire_bullet()
             

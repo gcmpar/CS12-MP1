@@ -5,6 +5,7 @@ import pyxel
 
 if TYPE_CHECKING:
     from gamefiles.GameField import GameField
+    from objects.Bullet import Bullet
 
 from objects.Tank import Tank
 from misc.util import Orientation
@@ -29,6 +30,7 @@ PlayerController:
 
 class PlayerController():
     _movement_last_ori: Orientation
+    _bullet: Bullet | None
     def __init__(self, game: GameField, tank: Tank):
         self.game = game
         self.tank = tank
@@ -37,6 +39,8 @@ class PlayerController():
         for c in get_args(Orientation):
             self._movement_held[c] = 0
         self._movement_last_ori = "north"
+
+        self._bullet = None
     
     def update(self, frame_count: int):
         for c, btn in controls.items():
@@ -46,7 +50,7 @@ class PlayerController():
                 self._movement_held[c] = 0
 
         # movement (whatever was pressed last)
-        moved = False
+        move = False
         orientations = get_args(Orientation)
         least_held: int | None = None
         ori_priority = orientations[0]
@@ -56,20 +60,23 @@ class PlayerController():
                 continue
 
             if least_held is None or self._movement_held[ori] < least_held:
-                moved = True
+                move = True
                 least_held = self._movement_held[ori]
                 ori_priority = ori
 
-        if not moved:
-            self.tank.speed = 0
+        if not move:
+            self.tank.stop_moving()
             ori_priority = self._movement_last_ori
         else:
-            self.tank.speed = 5
+            self.tank.start_moving()
             self._movement_last_ori = ori_priority
         
-        self.tank.orientation = ori_priority
+        self.tank.turn(ori_priority)
         
         # fire
         if pyxel.btn(controls["fire"]):
-            self.tank.fire()
+            if self._bullet is not None and self._bullet.is_destroyed():
+                self._bullet = None
+            if self._bullet is None:
+                self._bullet = self.tank.fire_bullet()
             

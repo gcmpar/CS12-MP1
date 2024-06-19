@@ -32,6 +32,8 @@ Entity:
 class Entity(GameObject):
     orientation: Orientation
     def __init__(self, game: GameField, x: int, y: int, ori: Orientation, speed: int = 0):
+        if type(self) == Entity:
+            raise ValueError("Superclass cannot be instantiated.")
         super().__init__(game, x, y)
         self.orientation = ori
         self.speed = speed

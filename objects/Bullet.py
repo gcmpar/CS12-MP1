@@ -9,6 +9,7 @@ if TYPE_CHECKING:
 from objects.GameObject import GameObject
 from objects.Entity import Entity
 from objects.Mirror import Mirror
+from objects.Water import Water
 
 '''
 Bullet:
@@ -46,10 +47,12 @@ class Bullet(Entity):
                 if self._last_mirror_hit not in cell.get_objects():
                     self._last_mirror_hit = None
 
-        self.bind_to_move(on_move)
+        self.on_move.add_listener(on_move)
 
     def can_collide(self, other: GameObject):
         if isinstance(other, Mirror):
+            return False
+        if isinstance(other, Water):
             return False
         
         return True

@@ -45,33 +45,57 @@ class GameField(PyxelGrid[Cell]):
         # internals
         self.physics = PhysicsManager(self)
         self.renderer = Renderer(self)
-        pyxel.load("spritesheet.pyxres")
+        pyxel.load("resources/spritesheet.pyxres")
 
-        self.StageFile = Stage(game=self)
-        self.currStage = self.StageFile.stage1
-        self.StageFile.generate_stage(self.currStage)
+        # self.StageFile = Stage(game=self)
+        # self.currStage = self.StageFile.stage1
+        # self.StageFile.generate_stage(self.currStage)
         # print(type((self.StageFile.stage1)))
         
         # fill cells
-        # for r in range(self.r):
-        #     for c in range(self.c):
-        #         Cell(game=self, x=c, y=r)
+        for r in range(self.r):
+            for c in range(self.c):
+                Cell(game=self, x=c, y=r)
 
         # spawn player
-        self.player = self.StageFile.player
-        # self.player = PlayerController(game=self, tank=Tank(game=self, x=0, y=0, team="player"))
-        # Brick(game=self, x=2,y=2)
-        # Stone(game=self, x=1,y=1)
-        # Mirror(game=self, x=2, y=4, ref_ori="northeast")
-        # Mirror(game=self, x=2, y=6, ref_ori="northeast")
-        # Mirror(game=self, x=12, y=6, ref_ori="southeast")
-        # Mirror(game=self, x=12, y=4, ref_ori="southeast")
+        # self.player = self.StageFile.player
+        self.player = PlayerController(
+            game=self,
+            tank=Tank(game=self, x=0, y=0, team="player",
+                      
+                      health=1,
+                      movement_speed=5,
+                      fire_rate=1,
+                )
+            )
+        Brick(game=self, x=2,y=2)
+        Stone(game=self, x=1,y=1)
+        Mirror(game=self, x=2, y=4, ref_ori="northeast")
+        Mirror(game=self, x=2, y=6, ref_ori="northeast")
+        Mirror(game=self, x=12, y=6, ref_ori="southeast")
+        Mirror(game=self, x=12, y=4, ref_ori="southeast")
 
         # spawn enemies
         self.enemies = list[EnemyController]()
-        enemy1 = EnemyController(game=self, tank=Tank(game=self, x=0, y=0) if self[0,0].get_objects() == [] else Tank(game=self, x=self.c - 1, y=0, ori="north"))
+        enemy1 = EnemyController(
+            game=self,
+            tank=Tank(game=self, x=6, y=9, team="player",
+                      
+                      health=1,
+                      movement_speed=5,
+                      fire_rate=1,
+                )
+            )
+        enemy2 = EnemyController(
+            game=self,
+            tank=Tank(game=self, x=9, y=6, team="player",
+                      
+                      health=1,
+                      movement_speed=5,
+                      fire_rate=1,
+                )
+            )
         self.enemies.append(enemy1)
-        enemy2 = EnemyController(game=self, tank=Tank(game=self, x=0, y=0) if self[0,0].get_objects() == [] else Tank(game=self, x=self.c - 1, y=3, ori="north"))
         self.enemies.append(enemy2)
 
         self.currentGameState = GameState.READY
@@ -88,6 +112,8 @@ class GameField(PyxelGrid[Cell]):
         if self.currentGameState == GameState.READY:
             if pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT):
                 self.currentGameState = GameState.ONGOING
+            else:
+                return
 
         if self.currentGameState == GameState.ONGOING:
             # 1 input handling
@@ -123,6 +149,7 @@ class GameField(PyxelGrid[Cell]):
         # background
         pyxel.rect(0, 0, self.c*self.dim, self.r*self.dim, 0)
 
+    def post_draw_grid(self) -> None:
         if self.currentGameState == GameState.WIN:
             # pyxel.text(pyxel.width//2, pyxel.height//2, "YOU WIN", 12)
             pyxel.text((pyxel.width - (len("VICTORY") * pyxel.FONT_WIDTH)) / 2, (pyxel.height / 2 - pyxel.FONT_HEIGHT), "VICTORY", 12)
