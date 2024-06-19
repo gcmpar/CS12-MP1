@@ -116,6 +116,13 @@ class GameField(PyxelGrid[Cell]):
                 return
 
         if self.currentGameState == GameState.ONGOING:
+            if not self.enemies:
+                self.currentGameState = GameState.WIN
+
+            if self.player.tank.is_destroyed():
+                self.currentGameState = GameState.LOSE
+
+                
             # 1 input handling
             self.player.update(pyxel.frame_count)
 
@@ -130,12 +137,6 @@ class GameField(PyxelGrid[Cell]):
                 enemy.update(pyxel.frame_count)
                 if enemy.tank.is_destroyed():
                     self.enemies.remove(enemy)
-            
-            if not self.enemies:
-                self.currentGameState = GameState.WIN
-
-            if self.player.tank.is_destroyed():
-                self.currentGameState = GameState.LOSE
 
         
         

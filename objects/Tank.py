@@ -56,7 +56,6 @@ class Tank(Entity):
         }
 
         self._last_fire_frame = 0
-        self._bullet_iframes = dict[Bullet, int]()
     
     def turn(self, ori: Orientation):
         self.orientation = ori
@@ -92,13 +91,6 @@ class Tank(Entity):
             ori=ori,
             speed=15
             )
-        self._bullet_iframes[bullet] = 0
-
-        def cancel_iframes():
-            del self._bullet_iframes[bullet]
-            bullet.on_move.remove_listener(cancel_iframes)
-        bullet.on_move.add_listener(cancel_iframes)
-
         return bullet
     
     def can_fire_bullet(self) -> bool:
@@ -111,12 +103,6 @@ class Tank(Entity):
         if self.stats["health"] <= 0:
             self.destroy()
             return
-        
-        for bullet in list(self._bullet_iframes):
-            if self._bullet_iframes[bullet] > self.game.FPS/10:
-                del self._bullet_iframes[bullet]
-                continue
-            self._bullet_iframes[bullet] += 1
 
     def can_collide(self, other: GameObject):
         if isinstance(other, Bullet):
@@ -127,8 +113,6 @@ class Tank(Entity):
 
     def collided_with(self, other: GameObject):
         if isinstance(other, Bullet):
-            if other in self._bullet_iframes:
-                return
             self.stats["health"] -= 1
                     
         
