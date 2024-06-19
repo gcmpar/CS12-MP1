@@ -45,70 +45,17 @@ class GameField(PyxelGrid[Cell]):
         # internals
         self.physics = PhysicsManager(self)
         self.renderer = Renderer(self)
+        self.StageFile = Stage(game=self)
         pyxel.load("resources/spritesheet.pyxres")
 
-        # self.StageFile = Stage(game=self)
-        # self.currStage = self.StageFile.stage1
-        # self.StageFile.generate_stage(self.currStage)
-        # print(type((self.StageFile.stage1)))
         
-        # fill cells
-        for r in range(self.r):
-            for c in range(self.c):
-                Cell(game=self, x=c, y=r)
-
-        # spawn player
-        # self.player = self.StageFile.player
-        self.player = PlayerController(
-            game=self,
-            tank=Tank(game=self, x=0, y=0, team="player",
-                      
-                      health=1,
-                      movement_speed=5,
-                      fire_rate=1,
-                )
-            )
-        Brick(game=self, x=2,y=2)
-        Stone(game=self, x=1,y=1)
-        Mirror(game=self, x=2, y=4, ref_ori="northeast")
-        Mirror(game=self, x=2, y=6, ref_ori="northeast")
-        Mirror(game=self, x=12, y=6, ref_ori="southeast")
-        Mirror(game=self, x=12, y=4, ref_ori="southeast")
-
-        # spawn enemies
-        self.enemies = list[EnemyController]()
-        enemy1 = EnemyController(
-            game=self,
-            tank=Tank(game=self, x=6, y=9, team="player",
-                      
-                      health=1,
-                      movement_speed=5,
-                      fire_rate=1,
-                )
-            )
-        enemy2 = EnemyController(
-            game=self,
-            tank=Tank(game=self, x=9, y=6, team="player",
-                      
-                      health=1,
-                      movement_speed=5,
-                      fire_rate=1,
-                )
-            )
-        self.enemies.append(enemy1)
-        self.enemies.append(enemy2)
-
+        self.currStage = 1
+        self.StageFile.generate_stage(self.currStage)
         self.currentGameState = GameState.READY
 
 
     def update(self) -> None:
-        # TODO 0 game state
-        # if not self.enemies:
-        #     # print("Win")
-        #     return
-        # if self.player.tank.is_destroyed():
-        #     # print("Lose")
-        #     return
+        # 0 game state
         if self.currentGameState == GameState.READY:
             if pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT):
                 self.currentGameState = GameState.ONGOING
@@ -116,15 +63,14 @@ class GameField(PyxelGrid[Cell]):
                 return
 
         if self.currentGameState == GameState.ONGOING:
-            if not self.enemies:
-                self.currentGameState = GameState.WIN
-
-            if self.player.tank.is_destroyed():
-                self.currentGameState = GameState.LOSE
-
+            
                 
             # 1 input handling
-            self.player.update(pyxel.frame_count)
+            self.StageFile.player.update(pyxel.frame_count)
+            # for player in self.StageFile.player:
+            #     player.update(pyxel.frame_count)
+            #     if player.tank.is_destroyed():
+            #         self.StageFile.player.remove(player)
 
             # 2 physics
             self.physics.update(pyxel.frame_count)
@@ -133,10 +79,27 @@ class GameField(PyxelGrid[Cell]):
             [obj.main_update(pyxel.frame_count) for r in range(self.r) for c in range(self.c) for obj in self[c, r].get_objects()]
 
             # TODO 4 enemy
-            for enemy in self.enemies:
+            for enemy in self.StageFile.enemies:
                 enemy.update(pyxel.frame_count)
                 if enemy.tank.is_destroyed():
-                    self.enemies.remove(enemy)
+                    self.StageFile.enemies.remove(enemy)
+                
+            self.StageFile.update(pyxel.frame_count)
+
+            if not self.StageFile.enemies and self.StageFile.remainingEnemies == 0:
+                self.StageFile.player.tank.destroy()
+                if self.currStage == len(self.StageFile.Layouts):
+                    self.currentGameState = GameState.WIN
+                else:
+                    self.currStage += 1
+                    self.StageFile.generate_stage(self.currStage)
+                    self.currentGameState = GameState.READY
+                return
+
+            if self.StageFile.player.tank.is_destroyed():
+            # if not self.StageFile.player:
+                self.currentGameState = GameState.LOSE
+                return
 
         
         
@@ -154,9 +117,21 @@ class GameField(PyxelGrid[Cell]):
         if self.currentGameState == GameState.WIN:
             # pyxel.text(pyxel.width//2, pyxel.height//2, "YOU WIN", 12)
             pyxel.text((pyxel.width - (len("VICTORY") * pyxel.FONT_WIDTH)) / 2, (pyxel.height / 2 - pyxel.FONT_HEIGHT), "VICTORY", 12)
+            pyxel.text((pyxel.width - (len("Press 1 to Restart") * pyxel.FONT_WIDTH)) / 2, (pyxel.height / 2), "Press 1 to Restart", 11)
+            if pyxel.btnp(pyxel.KEY_1):
+                pyxel.rect(0, 0, self.c*self.dim, self.r*self.dim, 0)
+                self.currStage = 1
+                self.StageFile.generate_stage(self.currStage)
+                self.currentGameState = GameState.READY
             return
 
         if self.currentGameState == GameState.LOSE:
             # pyxel.text(pyxel.width//3, pyxel.height//3, "YOU LOSE", 8)
             pyxel.text((pyxel.width - (len("YOU DIED") * pyxel.FONT_WIDTH)) / 2, (pyxel.height / 2 - pyxel.FONT_HEIGHT), "YOU DIED", 8)
+            pyxel.text((pyxel.width - (len("Press 1 to Restart") * pyxel.FONT_WIDTH)) / 2, (pyxel.height / 2), "Press 1 to Restart", 11)
+            if pyxel.btnp(pyxel.KEY_1):
+                pyxel.rect(0, 0, self.c*self.dim, self.r*self.dim, 0)
+                self.currStage = 1
+                self.StageFile.generate_stage(self.currStage)
+                self.currentGameState = GameState.READY
             return

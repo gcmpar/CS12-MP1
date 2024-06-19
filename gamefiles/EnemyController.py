@@ -17,7 +17,7 @@ EnemyController:
 '''
 
 def random_interval(fps: int):
-    return random.randint(math.floor(fps/4), math.floor(fps/1.5))
+    return random.randint(math.floor(fps/2), math.floor(fps))
 
 class EnemyController():
     _moveOnce: Callable[[], None] | None

@@ -45,7 +45,7 @@ class Tank(Entity):
                 
                 ):
         
-        super().__init__(game, x, y, ori="east", speed=0)
+        super().__init__(game, x, y, ori="north", speed=0)
         self.team = team
         self.is_moving = False
 
