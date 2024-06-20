@@ -5,8 +5,8 @@ from objects.Tank import Tank
 from objects.Bullet import Bullet
 from objects.Brick import Brick
 from objects.Stone import Stone
-from objects.Mirror import Mirror
 from objects.Water import Water
+from objects.Mirror import Mirror
 
 sprites: dict[Type[GameObject], Sequence[tuple[int, int]]] = {
     Tank: [(0, x) for x in range(4)] + [(1, x) for x in range(4)],

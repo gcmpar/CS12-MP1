@@ -1,137 +1,130 @@
+from collections.abc import Callable
 
 import pyxel
-import enum
 
 from pyxelgrid import PyxelGrid
 from gamefiles.Cell import Cell
-from gamefiles.PlayerController import PlayerController
-from gamefiles.EnemyController import EnemyController
+
 from gamefiles.PhysicsManager import PhysicsManager
 from gamefiles.Renderer import Renderer
+from gamefiles.SoundManager import SoundManager
 
-from resources.StageFile import Stage
+from gamefiles.StageFile import Stage
+from misc.util import GameState
+from misc.Signal import Signal
 
-from objects.Tank import Tank
-from objects.Brick import Brick
-from objects.Stone import Stone
-from objects.Mirror import Mirror
-
-'''
-GameField
-    FPS: int
-    physics: PhysicsManager
-    renderer: Renderer
-    
-    player: PlayerController
-
-
-'''
-
-class GameState(enum.Enum):
-    READY = 0
-    ONGOING = 1
-    WIN = 2
-    LOSE = 3
+from objects.GameObject import GameObject
 
 
 class GameField(PyxelGrid[Cell]):
-    def __init__(self, fps: int, r: int = 15, c: int = 15, dim: int = 8):
+    def __init__(self, fps: int, r: int = 15, c: int = 15, dim: int = 16):
         super().__init__(r, c, dim=dim)
         self.FPS = fps
         self.run(title="Battle Tanks Bootleg:tm:", fps=fps)
-        
 
-    def init(self) -> None:
+    def init(self):
         # internals
+        self._signalDestroyQueue = list[Callable[[], None]]()
+
         self.physics = PhysicsManager(self)
         self.renderer = Renderer(self)
-        self.StageFile = Stage(game=self)
+        self.sounds = SoundManager(self)
         pyxel.load("resources/spritesheet.pyxres")
 
-        
-        self.currStage = 1
-        self.StageFile.generate_stage(self.currStage)
         self.currentGameState = GameState.READY
+        self.onObjectAdded = Signal[[GameObject], None](self)
 
+        self.stage = Stage(self)
+        self.physics.init()
+        self.renderer.init()
+        self.sounds.init()
+    
+    def start_stage(self, stage: int):
+        self.stage.cleanup()
 
-    def update(self) -> None:
+        self.currentStage = stage
+        self.stage.generate_stage(str(self.currentStage), self.stage.get_lives())
+        self.currentGameState = GameState.ONGOING
+
+        # TEST
+        from objects.Tank import Tank
+        t1 = Tank(self, 2, 8, "enemy", 5, 2, 1)
+        t2 = Tank(self, 2, 2, "enemy", 5, 2, 1)
+        t1.turn("north")
+        t2.turn("south")
+        t1.start_moving()
+        t2.start_moving()
+
+    def next_stage(self):
+        self.start_stage(self.currentStage + 1 if self.currentStage < 3 else 3)
+        
+
+    
+    def update(self):
         # 0 game state
         if self.currentGameState == GameState.READY:
-            if pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT):
-                self.currentGameState = GameState.ONGOING
-            else:
-                return
+            if pyxel.btn(pyxel.KEY_0):
+                self.start_stage(1)
+            return
+        elif self.currentGameState != GameState.ONGOING:
+            if self.currentGameState == GameState.WIN:
+                if pyxel.btn(pyxel.KEY_2):
+                    self.next_stage()
+                    return
 
-        if self.currentGameState == GameState.ONGOING:
+            if pyxel.btn(pyxel.KEY_1):
+                self.start_stage(self.currentStage)
+            elif pyxel.btn(pyxel.KEY_0):
+                self.start_stage(1)
+
+            return
             
-                
-            # 1 input handling
-            self.StageFile.player.update(pyxel.frame_count)
-            # for player in self.StageFile.player:
-            #     player.update(pyxel.frame_count)
-            #     if player.tank.is_destroyed():
-            #         self.StageFile.player.remove(player)
-
-            # 2 physics
-            self.physics.update(pyxel.frame_count)
-
-            # 3 game objects
-            [obj.main_update(pyxel.frame_count) for r in range(self.r) for c in range(self.c) for obj in self[c, r].get_objects()]
-
-            # TODO 4 enemy
-            for enemy in self.StageFile.enemies:
-                enemy.update(pyxel.frame_count)
-                if enemy.tank.is_destroyed():
-                    self.StageFile.enemies.remove(enemy)
-                
-            self.StageFile.update(pyxel.frame_count)
-
-            if not self.StageFile.enemies and self.StageFile.remainingEnemies == 0:
-                self.StageFile.player.tank.destroy()
-                if self.currStage == len(self.StageFile.Layouts):
-                    self.currentGameState = GameState.WIN
-                else:
-                    self.currStage += 1
-                    self.StageFile.generate_stage(self.currStage)
-                    self.currentGameState = GameState.READY
-                return
-
-            if self.StageFile.player.tank.is_destroyed():
-            # if not self.StageFile.player:
-                self.currentGameState = GameState.LOSE
-                return
 
         
-        
+        if self.stage.get_lives() == 0:
+            self.currentGameState = GameState.LOSE
+        elif self.stage.get_total_enemy_count() == 0:
+            self.currentGameState = GameState.WIN
         
 
+        # 1 input handling
+        player = self.stage.get_player()
+        if player.tank.is_destroyed():
+            if pyxel.btn(pyxel.KEY_R):
+                self.stage.spawn_player()
+
+        if not player.tank.is_destroyed():
+            player.update(pyxel.frame_count)
+
+        # 2 physics
+        self.physics.update(pyxel.frame_count)
+
+        # 3 game objects
+        [obj.main_update(pyxel.frame_count) for r in range(self.r) for c in range(self.c) for obj in self[c, r].get_objects()]
+
+        # 4 enemy
+        enemies = self.stage.get_enemies()
+        for enemy in enemies:
+            enemy.update(pyxel.frame_count)
+        
+        # 5 stage
+        self.stage.update(pyxel.frame_count)
+
+        # 6 process signal destroy
+        [f() for f in self._signalDestroyQueue]
+        self._signalDestroyQueue = []
 
     def draw_cell(self, i: int, j: int, x: int, y: int) -> None:
-        self.renderer.update_cell(pyxel.frame_count, i, j, x, y)
+        self.renderer.draw_cell(pyxel.frame_count, i, j, x, y)
 
-    def pre_draw_grid(self) -> None:
-        # background
-        pyxel.rect(0, 0, self.c*self.dim, self.r*self.dim, 0)
+    def pre_draw_grid(self):
+        self.renderer.pre_draw_grid()
+        
+    def post_draw_grid(self):
+        self.renderer.post_draw_grid()
 
-    def post_draw_grid(self) -> None:
-        if self.currentGameState == GameState.WIN:
-            # pyxel.text(pyxel.width//2, pyxel.height//2, "YOU WIN", 12)
-            pyxel.text((pyxel.width - (len("VICTORY") * pyxel.FONT_WIDTH)) / 2, (pyxel.height / 2 - pyxel.FONT_HEIGHT), "VICTORY", 12)
-            pyxel.text((pyxel.width - (len("Press 1 to Restart") * pyxel.FONT_WIDTH)) / 2, (pyxel.height / 2), "Press 1 to Restart", 11)
-            if pyxel.btnp(pyxel.KEY_1):
-                pyxel.rect(0, 0, self.c*self.dim, self.r*self.dim, 0)
-                self.currStage = 1
-                self.StageFile.generate_stage(self.currStage)
-                self.currentGameState = GameState.READY
-            return
 
-        if self.currentGameState == GameState.LOSE:
-            # pyxel.text(pyxel.width//3, pyxel.height//3, "YOU LOSE", 8)
-            pyxel.text((pyxel.width - (len("YOU DIED") * pyxel.FONT_WIDTH)) / 2, (pyxel.height / 2 - pyxel.FONT_HEIGHT), "YOU DIED", 8)
-            pyxel.text((pyxel.width - (len("Press 1 to Restart") * pyxel.FONT_WIDTH)) / 2, (pyxel.height / 2), "Press 1 to Restart", 11)
-            if pyxel.btnp(pyxel.KEY_1):
-                pyxel.rect(0, 0, self.c*self.dim, self.r*self.dim, 0)
-                self.currStage = 1
-                self.StageFile.generate_stage(self.currStage)
-                self.currentGameState = GameState.READY
-            return
+    # ---------------------------------
+    # INTERNAL
+    def queue_signal_destroy(self, f: Callable[[], None]):
+        self._signalDestroyQueue.append(f)
