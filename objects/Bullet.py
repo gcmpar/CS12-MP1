@@ -1,5 +1,6 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
+import pyxel
 
 if TYPE_CHECKING:
     from gamefiles.GameField import GameField
@@ -59,6 +60,7 @@ class Bullet(Entity):
 
     def collided_with(self, other: GameObject):
         self.destroy()
+        pyxel.play(0,pyxel.sounds[1])
     
     def touched(self, other: GameObject):
         if isinstance(other, Mirror) and self._lastMirrorHit != other: # debounce

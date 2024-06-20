@@ -62,9 +62,11 @@ class Stage():
     def get_layout(self, stageLevel) -> list[list[str]]:
         return self.Layouts[stageLevel]
     
-    def generate_stage(self, stageLevel):
+    def generate_stage(self, stageLevel, Lives):
         self.currStage = self.get_layout(stageLevel)
         
+        self.Lives = Lives
+
         self.enemies = list[EnemyController]()
         self.remainingEnemies = 0
         self.enemySpawns = []
@@ -90,6 +92,8 @@ class Stage():
                     Mirror(game=self.game, x=c, y=r, ref_ori="southeast")
 
                 if self.currStage[r][c] == "Spawn":
+                    self.Spawnpoint = (c,r)
+
                     self.player = (PlayerController(
                         game=self,
                         tank=Tank(game=self.game, x=c, y=r, team="player",
@@ -133,3 +137,16 @@ class Stage():
             
             self.remainingEnemies -= 1
 
+        if self.player.tank.is_destroyed() and self.Lives > 0:
+            c,r = self.Spawnpoint
+
+            self.player = (PlayerController(
+                        game=self,
+                        tank=Tank(game=self.game, x=c, y=r, team="player",
+                                
+                                health=1,
+                                movement_speed=5,
+                                fire_rate=1,
+                            )
+                        )
+                    )

@@ -93,6 +93,7 @@ class Tank(Entity):
             ori=ori,
             speed=15
             )
+        pyxel.play(0,pyxel.sounds[0])
         return bullet
     
     def can_fire_bullet(self) -> bool:
@@ -102,6 +103,9 @@ class Tank(Entity):
     def update(self, frame_count: int):
         if self.stats["health"] <= 0:
             self.destroy()
+            pyxel.play(0,pyxel.sounds[2])
+            if self.team == "player":
+                self.game.StageFile.Lives -= 1
             return
         if self._bulletFired:
             self._bulletFired = False

@@ -35,7 +35,7 @@ class GameState(enum.Enum):
 
 
 class GameField(PyxelGrid[Cell]):
-    def __init__(self, fps: int, r: int = 15, c: int = 15, dim: int = 8):
+    def __init__(self, fps: int, r: int = 15, c: int = 15, dim: int = 16):
         super().__init__(r, c, dim=dim)
         self.FPS = fps
         self.run(title="Battle Tanks Bootleg:tm:", fps=fps)
@@ -50,7 +50,7 @@ class GameField(PyxelGrid[Cell]):
 
         
         self.currStage = 1
-        self.StageFile.generate_stage(self.currStage)
+        self.StageFile.generate_stage(self.currStage, 2)
         self.currentGameState = GameState.READY
 
 
@@ -92,15 +92,17 @@ class GameField(PyxelGrid[Cell]):
                     self.currentGameState = GameState.WIN
                 else:
                     self.currStage += 1
-                    self.StageFile.generate_stage(self.currStage)
+                    self.StageFile.generate_stage(self.currStage, self.StageFile.Lives)
                     self.currentGameState = GameState.READY
                 return
 
             if self.StageFile.player.tank.is_destroyed():
             # if not self.StageFile.player:
-                self.currentGameState = GameState.LOSE
-                return
-
+                if self.StageFile.Lives == 0:
+                    self.currentGameState = GameState.LOSE
+                    return
+                # else:
+                #     print(self.StageFile.Lives)
         
         
         
@@ -114,6 +116,8 @@ class GameField(PyxelGrid[Cell]):
         pyxel.rect(0, 0, self.c*self.dim, self.r*self.dim, 0)
 
     def post_draw_grid(self) -> None:
+        pyxel.text(0,0,f"Lives: {self.StageFile.Lives}",12)
+
         if self.currentGameState == GameState.WIN:
             # pyxel.text(pyxel.width//2, pyxel.height//2, "YOU WIN", 12)
             pyxel.text((pyxel.width - (len("VICTORY") * pyxel.FONT_WIDTH)) / 2, (pyxel.height / 2 - pyxel.FONT_HEIGHT), "VICTORY", 12)
@@ -121,7 +125,7 @@ class GameField(PyxelGrid[Cell]):
             if pyxel.btnp(pyxel.KEY_1):
                 pyxel.rect(0, 0, self.c*self.dim, self.r*self.dim, 0)
                 self.currStage = 1
-                self.StageFile.generate_stage(self.currStage)
+                self.StageFile.generate_stage(self.currStage, 2)
                 self.currentGameState = GameState.READY
             return
 
@@ -132,6 +136,6 @@ class GameField(PyxelGrid[Cell]):
             if pyxel.btnp(pyxel.KEY_1):
                 pyxel.rect(0, 0, self.c*self.dim, self.r*self.dim, 0)
                 self.currStage = 1
-                self.StageFile.generate_stage(self.currStage)
+                self.StageFile.generate_stage(self.currStage, 2)
                 self.currentGameState = GameState.READY
             return
