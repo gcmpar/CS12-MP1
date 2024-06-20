@@ -39,11 +39,11 @@ class GameField(PyxelGrid[Cell]):
         self.renderer.init()
         self.sounds.init()
     
-    def start_stage(self, stage: int):
+    def start_stage(self, stage: int, lives: int):
         self.stage.cleanup()
 
         self.currentStage = stage
-        self.stage.generate_stage(str(self.currentStage), self.stage.get_lives())
+        self.stage.generate_stage(str(self.currentStage), lives)
         self.currentGameState = GameState.ONGOING
 
         # TEST
@@ -56,7 +56,10 @@ class GameField(PyxelGrid[Cell]):
         t2.start_moving()
 
     def next_stage(self):
-        self.start_stage(self.currentStage + 1 if self.currentStage < 3 else 3)
+        self.start_stage(
+            stage=self.currentStage + 1 if self.currentStage < 3 else 3,
+            lives=self.stage.get_lives()
+            )
         
 
     
@@ -64,28 +67,17 @@ class GameField(PyxelGrid[Cell]):
         # 0 game state
         if self.currentGameState == GameState.READY:
             if pyxel.btn(pyxel.KEY_0):
-                self.start_stage(1)
+                self.start_stage(stage=1, lives=2)
             return
         elif self.currentGameState != GameState.ONGOING:
             if self.currentGameState == GameState.WIN:
-                if pyxel.btn(pyxel.KEY_2):
+                if pyxel.btn(pyxel.KEY_1):
                     self.next_stage()
                     return
-
-            if pyxel.btn(pyxel.KEY_1):
-                self.start_stage(self.currentStage)
             elif pyxel.btn(pyxel.KEY_0):
-                self.start_stage(1)
+                self.start_stage(stage=1,lives=2)
 
             return
-            
-
-        
-        if self.stage.get_lives() == 0:
-            self.currentGameState = GameState.LOSE
-        elif self.stage.get_total_enemy_count() == 0:
-            self.currentGameState = GameState.WIN
-        
 
         # 1 input handling
         player = self.stage.get_player()
@@ -113,6 +105,12 @@ class GameField(PyxelGrid[Cell]):
         # 6 process signal destroy
         [f() for f in self._signalDestroyQueue]
         self._signalDestroyQueue = []
+
+        # 7 check game state
+        if self.stage.get_lives() == 0 or self.stage.get_home().is_destroyed():
+            self.currentGameState = GameState.LOSE
+        elif self.stage.get_total_enemy_count() == 0:
+            self.currentGameState = GameState.WIN
 
     def draw_cell(self, i: int, j: int, x: int, y: int) -> None:
         self.renderer.draw_cell(pyxel.frame_count, i, j, x, y)

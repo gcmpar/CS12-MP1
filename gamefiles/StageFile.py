@@ -13,6 +13,8 @@ from objects.Tank import Tank
 from objects.Brick import Brick
 from objects.Stone import Stone
 from objects.Water import Water
+from objects.Forest import Forest
+from objects.Home import Home
 from objects.Mirror import Mirror
 
 from misc.Signal import Signal
@@ -51,6 +53,7 @@ class Stage():
 
     def generate_stage(self, filename: str, lives: int = 2):
         spawnpoint: tuple[int, int] | None = None
+        home: Home | None = None
 
         self._enemySpawns = []
         self._enemies = []
@@ -74,13 +77,19 @@ class Stage():
                 if id == " ":
                     continue
                 if id == "Brick":
-                    Brick(self.game, x=c, y=r)
+                    Brick(self.game, c, r)
                 elif id == "CrackedBrick":
                     Brick(self.game, x=c, y=r, cracked=True)
                 elif id == "Stone":
-                    Stone(self.game, x=c, y=r)
+                    Stone(self.game, c, r)
                 elif id == "Water":
-                    Water(self.game, x=c, y=r)
+                    Water(self.game, c, r)
+                elif id == "Forest":
+                    Forest(self.game, c, r)
+                elif id == "Home":
+                    if home:
+                        raise ValueError("Stage cannot have more than one Home!")
+                    home = Home(self.game, c, r)
 
                 elif id == "MirrorNE":
                     Mirror(game=self.game, x=c, y=r, ref_ori="northeast")
@@ -97,10 +106,13 @@ class Stage():
                 else:
                     raise ValueError("Invalid stage file!")
                     
-        if spawnpoint == None:
+        if spawnpoint is None:
             raise ValueError("Please specify player spawn!")
+        if home is None:
+            raise ValueError("Please specify Home!")
         
         self._spawnpoint = spawnpoint
+        self._home = home
         self.spawn_player()
         self.spawn_enemy()
 
@@ -112,6 +124,9 @@ class Stage():
     def set_lives(self, lives: int):
         self._lives = lives
 
+    def get_home(self):
+        return self._home
+    
     def get_player(self):
         return self._player
     

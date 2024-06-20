@@ -6,6 +6,8 @@ from objects.Bullet import Bullet
 from objects.Brick import Brick
 from objects.Stone import Stone
 from objects.Water import Water
+from objects.Forest import Forest
+from objects.Home import Home
 from objects.Mirror import Mirror
 
 sprites: dict[Type[GameObject], Sequence[tuple[int, int]]] = {
@@ -14,6 +16,8 @@ sprites: dict[Type[GameObject], Sequence[tuple[int, int]]] = {
     Brick: [(3, 0), (3, 1)],
     Stone: [(3, 2)],
     Water: [(3, 3)],
+    Forest: [(3, 3)],
+    Home: [(3, 3)],
     Mirror: [(4, 0), (4, 1)],
     
 }
