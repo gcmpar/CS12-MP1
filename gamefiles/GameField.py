@@ -35,7 +35,7 @@ class GameState(enum.Enum):
 
 
 class GameField(PyxelGrid[Cell]):
-    def __init__(self, fps: int, r: int = 15, c: int = 15, dim: int = 8):
+    def __init__(self, fps: int, r: int = 15, c: int = 15, dim: int = 16):
         super().__init__(r, c, dim=dim)
         self.FPS = fps
         self.run(title="Battle Tanks Bootleg:tm:", fps=fps)

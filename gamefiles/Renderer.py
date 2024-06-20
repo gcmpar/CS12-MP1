@@ -27,6 +27,7 @@ class Renderer:
 
             obj_class = type(obj)
             index = assetindex.sprites[obj_class]
+            
 
             if isinstance(obj, Entity):
 
@@ -44,12 +45,26 @@ class Renderer:
             else:
                 index = index[0]
 
+            # Old 8x8 sprite rendering
+            # (u_ind, v_ind) = index
+            # pyxel.bltm(
+            #     x=x,
+            #     y=y,
+            #     w=8,
+            #     h=8,
+            #     tm=0,
+            #     u=u_ind * self.game.dim,
+            #     v=v_ind * self.game.dim,
+            #     colkey=0
+            # )
+
+            # New 16x16 sprite rendering
             (u_ind, v_ind) = index
             pyxel.bltm(
                 x=x,
                 y=y,
-                w=8,
-                h=8,
+                w=16,
+                h=16,
                 tm=0,
                 u=u_ind * self.game.dim,
                 v=v_ind * self.game.dim,
