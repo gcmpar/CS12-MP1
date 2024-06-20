@@ -8,7 +8,7 @@ EnemySpawn| | | | | | |EnemySpawn| | | | | | |EnemySpawn
  | | | | | | |MirrorSE| | | | | | |Stone
  | | | | | | | | | | | | | |Water
  | | | | | | | | | | | | | |CrackedBrick
- | | | | | | |MirrorNE| | | | | | | 
+ | | | | | | |MirrorNE| | | | | | |Forest
  | | | | | | | | | | | | | | 
  | | | | | | | | | | | | | | 
  | | | | | | | | | | | | | | 
