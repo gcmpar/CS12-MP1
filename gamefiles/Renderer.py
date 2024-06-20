@@ -9,8 +9,9 @@ if TYPE_CHECKING:
 from objects.Entity import Entity
 from objects.Tank import Tank
 from objects.Bullet import Bullet
-from objects.Mirror import Mirror
 from objects.Brick import Brick
+from objects.Forest import Forest
+from objects.Mirror import Mirror
 
 from misc.util import Orientation, GameState
 
@@ -20,6 +21,7 @@ class Renderer:
     def __init__(self, game: GameField):
         self.game = game
         self._entities: dict[Entity, dict[str, Any]] = {}
+        self._zOrder = list[dict[str, Any]]()
     
     def init(self):
         pass
@@ -28,19 +30,43 @@ class Renderer:
         if self.game.currentGameState == GameState.READY:
             return
         
+        if (x, y) in self.game.stage.get_enemy_spawns():
+            ...
+            # (u_ind, v_ind) = 
+            # pyxel.bltm(
+            #     x=x,
+            #     y=y,
+            #     w=16,
+            #     h=16,
+            #     tm=0,
+            #     u=u_ind * self.game.dim,
+            #     v=v_ind * self.game.dim,
+            #     colkey=0
+            # )
+
         cell = self.game[i, j]
         for obj in cell.get_objects():
 
             obj_class = type(obj)
             index = assetindex.sprites[obj_class]
+            z_index = 0
             
 
             if isinstance(obj, Entity):
 
                 if isinstance(obj, Tank):
-                    index = index[get_args(Orientation).index(obj.orientation) + (4 if obj.team == "enemy" else 0)]
+                    offset = 0
+                    if obj.type == "light":
+                        offset = 8
+                    elif obj.type == "armored":
+                        offset = 12
+                    elif obj.team == "enemy":
+                        offset = 4
+                    index = index[offset + get_args(Orientation).index(obj.orientation)]
+                    z_index = 1
                 elif isinstance(obj, Bullet):
                     index = index[get_args(Orientation).index(obj.orientation)]
+                    z_index = 3
                 else:
                     index = index[0]
 
@@ -49,36 +75,21 @@ class Renderer:
             elif isinstance(obj, Brick):
                 index = index[0 if not obj.cracked else 1]
             else:
+                if isinstance(obj, Forest):
+                    z_index = 2
                 index = index[0]
 
-            # Old 8x8 sprite rendering
-            # (u_ind, v_ind) = index
-            # pyxel.bltm(
-            #     x=x,
-            #     y=y,
-            #     w=8,
-            #     h=8,
-            #     tm=0,
-            #     u=u_ind * self.game.dim,
-            #     v=v_ind * self.game.dim,
-            #     colkey=0
-            # )
-
-            # New 16x16 sprite rendering
-            (u_ind, v_ind) = index
-            pyxel.bltm(
-                x=x,
-                y=y,
-                w=16,
-                h=16,
-                tm=0,
-                u=u_ind * self.game.dim,
-                v=v_ind * self.game.dim,
-                colkey=0
-            )
+            self._zOrder.append({
+                "x": x,
+                "y": y,
+                "index": index,
+                "zIndex": z_index
+            })
+            
     
     def pre_draw_grid(self):
         pyxel.rect(0, 0, self.game.c*self.game.dim, self.game.r*self.game.dim, 0)
+        self._zOrder = list[dict[str, Any]]()
     
     def post_draw_grid(self):
         pyxel.text(1,1,f"Lives: {self.game.stage.get_lives()}",12)
@@ -88,6 +99,7 @@ class Renderer:
 
         if self.game.currentGameState == GameState.READY:
             self.display_center_text("Press 0 to Start", 11)
+            return
 
         elif self.game.currentGameState != GameState.ONGOING:
             if self.game.currentGameState == GameState.WIN:
@@ -98,6 +110,35 @@ class Renderer:
                 self.display_center_text("HOME CELL WAS DESTROYED" if self.game.stage.get_home().is_destroyed() else "YOU DIED", 8)
 
             self.display_center_text("Press 0 to Start at Beginning", 11, 0, pyxel.FONT_HEIGHT * 3)
+        
+        # Old 8x8 sprite rendering
+        # (u_ind, v_ind) = index
+        # pyxel.bltm(
+        #     x=x,
+        #     y=y,
+        #     w=8,
+        #     h=8,
+        #     tm=0,
+        #     u=u_ind * self.game.dim,
+        #     v=v_ind * self.game.dim,
+        #     colkey=0
+        # )
+
+        # New 16x16 sprite rendering
+        self._zOrder.sort(key=lambda e: e["zIndex"])
+        for data in self._zOrder:
+            (u_ind, v_ind) = data["index"]
+            pyxel.bltm(
+                x=data["x"],
+                y=data["y"],
+                w=16,
+                h=16,
+                tm=0,
+                u=u_ind * self.game.dim,
+                v=v_ind * self.game.dim,
+                colkey=0
+            )
+        
             
             
     

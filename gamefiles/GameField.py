@@ -9,6 +9,8 @@ from gamefiles.PhysicsManager import PhysicsManager
 from gamefiles.Renderer import Renderer
 from gamefiles.SoundManager import SoundManager
 
+from gamefiles.TankFactory import TankFactory
+
 from gamefiles.StageFile import Stage
 from misc.util import GameState
 from misc.Signal import Signal
@@ -29,6 +31,7 @@ class GameField(PyxelGrid[Cell]):
         self.physics = PhysicsManager(self)
         self.renderer = Renderer(self)
         self.sounds = SoundManager(self)
+        self.tankFactory = TankFactory(self)
         pyxel.load("resources/spritesheet.pyxres")
 
         self.currentGameState = GameState.READY
@@ -46,10 +49,9 @@ class GameField(PyxelGrid[Cell]):
         self.stage.generate_stage(str(self.currentStage), lives)
         self.currentGameState = GameState.ONGOING
 
-        # TEST
-        from objects.Tank import Tank
-        t1 = Tank(self, 2, 8, "enemy", 5, 2, 1)
-        t2 = Tank(self, 2, 2, "enemy", 5, 2, 1)
+        # PHYSICS TEST (can remove this ig)
+        t1 = self.tankFactory.tank(2, 8, "enemy", "light")
+        t2 = self.tankFactory.tank(2, 2, "enemy", "armored")
         t1.turn("north")
         t2.turn("south")
         t1.start_moving()

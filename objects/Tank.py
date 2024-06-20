@@ -13,6 +13,8 @@ from misc.Signal import Signal
 
 '''
 Tank
+    type: str
+        - descriptor for rendering or other managers
     team: Team
     isMoving: bool
     stats: {
@@ -40,7 +42,7 @@ class Tank(Entity):
     isMoving: bool
     _bulletFired: bool
     _canFireBullet: bool
-    def __init__(self, game: GameField, x: int, y: int, team: Team,
+    def __init__(self, game: GameField, x: int, y: int, team: Team, tank_type: str,
                  
                  health: float,
                  movement_speed: float,
@@ -48,6 +50,7 @@ class Tank(Entity):
                 
                 ):
         self.team = team
+        self.type = tank_type
         self.isMoving = False
         self.stats = {
             "health": health,

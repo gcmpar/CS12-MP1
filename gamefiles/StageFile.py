@@ -9,7 +9,6 @@ from gamefiles.Cell import Cell
 from gamefiles.PlayerController import PlayerController
 from gamefiles.EnemyController import EnemyController
 
-from objects.Tank import Tank
 from objects.Brick import Brick
 from objects.Stone import Stone
 from objects.Water import Water
@@ -133,15 +132,11 @@ class Stage():
     def spawn_player(self):
         if self.get_lives() <= 0:
             return
-        player = (PlayerController(
-                game=self.game,
-                tank=Tank(game=self.game, x=self._spawnpoint[0], y=self._spawnpoint[1], team="player",
-                        health=1,
-                        movement_speed=5,
-                        fire_rate=1,
-                    )
-                )
-            )
+        (x, y) = self._spawnpoint
+        player = PlayerController(
+            game=self.game,
+            tank=self.game.tankFactory.tank(x=x, y=y, team="player", tank_type="normal")
+        )
         self._player = player
         
         def decrease_life():
@@ -153,25 +148,24 @@ class Stage():
     def get_enemies(self):
         return self._enemies
     
+    def get_enemy_spawns(self):
+        return self._enemySpawns
+
     def get_total_enemy_count(self) -> int:
-        return len(self.get_enemies()) + len(self._enemySpawns)
+        return len(self.get_enemies()) + len(self.get_enemy_spawns())
 
     def spawn_enemy(self):
-        if len(self._enemySpawns) == 0:
+        enemy_spawns = self.get_enemy_spawns()
+        if len(enemy_spawns) == 0:
             return
-
-        coords = choice(self._enemySpawns)
+        
+        coords = choice(enemy_spawns)
         self._enemySpawns.remove(coords)
         x, y = coords
         enemy = EnemyController(
             game=self.game,
-            tank=Tank(game=self.game, x=x, y=y, team="enemy",
-                    
-                    health=1,
-                    movement_speed=5,
-                    fire_rate=1,
-                )
-            )
+            tank=self.game.tankFactory.tank(x=x, y=y, team="enemy", tank_type=choice(self.game.tankFactory.get_tank_types()))
+        )
         def remove_enemy():
             self._enemies.remove(enemy)
         enemy.tank.onDestroy.add_listener(remove_enemy)
