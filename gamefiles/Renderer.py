@@ -21,6 +21,9 @@ class Renderer:
         self.game = game
         self._entities: dict[Entity, dict[str, Any]] = {}
     
+    def init(self):
+        pass
+
     def draw_cell(self, frame_count: int, i: int, j: int, x: int, y: int):
         if self.game.currentGameState == GameState.READY:
             return
@@ -78,19 +81,20 @@ class Renderer:
         pyxel.rect(0, 0, self.game.c*self.game.dim, self.game.r*self.game.dim, 0)
     
     def post_draw_grid(self):
+        pyxel.text(0,0,f"Lives: {self.game.stage.get_lives()}",12)
         if self.game.currentGameState == GameState.READY:
-            self.display_center_text("Press 0 to Start", 11, 0, -pyxel.FONT_HEIGHT)
+            self.display_center_text("Press 0 to Start", 11)
 
         elif self.game.currentGameState != GameState.ONGOING:
             if self.game.currentGameState == GameState.WIN:
                 self.display_center_text("VICTORY", 12)
-                self.display_center_text("Press 2 to Next Stage", 11, 0, -pyxel.FONT_HEIGHT)
+                self.display_center_text("Press 2 to Next Stage", 11, 0, pyxel.FONT_HEIGHT * 2)
 
             elif self.game.currentGameState == GameState.LOSE:
                 self.display_center_text("YOU DIED", 8)
             
-            self.display_center_text("Press 1 to Restart Stage", 11, 0, -pyxel.FONT_HEIGHT*2)
-            self.display_center_text("Press 0 to Start at Stage 1", 11, 0, -pyxel.FONT_HEIGHT*3)
+            self.display_center_text("Press 1 to Restart Stage", 11, 0, pyxel.FONT_HEIGHT * 3)
+            self.display_center_text("Press 0 to Start at Stage 1", 11, 0, pyxel.FONT_HEIGHT * 4)
             
             
     

@@ -6,6 +6,7 @@ if TYPE_CHECKING:
     from misc.util import Orientation
 
 from objects.GameObject import GameObject
+from misc.Signal import Signal
 
 # A game object that has velocity
 
@@ -14,6 +15,8 @@ from objects.GameObject import GameObject
 Entity:
     orientation: Orientation
     speed: int
+
+    onOutOfBounds = Signal[[], None](game)
 
     ---------------------------------
     INTERNALS
@@ -34,9 +37,14 @@ class Entity(GameObject):
     def __init__(self, game: GameField, x: int, y: int, ori: Orientation, speed: int = 0):
         if type(self) == Entity:
             raise ValueError("Superclass cannot be instantiated.")
-        super().__init__(game, x, y)
         self.orientation = ori
         self.speed = speed
+        self.onOutOfBounds = Signal[[], None](game)
+
+        super().__init__(game, x, y)
+        def d():
+            self.onOutOfBounds.destroy()
+        self.onDestroy.add_listener(d)
 
     # ---------------------------------
     # internal
@@ -44,6 +52,7 @@ class Entity(GameObject):
         if self.is_destroyed():
             return
         self.out_of_bounds()
+        self.onOutOfBounds.fire()
 
     # ---------------------------------
     # method overrides

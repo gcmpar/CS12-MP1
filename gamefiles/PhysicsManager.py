@@ -13,6 +13,11 @@ class PhysicsManager:
         self.game = game
         self._entities: dict[Entity, dict[str, Any]] = {}
     
+    def init(self):
+        def reset():
+            self._entities = {}
+        self.game.stage.onStageGenerated.add_listener(reset)
+
     def update(self, frame_count: int):
         
         collision_pairs: list[set[GameObject]] = []
@@ -115,6 +120,7 @@ class PhysicsManager:
                 valid_movers.append(entity)
         
         # check collision on entities with same target cell
+        invalidated = list[Entity]()
         for cell, entities in target_cell_map.items():
             for entity in entities:
                 for other in entities:
@@ -133,15 +139,20 @@ class PhysicsManager:
                     if pair in collision_pairs:
                         continue
                     collision_pairs.append(pair)
+
+                    # only one entity can move to this cell (otherwise theres noclip hax lmao)
+                    invalidated.append(other)
         
+        # move
+        for entity in valid_movers:
+            if entity in invalidated:
+                continue
+            target_cell = moving_entities[entity]
+            entity.move_to(target_cell.x, target_cell.y)
+            self._entities[entity]["last_move_frame"] = frame_count
+
         # trigger collision
         for pair in collision_pairs:
             (obj, other) = tuple(pair)
             obj.main_collided_with(other)
             other.main_collided_with(obj)
-
-        # move
-        for entity in valid_movers:
-            target_cell = moving_entities[entity]
-            entity.move_to(target_cell.x, target_cell.y)
-            self._entities[entity]["last_move_frame"] = frame_count

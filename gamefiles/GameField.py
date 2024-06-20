@@ -1,24 +1,20 @@
+from collections.abc import Callable
+
 import pyxel
 
 from pyxelgrid import PyxelGrid
 from gamefiles.Cell import Cell
+
 from gamefiles.PhysicsManager import PhysicsManager
 from gamefiles.Renderer import Renderer
+from gamefiles.SoundManager import SoundManager
 
 from gamefiles.StageFile import Stage
-
 from misc.util import GameState
+from misc.Signal import Signal
 
+from objects.GameObject import GameObject
 
-'''
-GameField
-    FPS: int
-    physics: PhysicsManager
-    renderer: Renderer
-    stage: stage
-
-
-'''
 
 class GameField(PyxelGrid[Cell]):
     def __init__(self, fps: int, r: int = 15, c: int = 15, dim: int = 16):
@@ -28,22 +24,39 @@ class GameField(PyxelGrid[Cell]):
 
     def init(self):
         # internals
+        self._signalDestroyQueue = list[Callable[[], None]]()
+
         self.physics = PhysicsManager(self)
         self.renderer = Renderer(self)
-        self.stage = Stage(self)
+        self.sounds = SoundManager(self)
         pyxel.load("resources/spritesheet.pyxres")
 
         self.currentGameState = GameState.READY
+        self.onObjectAdded = Signal[[GameObject], None](self)
+
+        self.stage = Stage(self)
+        self.physics.init()
+        self.renderer.init()
+        self.sounds.init()
     
     def start_stage(self, stage: int):
+        self.stage.cleanup()
+
         self.currentStage = stage
-        self.stage.generate_stage("stage"+str(self.currentStage))
+        self.stage.generate_stage(str(self.currentStage), self.stage.get_lives())
         self.currentGameState = GameState.ONGOING
 
+        # TEST
+        from objects.Tank import Tank
+        t1 = Tank(self, 2, 8, "enemy", 5, 2, 1)
+        t2 = Tank(self, 2, 2, "enemy", 5, 2, 1)
+        t1.turn("north")
+        t2.turn("south")
+        t1.start_moving()
+        t2.start_moving()
+
     def next_stage(self):
-        if self.currentStage == 3:
-            return
-        self.start_stage(self.currentStage + 1)
+        self.start_stage(self.currentStage + 1 if self.currentStage < 3 else 3)
         
 
     
@@ -68,14 +81,20 @@ class GameField(PyxelGrid[Cell]):
             
 
         
-        if self.stage.get_player().tank.is_destroyed():
+        if self.stage.get_lives() == 0:
             self.currentGameState = GameState.LOSE
-        elif self.stage.get_total_enemies() == 0:
+        elif self.stage.get_total_enemy_count() == 0:
             self.currentGameState = GameState.WIN
         
 
         # 1 input handling
-        self.stage.get_player().update(pyxel.frame_count)
+        player = self.stage.get_player()
+        if player.tank.is_destroyed():
+            if pyxel.btn(pyxel.KEY_R):
+                self.stage.spawn_player()
+
+        if not player.tank.is_destroyed():
+            player.update(pyxel.frame_count)
 
         # 2 physics
         self.physics.update(pyxel.frame_count)
@@ -91,6 +110,10 @@ class GameField(PyxelGrid[Cell]):
         # 5 stage
         self.stage.update(pyxel.frame_count)
 
+        # 6 process signal destroy
+        [f() for f in self._signalDestroyQueue]
+        self._signalDestroyQueue = []
+
     def draw_cell(self, i: int, j: int, x: int, y: int) -> None:
         self.renderer.draw_cell(pyxel.frame_count, i, j, x, y)
 
@@ -99,3 +122,9 @@ class GameField(PyxelGrid[Cell]):
         
     def post_draw_grid(self):
         self.renderer.post_draw_grid()
+
+
+    # ---------------------------------
+    # INTERNAL
+    def queue_signal_destroy(self, f: Callable[[], None]):
+        self._signalDestroyQueue.append(f)

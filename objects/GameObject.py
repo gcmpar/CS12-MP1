@@ -13,11 +13,15 @@ from misc.Signal import Signal
 GameObject
     game: GameField
         - reference to main game
+    id: int
+        - object id
     _cell: Cell
         - reference to the cell it's currently in
     _destroyed: bool
 
-    onMove: Signal[[], None]
+    onMove: Signal[[int, int], None]
+    onCollision: Signal[[GameObject], None]
+    onTouched: Signal[[GameObject], None]
     onDestroy: Signal[[], None]
         
     get_cell() -> Cell:
@@ -63,19 +67,32 @@ GameObject
         - called on both for each other
 '''
 
+object_id = 0
 class GameObject():
     _destroyed: bool
     def __init__(self, game: GameField, x: int, y: int):
         if type(self) == GameObject:
             raise ValueError("Superclass cannot be instantiated.")
         
+        global object_id
+        object_id += 1
+
         self.game = game
+        self.id = object_id
         self._cell = game[y, x]
         self._cell.add_object(self)
         self._destroyed = False
 
-        self.onMove = Signal[[], None]()
-        self.onDestroy = Signal[[], None]()
+        self.onMove = Signal[[int, int], None](game)
+        self.onCollision = Signal[[GameObject], None](game)
+        self.onTouched = Signal[[GameObject], None](game)
+        self.onDestroy = Signal[[], None](game)
+
+        self.game.onObjectAdded.fire(self)
+
+    def __hash__(self):
+        return hash(self.id)
+    
 
     def get_cell(self) -> Cell:
         return self._cell
@@ -91,7 +108,7 @@ class GameObject():
         target_cell.add_object(self)
         self._cell = target_cell
 
-        self.onMove.fire()
+        self.onMove.fire(x, y)
 
     def destroy(self):
         if self.is_destroyed():
@@ -100,10 +117,15 @@ class GameObject():
         self._cell.remove_object(self)
         self._destroyed = True
 
+        self.onMove.destroy()
+        self.onCollision.destroy()
+        self.onTouched.destroy()
+
         self.onDestroy.fire()
         self.onDestroy.destroy()
 
         del self
+
     def is_destroyed(self) -> bool:
         return self._destroyed
     
@@ -112,17 +134,19 @@ class GameObject():
     # internal
 
     def main_update(self, frame_count: int):
-        if self.is_destroyed():
-            return
+        # if self.is_destroyed():
+        #     return
         self.update(frame_count)
     def main_collided_with(self, other: GameObject):
-        if self.is_destroyed():
-            return
+        # if self.is_destroyed():
+        #     return
         self.collided_with(other)
+        self.onCollision.fire(other)
     def main_touched(self, other: GameObject):
-        if self.is_destroyed():
-            return
+        # if self.is_destroyed():
+        #     return
         self.touched(other)
+        self.onTouched.fire(other)
 
 
     # ---------------------------------

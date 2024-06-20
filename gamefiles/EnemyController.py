@@ -12,7 +12,7 @@ from misc.util import Orientation
 '''
 EnemyController:
     tank: Tank
-    update()
+    update(frame_count: int)
 
 '''
 
@@ -20,7 +20,7 @@ def random_interval(fps: int):
     return random.randint(math.floor(fps/2), math.floor(fps))
 
 class EnemyController():
-    _moveOnce: Callable[[], None] | None
+    _moveOnce: Callable[[int, int], None] | None
     def __init__(self, game: GameField, tank: Tank):
         self.game = game
         self.tank = tank
@@ -55,7 +55,7 @@ class EnemyController():
                 self.tank.onMove.remove_listener(self._moveOnce)
             self.tank.start_moving()
 
-            def moveOnce():
+            def moveOnce(x: int, y: int):
                 self.tank.stop_moving()
                 self.tank.onMove.remove_listener(moveOnce)
                 self._moveOnce = None

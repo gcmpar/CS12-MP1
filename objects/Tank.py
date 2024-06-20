@@ -9,6 +9,8 @@ from objects.Entity import Entity
 from objects.GameObject import GameObject
 from objects.Bullet import Bullet
 
+from misc.Signal import Signal
+
 '''
 Tank
     team: Team
@@ -18,6 +20,7 @@ Tank
         "movementSpeed: float
         "fireRate: int
     }
+    onBulletFired: Signal[[Bullet], None]
 
     turn(ori: Orientation)
     start_moving()
@@ -44,20 +47,28 @@ class Tank(Entity):
                  fire_rate: float
                 
                 ):
-        
-        super().__init__(game, x, y, ori="north", speed=0)
         self.team = team
         self.isMoving = False
-
         self.stats = {
             "health": health,
             "movementSpeed": movement_speed,
             "fireRate": fire_rate,
         }
+        self.onBulletFired = Signal[[Bullet], None](game)
+
+
 
         self._lastFireFrame = 0
         self._bulletFired = False
         self._canFireBullet = True
+
+        super().__init__(game, x, y, ori="north", speed=0)
+        def d():
+            self.onBulletFired.destroy()
+        self.onDestroy.add_listener(d)
+
+
+
     
     def turn(self, ori: Orientation):
         self.orientation = ori
@@ -93,6 +104,7 @@ class Tank(Entity):
             ori=ori,
             speed=15
             )
+        self.onBulletFired.fire(bullet)
         return bullet
     
     def can_fire_bullet(self) -> bool:

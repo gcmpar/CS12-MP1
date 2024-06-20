@@ -36,12 +36,11 @@ class Bullet(Entity):
     orientation: Orientation
     _lastMirrorHit: Mirror | None
     def __init__(self, game: GameField, x: int, y: int, owner: Tank, ori: Orientation, speed: int=15):
-        super().__init__(game=game, x=x, y=y, ori=ori, speed=speed)
         self._lastMirrorHit = None
-
         self.owner = owner
 
-        def on_move():
+        super().__init__(game=game, x=x, y=y, ori=ori, speed=speed)
+        def on_move(x: int, y: int):
             cell = self.get_cell()
             if self._lastMirrorHit is not None:
                 if self._lastMirrorHit not in cell.get_objects():

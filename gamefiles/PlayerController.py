@@ -23,7 +23,7 @@ PlayerController:
     tank: Tank
         - the tank the player controls
     
-    update()
+    update(frame_count: int)
         - used by the main GameField to check input presses every frame and control tank accordingly
 
 '''
@@ -41,6 +41,13 @@ class PlayerController():
         self._movementLastOri = "north"
 
         self._bullet = None
+
+        def record_bullet(bullet: Bullet):
+            self._bullet = bullet
+            def unrecord_bullet():
+                self._bullet = None
+            bullet.onDestroy.add_listener(unrecord_bullet)
+        self.tank.onBulletFired.add_listener(record_bullet)
     
     def update(self, frame_count: int):
         for c, btn in controls.items():
@@ -75,8 +82,6 @@ class PlayerController():
         
         # fire
         if pyxel.btn(controls["fire"]):
-            if self._bullet is not None and self._bullet.is_destroyed():
-                self._bullet = None
             if self._bullet is None:
                 self._bullet = self.tank.fire_bullet()
             
