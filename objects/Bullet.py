@@ -34,20 +34,20 @@ ref_map_inv: dict[tuple[int, int], Orientation] = {v: k for k, v in ref_map.item
 
 class Bullet(Entity):
     orientation: Orientation
-    _last_mirror_hit: Mirror | None
+    _lastMirrorHit: Mirror | None
     def __init__(self, game: GameField, x: int, y: int, owner: Tank, ori: Orientation, speed: int=15):
         super().__init__(game=game, x=x, y=y, ori=ori, speed=speed)
-        self._last_mirror_hit = None
+        self._lastMirrorHit = None
 
         self.owner = owner
 
         def on_move():
             cell = self.get_cell()
-            if self._last_mirror_hit is not None:
-                if self._last_mirror_hit not in cell.get_objects():
-                    self._last_mirror_hit = None
+            if self._lastMirrorHit is not None:
+                if self._lastMirrorHit not in cell.get_objects():
+                    self._lastMirrorHit = None
 
-        self.on_move.add_listener(on_move)
+        self.onMove.add_listener(on_move)
 
     def can_collide(self, other: GameObject):
         if isinstance(other, Mirror):
@@ -61,10 +61,10 @@ class Bullet(Entity):
         self.destroy()
     
     def touched(self, other: GameObject):
-        if isinstance(other, Mirror) and self._last_mirror_hit != other: # debounce
-            self._last_mirror_hit = other
+        if isinstance(other, Mirror) and self._lastMirrorHit != other: # debounce
+            self._lastMirrorHit = other
 
-            ref_ori = other.reflect_orientation
+            ref_ori = other.reflectOrientation
             
             c = ref_map[self.orientation]
             c = (c[1], c[0])

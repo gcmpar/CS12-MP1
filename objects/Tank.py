@@ -1,8 +1,6 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 
-import pyxel
-
 if TYPE_CHECKING:
     from gamefiles.GameField import GameField
     from misc.util import Orientation, Team
@@ -14,11 +12,11 @@ from objects.Bullet import Bullet
 '''
 Tank
     team: Team
-    is_moving: bool
+    isMoving: bool
     stats: {
         "health": float
-        "movement_speed": float
-        "fire_rate": int
+        "movementSpeed: float
+        "fireRate: int
     }
 
     turn(ori: Orientation)
@@ -36,7 +34,9 @@ Tank
 
 class Tank(Entity):
     team: Team
-    is_moving: bool
+    isMoving: bool
+    _bulletFired: bool
+    _canFireBullet: bool
     def __init__(self, game: GameField, x: int, y: int, team: Team,
                  
                  health: float,
@@ -47,20 +47,22 @@ class Tank(Entity):
         
         super().__init__(game, x, y, ori="north", speed=0)
         self.team = team
-        self.is_moving = False
+        self.isMoving = False
 
         self.stats = {
             "health": health,
-            "movement_speed": movement_speed,
-            "fire_rate": fire_rate,
+            "movementSpeed": movement_speed,
+            "fireRate": fire_rate,
         }
 
-        self._last_fire_frame = 0
+        self._lastFireFrame = 0
+        self._bulletFired = False
+        self._canFireBullet = True
     
     def turn(self, ori: Orientation):
         self.orientation = ori
     def start_moving(self):
-        self.speed = self.stats["movement_speed"]
+        self.speed = self.stats["movementSpeed"]
     def stop_moving(self):
         self.speed = 0
 
@@ -81,7 +83,7 @@ class Tank(Entity):
         # fire cap
         if not self.can_fire_bullet():
             return
-        self._last_fire_frame = pyxel.frame_count
+        self._bulletFired = True
 
         bullet = Bullet(
             game=self.game,
@@ -94,15 +96,17 @@ class Tank(Entity):
         return bullet
     
     def can_fire_bullet(self) -> bool:
-        if pyxel.frame_count < (self._last_fire_frame + (self.game.FPS / self.stats["fire_rate"])):
-            return False
-        return True
+        return self._canFireBullet
 
     
     def update(self, frame_count: int):
         if self.stats["health"] <= 0:
             self.destroy()
             return
+        if self._bulletFired:
+            self._bulletFired = False
+            self._lastFireFrame = frame_count
+        self._canFireBullet = not (frame_count < (self._lastFireFrame + (self.game.FPS / self.stats["fireRate"])))
 
     def can_collide(self, other: GameObject):
         if isinstance(other, Bullet):

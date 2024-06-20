@@ -17,8 +17,8 @@ GameObject
         - reference to the cell it's currently in
     _destroyed: bool
 
-    on_move: Signal[[], None]
-    on_destroy: Signal[[], None]
+    onMove: Signal[[], None]
+    onDestroy: Signal[[], None]
         
     get_cell() -> Cell:
         - returns the cell it's in
@@ -28,7 +28,7 @@ GameObject
 
     destroy()
         - removes the object from game
-        - fires functions in on_destroy
+        - fires functions in onDestroy
     is_destroyed() -> bool
         returns True if destroyed
 
@@ -72,8 +72,8 @@ class GameObject():
         self._cell.add_object(self)
         self._destroyed = False
 
-        self.on_move = Signal[[], None]()
-        self.on_destroy = Signal[[], None]()
+        self.onMove = Signal[[], None]()
+        self.onDestroy = Signal[[], None]()
 
     def get_cell(self) -> Cell:
         return self._cell
@@ -89,7 +89,7 @@ class GameObject():
         target_cell.add_object(self)
         self._cell = target_cell
 
-        self.on_move.fire()
+        self.onMove.fire()
 
     def destroy(self):
         if self.is_destroyed():
@@ -98,7 +98,7 @@ class GameObject():
         self._cell.remove_object(self)
         self._destroyed = True
 
-        self.on_destroy.fire()
+        self.onDestroy.fire()
 
         del self
     def is_destroyed(self) -> bool:

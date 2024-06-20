@@ -29,25 +29,25 @@ PlayerController:
 '''
 
 class PlayerController():
-    _movement_last_ori: Orientation
+    _movementLastOri: Orientation
     _bullet: Bullet | None
     def __init__(self, game: GameField, tank: Tank):
         self.game = game
         self.tank = tank
 
-        self._movement_held: dict[str, int] = {}
+        self._movementHeld: dict[str, int] = {}
         for c in controls.keys():
-            self._movement_held[c] = 0
-        self._movement_last_ori = "north"
+            self._movementHeld[c] = 0
+        self._movementLastOri = "north"
 
         self._bullet = None
     
     def update(self, frame_count: int):
         for c, btn in controls.items():
             if pyxel.btn(btn):
-                self._movement_held[c] += 1
+                self._movementHeld[c] += 1
             else:
-                self._movement_held[c] = 0
+                self._movementHeld[c] = 0
 
         # movement (whatever was pressed last)
         move = False
@@ -56,20 +56,20 @@ class PlayerController():
         ori_priority = orientations[0]
 
         for ori in get_args(Orientation):
-            if self._movement_held[ori] == 0:
+            if self._movementHeld[ori] == 0:
                 continue
 
-            if least_held is None or self._movement_held[ori] < least_held:
+            if least_held is None or self._movementHeld[ori] < least_held:
                 move = True
-                least_held = self._movement_held[ori]
+                least_held = self._movementHeld[ori]
                 ori_priority = ori
 
         if not move:
             self.tank.stop_moving()
-            ori_priority = self._movement_last_ori
+            ori_priority = self._movementLastOri
         else:
             self.tank.start_moving()
-            self._movement_last_ori = ori_priority
+            self._movementLastOri = ori_priority
         
         self.tank.turn(ori_priority)
         

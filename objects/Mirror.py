@@ -10,4 +10,4 @@ from objects.Item import Item
 class Mirror(Item):
     def __init__(self, game: GameField, x: int, y: int, ref_ori: ReflectOrientation):
         super().__init__(game, x, y)
-        self.reflect_orientation = ref_ori
+        self.reflectOrientation = ref_ori
