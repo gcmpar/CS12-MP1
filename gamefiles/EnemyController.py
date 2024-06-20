@@ -52,14 +52,14 @@ class EnemyController():
 
             # just makes sure it moves one cell only each time
             if self._moveOnce is not None:
-                self.tank.on_move.remove_listener(self._moveOnce)
+                self.tank.onMove.remove_listener(self._moveOnce)
             self.tank.start_moving()
 
             def moveOnce():
                 self.tank.stop_moving()
-                self.tank.on_move.remove_listener(moveOnce)
+                self.tank.onMove.remove_listener(moveOnce)
                 self._moveOnce = None
-            self.tank.on_move.add_listener(moveOnce)
+            self.tank.onMove.add_listener(moveOnce)
             self._moveOnce = moveOnce
         
         # fire

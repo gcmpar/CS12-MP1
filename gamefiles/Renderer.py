@@ -39,7 +39,7 @@ class Renderer:
                     index = index[0]
 
             elif isinstance(obj, Mirror):
-                index = index[0 if obj.reflect_orientation == "northeast" else 1]
+                index = index[0 if obj.reflectOrientation == "northeast" else 1]
             elif isinstance(obj, Brick):
                 index = index[0 if not obj.cracked else 1]
             else:

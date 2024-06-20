@@ -1,6 +1,8 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 
+import pyxel
+
 if TYPE_CHECKING:
     from gamefiles.GameField import GameField
     from misc.util import Orientation, Team
