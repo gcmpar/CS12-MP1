@@ -12,7 +12,7 @@ from objects.Bullet import Bullet
 from objects.Mirror import Mirror
 from objects.Brick import Brick
 
-from misc.util import Orientation
+from misc.util import Orientation, GameState
 
 import resources.assetindex as assetindex
 
@@ -21,7 +21,10 @@ class Renderer:
         self.game = game
         self._entities: dict[Entity, dict[str, Any]] = {}
     
-    def update_cell(self, frame_count: int, i: int, j: int, x: int, y: int):
+    def draw_cell(self, frame_count: int, i: int, j: int, x: int, y: int):
+        if self.game.currentGameState == GameState.READY:
+            return
+        
         cell = self.game[i, j]
         for obj in cell.get_objects():
 
@@ -39,7 +42,7 @@ class Renderer:
                     index = index[0]
 
             elif isinstance(obj, Mirror):
-                index = index[0 if obj.reflect_orientation == "northeast" else 1]
+                index = index[0 if obj.reflectOrientation == "northeast" else 1]
             elif isinstance(obj, Brick):
                 index = index[0 if not obj.cracked else 1]
             else:
@@ -70,3 +73,26 @@ class Renderer:
                 v=v_ind * self.game.dim,
                 colkey=0
             )
+    
+    def pre_draw_grid(self):
+        pyxel.rect(0, 0, self.game.c*self.game.dim, self.game.r*self.game.dim, 0)
+    
+    def post_draw_grid(self):
+        if self.game.currentGameState == GameState.READY:
+            self.display_center_text("Press 0 to Start", 11, 0, -pyxel.FONT_HEIGHT)
+
+        elif self.game.currentGameState != GameState.ONGOING:
+            if self.game.currentGameState == GameState.WIN:
+                self.display_center_text("VICTORY", 12)
+                self.display_center_text("Press 2 to Next Stage", 11, 0, -pyxel.FONT_HEIGHT)
+
+            elif self.game.currentGameState == GameState.LOSE:
+                self.display_center_text("YOU DIED", 8)
+            
+            self.display_center_text("Press 1 to Restart Stage", 11, 0, -pyxel.FONT_HEIGHT*2)
+            self.display_center_text("Press 0 to Start at Stage 1", 11, 0, -pyxel.FONT_HEIGHT*3)
+            
+            
+    
+    def display_center_text(self, s: str, col: int, x_offset: int = 0, y_offset: int = 0):
+        pyxel.text((pyxel.width - (len(s) * pyxel.FONT_WIDTH)) / 2 + x_offset, (pyxel.height / 2) + y_offset, s, col)

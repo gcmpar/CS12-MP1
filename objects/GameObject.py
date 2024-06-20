@@ -25,10 +25,12 @@ GameObject
 
     move_to(x: int, y: int):
         - moves to cell at (x, y)
+        - fires onMove
 
     destroy()
         - removes the object from game
-        - fires functions in onDestroy
+        - fires onDestroy
+        - disconnects all listeners for onDestroy
     is_destroyed() -> bool
         returns True if destroyed
 
@@ -99,6 +101,7 @@ class GameObject():
         self._destroyed = True
 
         self.onDestroy.fire()
+        self.onDestroy.destroy()
 
         del self
     def is_destroyed(self) -> bool:

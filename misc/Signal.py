@@ -28,7 +28,11 @@ class Signal(Generic[P, R]):
         for f in self._listeners:
             f(*args, **kwargs)
     
+    def is_destroyed(self) -> bool:
+        return self._destroyed
+    
     def destroy(self):
-        if self._destroyed:
+        if self.is_destroyed():
             return
+        self._destroyed = True
         self._listeners = []

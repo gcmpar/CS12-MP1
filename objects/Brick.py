@@ -10,9 +10,9 @@ from objects.Bullet import Bullet
 
 class Brick(Item):
     cracked: bool
-    def __init__(self, game: GameField, x: int, y: int):
+    def __init__(self, game: GameField, x: int, y: int, cracked: bool = False):
         super().__init__(game, x, y)
-        self.cracked = False
+        self.cracked = cracked
     
     def collided_with(self, other: GameObject):
         if isinstance(other, Bullet):
