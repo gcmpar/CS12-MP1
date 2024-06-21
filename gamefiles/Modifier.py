@@ -41,28 +41,28 @@ Modifier
 '''
 
 class Modifier:
-    init: Callable[[], None]
-    update: Callable[[int], None]
-    destroy: Callable[[], None]
-    can_collide: Callable[[GameObject], bool | None]
-    can_touch: Callable[[GameObject], bool | None]
+    init: Callable[[Modifier], None]
+    update: Callable[[Modifier, int], None]
+    destroy: Callable[[Modifier], None]
+    can_collide: Callable[[Modifier, GameObject], bool | None]
+    can_touch: Callable[[Modifier, GameObject], bool | None]
     def __init__(self, game: GameField, owner: GameObject | None = None, priority: int | None = None,
-                 init: Callable[[], None] | None = None,
-                 update: Callable[[int], None] | None = None,
-                 destroy: Callable[[], None] | None = None,
-                 can_collide: Callable[[GameObject], bool | None] | None = None,
-                 can_touch: Callable[[GameObject], bool | None] | None = None,
+                 init: Callable[[Modifier], None] | None = None,
+                 update: Callable[[Modifier, int], None] | None = None,
+                 destroy: Callable[[Modifier], None] | None = None,
+                 can_collide: Callable[[Modifier, GameObject], bool | None] | None = None,
+                 can_touch: Callable[[Modifier, GameObject], bool | None] | None = None,
                  ):
         
         self.game = game
         self.owner = owner
         self.priority = priority if priority is not None else 0
 
-        self.init = init if init is not None else lambda: None
-        self.update = update if update is not None else lambda f: None
-        self.destroy = destroy if destroy is not None else lambda: None
-        self.can_collide = can_collide if can_collide is not None else lambda o: None
-        self.can_touch = can_touch if can_touch is not None else lambda o: None
+        self.init = init if init is not None else lambda _: None
+        self.update = update if update is not None else lambda _, f: None
+        self.destroy = destroy if destroy is not None else lambda _: None
+        self.can_collide = can_collide if can_collide is not None else lambda _, o: None
+        self.can_touch = can_touch if can_touch is not None else lambda _, o: None
     
     def copy(self, copy_data: bool = False):
         return Modifier(

@@ -42,9 +42,9 @@ def _(game: GameField, tank: Tank):
 
 @create(powerup_type="ExtraSpeed")
 def _(game: GameField, tank: Tank):
-    def update(frame_count: int):
+    def update(self: Modifier, frame_count: int):
         tank.stats["movementSpeed"].current = tank.stats["movementSpeed"].base*1.5
-    def destroy():
+    def destroy(self: Modifier):
         tank.stats["movementSpeed"].current = tank.stats["movementSpeed"].base
         
     mod = Modifier(
