@@ -6,37 +6,49 @@ if TYPE_CHECKING:
     from gamefiles.Cell import Cell
 
 from misc.Signal import Signal
+from gamefiles.Modifier import Modifier
 
-# Base class for all game objects
+
 
 '''
+Base class for all game objects
+
 GameObject
     game: GameField
-        - reference to main game
     id: int
         - object id
-    _cell: Cell
-        - reference to the cell it's currently in
-    _destroyed: bool
-
     onMove: Signal[[int, int], None]
     onCollision: Signal[[GameObject], None]
     onTouched: Signal[[GameObject], None]
     onDestroy: Signal[[], None]
-        
-    get_cell() -> Cell:
-        - returns the cell it's in
 
+    modifier: Modifier | None
+        - only one modifier at a time
+    onModifierAdded: Signal[[Modifier], None]
+    onModifierRemoved: Signal[[Modifier], None]
+
+
+
+    _cell: Cell
+    _destroyed: bool
+        
+    get_cell() -> Cell
     move_to(x: int, y: int):
         - moves to cell at (x, y)
         - fires onMove
 
     destroy()
+        - cleanup/deletion function
         - removes the object from game
         - fires onDestroy
         - disconnects all listeners for onDestroy
     is_destroyed() -> bool
-        returns True if destroyed
+
+    add_modifier(mod: Modifier)
+        - stops current modifier, if any
+        - sets modifier and fires onModifierAdded
+    remove_modifier()
+        - removes modifier and fires onModifierRemoved
 
         
     ---------------------------------
@@ -57,18 +69,25 @@ GameObject
     i love decoupling
     can_collide(other: GameObject) -> bool = True
         - return True if objects collide with each other (can pass through or not)
+        - modified by Modifier
+    can_touch(other: GameObject) -> bool = True
+        - return True if objects can touch each other (when same cell)
+        - modified by Modifier
 
     collided_with(other: GameObject)
         - called whenever a GameObject collides with another
         - called on both for each other
+        - called along with onCollision
 
     touched(other: GameObject)
         - called whenever a GameObject is on the same cell as another
         - called on both for each other
+        - called along with onTouched
 '''
 
 object_id = 0
 class GameObject():
+    modifier: Modifier | None
     _destroyed: bool
     def __init__(self, game: GameField, x: int, y: int):
         if type(self) == GameObject:
@@ -79,15 +98,19 @@ class GameObject():
 
         self.game = game
         self.id = object_id
-        self._cell = game[y, x]
-        self._cell.add_object(self)
-        self._destroyed = False
-
         self.onMove = Signal[[int, int], None](game)
         self.onCollision = Signal[[GameObject], None](game)
         self.onTouched = Signal[[GameObject], None](game)
         self.onDestroy = Signal[[], None](game)
 
+        self.modifier = None
+        self.onModifierAdded = Signal[[Modifier], None](game)
+        self.onModifierRemoved = Signal[[Modifier], None](game)
+
+
+        self._cell = game[y, x]
+        self._cell.add_object(self)
+        self._destroyed = False
         self.game.onObjectAdded.fire(self)
 
     def __hash__(self):
@@ -129,6 +152,22 @@ class GameObject():
     def is_destroyed(self) -> bool:
         return self._destroyed
     
+
+    def add_modifier(self, mod: Modifier):
+        if self.modifier is not None:
+            self.remove_modifier()
+        self.modifier = mod
+        mod.init()
+        self.onModifierAdded.fire(mod)
+
+    def remove_modifier(self):
+        mod = self.modifier
+        if mod is None:
+            return
+        self.modifier = None
+        mod.destroy()
+        self.onModifierRemoved.fire(mod)
+    
     
     # ---------------------------------
     # internal
@@ -137,6 +176,8 @@ class GameObject():
         # if self.is_destroyed():
         #     return
         self.update(frame_count)
+        if self.modifier is not None:
+            self.modifier.update(frame_count)
     def main_collided_with(self, other: GameObject):
         # if self.is_destroyed():
         #     return
@@ -156,7 +197,14 @@ class GameObject():
         pass
 
     def can_collide(self, other: GameObject) -> bool:
+        if self.modifier is not None:
+            c = self.modifier.can_collide(other)
+            if c is not None:
+                return c
         return True
+    def can_touch(self, other: GameObject) -> bool:
+        return True
+    
     def collided_with(self, other: GameObject):
         pass
     def touched(self, other: GameObject):

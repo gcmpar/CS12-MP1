@@ -8,8 +8,9 @@ from objects.GameObject import GameObject
 
 
 
-
-# a game object that determines a cell's type
+'''
+a game object that determines a cell's type
+'''
 
 class Item(GameObject):
     def __init__(self, game: GameField, x: int, y: int):

@@ -24,6 +24,16 @@ tank_stats: dict[str, dict[str, float]]  = {
     }
 }
 
+'''
+Factory for Tank creation
+
+TankFactory:
+    - tank(x: int, y: int, team: Team, tank_type: str)
+        - selects stats from dictionary above based on tank_type
+        
+    - get_tank_types() -> list[str]
+'''
+
 class TankFactory:
     def __init__(self, game: GameField):
         self.game = game

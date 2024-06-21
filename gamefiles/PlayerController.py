@@ -18,13 +18,18 @@ controls = {
     "south": pyxel.KEY_S,
     "fire": pyxel.KEY_SPACE,
 }
+
 '''
+input checker for player
+
 PlayerController:
     tank: Tank
         - the tank the player controls
     
     update(frame_count: int)
         - used by the main GameField to check input presses every frame and control tank accordingly
+        - for movement, prioritize the key that was last held
+        - for firing bullets, only fire bullet if the last bullet doesn't exist/was already destroyed
 
 '''
 

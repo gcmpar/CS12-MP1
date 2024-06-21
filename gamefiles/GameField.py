@@ -18,6 +18,57 @@ from misc.Signal import Signal
 from objects.GameObject import GameObject
 
 
+'''
+the World class
+
+GameField
+    FPS: int
+
+    physics: PhysicsManager
+    renderer: Renderer
+    sounds: SoundManager
+    stage: Stage
+    tankFactory: TankFactory
+
+    currentStage: int
+    currentGameState: GameState
+    onObjectAdded(obj: GameObject)
+        - fired for any GameObject creation
+    
+    start_stage(stage: int, lives: int)
+        - cleans the game field up
+        - loads the stage with path "resources/stages/{stage}.txt"
+        - sets GameState to ONGOING
+    
+    next_stage()
+        - calls start_stage for currentStage + 1, or stays in same stage if file does not exist
+        - also passes in lives value of previous stage via stage.get_lives()
+    
+    update()
+        - the main game loop
+        - ORDER:
+            - pre-loop GameState check (returns if not ONGOING)
+                - also checks button inputs for game restarting/next stage
+
+            - inputs (PlayerController updates)
+            - physics
+            - GameObject updates
+            - EnemyController updates
+            - stage-specific updates
+            - signal destroy processing
+
+            - GameState check (WIN/LOSE)
+
+    ---------------------------------
+    # INTERNALS
+
+    queue_signal_destroy(f: Callable[[], None])
+        - all Signals call this function to tag them for cleanup
+        - Signal destroy is handled asynchronously (at the end of the frame in game loop)
+        - this is to let Signals still fire for at most 1 frame after GameObject is destroyed
+
+'''
+
 class GameField(PyxelGrid[Cell]):
     def __init__(self, fps: int, r: int = 15, c: int = 15, dim: int = 16):
         super().__init__(r, c, dim=dim)
@@ -50,10 +101,12 @@ class GameField(PyxelGrid[Cell]):
         self.currentGameState = GameState.ONGOING
 
         # PHYSICS TEST (can remove this ig)
-        t1 = self.tankFactory.tank(2, 8, "enemy", "light")
-        t2 = self.tankFactory.tank(2, 2, "enemy", "armored")
+        from objects.Stone import Stone
+        Stone(self, 1, 2)
+        t1 = self.tankFactory.tank(2, 4, "enemy", "armored")
+        t2 = self.tankFactory.tank(3, 2, "enemy", "armored")
         t1.turn("north")
-        t2.turn("south")
+        t2.turn("west")
         t1.start_moving()
         t2.start_moving()
 
@@ -107,9 +160,9 @@ class GameField(PyxelGrid[Cell]):
         # 6 process signal destroy
         [f() for f in self._signalDestroyQueue]
         self._signalDestroyQueue = []
-
+        
         # 7 check game state
-        if self.stage.get_lives() == 0 or self.stage.get_home().is_destroyed():
+        if self.stage.get_lives() == 0 or True in {h.is_destroyed() for h in self.stage.get_homes()}:
             self.currentGameState = GameState.LOSE
         elif self.stage.get_total_enemy_count() == 0:
             self.currentGameState = GameState.WIN

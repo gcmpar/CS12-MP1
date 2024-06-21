@@ -7,9 +7,11 @@ if TYPE_CHECKING:
 
 from objects.Item import Item
 
-# A container class for all GameObjects
+
 
 '''
+A container class for all GameObjects
+
 Cell:
     game: GameField
         - reference to game
@@ -17,11 +19,9 @@ Cell:
         - object that determines cell's type (only one)
     _objects: list[GameObject]
         - the GameObjects currently occupying the cell
-
+    
     x: int
-        - the X position on grid
     y: int
-        - the Y position on grid
     
     get_item() -> Item | None
         - returns current Item
@@ -30,10 +30,7 @@ Cell:
         - returns all GameObjects currently occupying the cell
     
     add_object(obj: GameObject)
-        - adds a GameObject to cell
-    
     remove_object(obj: GameObject)
-        - removes a GameObject from cell
 
 '''
 

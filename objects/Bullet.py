@@ -5,9 +5,7 @@ if TYPE_CHECKING:
     from gamefiles.GameField import GameField
     from misc.util import Orientation
     from objects.Tank import Tank
-
-import pyxel
-
+    
 from objects.GameObject import GameObject
 from objects.Entity import Entity
 from objects.Mirror import Mirror
@@ -40,7 +38,6 @@ class Bullet(Entity):
     def __init__(self, game: GameField, x: int, y: int, owner: Tank, ori: Orientation, speed: int=15):
         self._lastMirrorHit = None
         self.owner = owner
-        pyxel.play(0,pyxel.sounds[0])
 
         super().__init__(game=game, x=x, y=y, ori=ori, speed=speed)
         def on_move(x: int, y: int):
@@ -52,30 +49,24 @@ class Bullet(Entity):
         self.onMove.add_listener(on_move)
 
     def can_collide(self, other: GameObject):
-        if isinstance(other, Mirror):
-            return False
-        if isinstance(other, Water):
-            return False
-        
-        return True
-
-    def collided_with(self, other: GameObject):
-        self.destroy()
-        pyxel.play(0,pyxel.sounds[1])
+        return False
     
     def touched(self, other: GameObject):
-        if isinstance(other, Mirror) and self._lastMirrorHit != other: # debounce
-            self._lastMirrorHit = other
+        if isinstance(other, Mirror):
+            if self._lastMirrorHit != other: # debounce
+                self._lastMirrorHit = other
 
-            ref_ori = other.reflectOrientation
-            
-            c = ref_map[self.orientation]
-            c = (c[1], c[0])
-            if ref_ori == "northeast":
-                c = (-c[0], -c[1])
+                ref_ori = other.reflectOrientation
+                
+                c = ref_map[self.orientation]
+                c = (c[1], c[0])
+                if ref_ori == "northeast":
+                    c = (-c[0], -c[1])
 
-            new_ori = ref_map_inv[c]
-            self.orientation = new_ori
+                new_ori = ref_map_inv[c]
+                self.orientation = new_ori
+        elif not isinstance(other, Water):
+            self.destroy()
     
     def out_of_bounds(self):
         self.destroy()

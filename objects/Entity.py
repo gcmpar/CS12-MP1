@@ -8,9 +8,9 @@ if TYPE_CHECKING:
 from objects.GameObject import GameObject
 from misc.Signal import Signal
 
-# A game object that has velocity
 
 '''
+A game object that has velocity
 
 Entity:
     orientation: Orientation
@@ -30,6 +30,7 @@ Entity:
     
     out_of_bounds()
         - called whenever the object attempted to move out of bounds
+        - called along with onOutOfBounds
 
 '''
 class Entity(GameObject):

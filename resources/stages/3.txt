@@ -12,4 +12,4 @@ EnemySpawn| | | | | | |EnemySpawn| | | | | | |EnemySpawn
  | | | | | | | | | | | | | | 
  | | | | | | | | | | | | | | 
  | | | | | | | | | | | | | | 
-Spawn|Home| | | | | | | | | | | | | 
+Spawn|Home|Home| | | | | | | | | | | | 

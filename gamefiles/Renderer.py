@@ -17,6 +17,36 @@ from misc.util import Orientation, GameState
 
 import resources.assetindex as assetindex
 
+'''
+Singleton for rendering
+Renderer
+    init()
+        - called on GameField initialization
+    draw_cell()
+        - store all objects into a dictionary
+            - x
+            - y
+            - index
+                (u, v) on tilemap, disregards cell dimension (for easier indexing)
+            - zIndex
+                - z-order of object to allow for Forest cell to cover things, as well as other necessary ordering
+                ORDER: (top-to-bottom is higher to lower priority)
+                    - Bullet (3)
+                    - Forest Cell (2)
+                    - Tank (1)
+                    - any other GameObject
+    pre_draw_grid()
+        - draws black background
+        - resets the dictionary for every frame
+    post_draw_grid()
+        - lives counter
+        - enemy counter
+        - victory/lose text
+        - game restart/next stage buttons text
+        
+        - draws all objects in the draw_cell() dictionary, sorted by zIndex
+'''
+
 class Renderer:
     def __init__(self, game: GameField):
         self.game = game
@@ -107,7 +137,7 @@ class Renderer:
                 self.display_center_text("Press 1 to Next Stage", 11, 0, pyxel.FONT_HEIGHT * 2)
 
             elif self.game.currentGameState == GameState.LOSE:
-                self.display_center_text("HOME CELL WAS DESTROYED" if self.game.stage.get_home().is_destroyed() else "YOU DIED", 8)
+                self.display_center_text("HOME CELL WAS DESTROYED" if True in {h.is_destroyed() for h in self.game.stage.get_homes()} else "YOU DIED", 8)
 
             self.display_center_text("Press 0 to Start at Beginning", 11, 0, pyxel.FONT_HEIGHT * 3)
         

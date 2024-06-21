@@ -9,10 +9,16 @@ if TYPE_CHECKING:
 from objects.Tank import Tank
 from misc.util import Orientation
 
+
+
+
 '''
+AI for enemy tanks
+
 EnemyController:
     tank: Tank
     update(frame_count: int)
+        - called every game loop
 
 '''
 

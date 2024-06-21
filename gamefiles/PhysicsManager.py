@@ -3,10 +3,36 @@ from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from gamefiles.GameField import GameField
-    from gamefiles.Cell import Cell
     from objects.GameObject import GameObject
 
 from objects.Entity import Entity
+
+'''
+Singleton for managing physics and Entity movement
+Entity speed/movement is one cell every certain number of frames
+Negative speed values is same as 0 (since Orientation determines vector direction anyway)
+can_collide(), collided_with() and touched() are called on both for each other
+
+init()
+    - called on GameField initialization
+update()
+    - called every game loop
+    - ORDER:
+        - SAME-CELL COLLISION
+            - call collided_with(), touched() on objects in same cell
+                (this is for if there's somehow two GameObjects that were able to move into each other even if collidable)
+        
+        - MOVEMENT COLLISION
+            - for entities that need to move to a target cell at this exact frame
+            - call collided_with() on (entity, other) where other is a collidable object on the target cell
+
+        - MOVEMENT TOUCHED
+            - trigger touched() on all entities that moved
+
+
+
+
+'''
 
 class PhysicsManager:
     def __init__(self, game: GameField):
@@ -20,6 +46,7 @@ class PhysicsManager:
 
     def update(self, frame_count: int):
         
+        # same-cell collision
         collision_pairs: list[set[GameObject]] = []
         for r in range(self.game.r):
             for c in range(self.game.c):
@@ -32,8 +59,7 @@ class PhysicsManager:
                             self._entities[obj] = {
                                 "last_move_frame": -1
                             }
-
-                    # check overlaps first
+                            
                     for other in cell.get_objects():
                         if other == obj:
                             continue
@@ -45,18 +71,12 @@ class PhysicsManager:
                         if obj.can_collide(other) and other.can_collide(obj):
                             obj.main_collided_with(other)
                             other.main_collided_with(obj)
-                        
-                        obj.main_touched(other)
-                        other.main_touched(obj)
-
-
-        # reset
-        collision_pairs: list[set[GameObject]] = []
+                        if obj.can_touch(other) and other.can_touch(obj):
+                            obj.main_touched(other)
+                            other.main_touched(obj)
         
-        # store entities that need to move at this frame
-        # this is so entities don't trigger collision in-between if they "move out of the way" anyway in a later iteration
-        moving_entities: dict[Entity, Cell] = {}
-        target_cell_map: dict[Cell, list[Entity]] = {}
+        # movement collision
+        moved_entities: list[Entity] = []
         for entity in list(self._entities):
             if entity.is_destroyed():
                 del self._entities[entity]
@@ -83,76 +103,33 @@ class PhysicsManager:
                 entity.main_out_of_bounds()
                 continue
             
-            # store the target cell (cell where entity is supposed to move to at this frame)
+            # check collision
             new_cell = self.game[new_y, new_x]
-            moving_entities[entity] = new_cell
-
-            if new_cell not in target_cell_map.keys():
-                target_cell_map[new_cell] = []
-            target_cell_map[new_cell].append(entity)
-
-        
-        # check collision on target cell
-        movers = moving_entities.keys()
-        valid_movers: list[Entity] = []
-        for entity, target_cell in moving_entities.items():
-
             can_move_to: bool = True
-
-            for other in target_cell.get_objects():
-                if not (entity.can_collide(other) and other.can_collide(entity)):
+            for other in new_cell.get_objects():
+                if other == entity:
                     continue
 
-                if isinstance(other, Entity) and other in movers:
-                    # if not moving towards each other then dont trigger collision
-                    other_target = moving_entities[other]
-                    if other_target != entity.get_cell() or target_cell != other.get_cell():
-                        continue
-                    
-                can_move_to = False
-
-                pair = {entity, other}
-                if pair in collision_pairs:
-                    continue
-                collision_pairs.append(pair)
-                
+                if entity.can_collide(other) and other.can_collide(entity):
+                    entity.main_collided_with(other)
+                    other.main_collided_with(entity)
+                    can_move_to = False
+            
             if can_move_to:
-                valid_movers.append(entity)
+                entity.move_to(new_x, new_y)
+                moved_entities.append(entity)
+                data["last_move_frame"] = frame_count
         
-        # check collision on entities with same target cell
-        invalidated = list[Entity]()
-        for cell, entities in target_cell_map.items():
-            for entity in entities:
-                for other in entities:
-                    
-                    if other == entity:
-                        continue
-                    if not (entity.can_collide(other) and other.can_collide(entity)):
-                        continue
+        # movement touched
+        for obj in moved_entities:
+            cell = obj.get_cell()
+            for other in cell.get_objects():
+                if other == obj:
+                    continue
 
-                    target1 = moving_entities[entity]
-                    target2 = moving_entities[other]
-                    if target1 != target2:
-                        continue
+                if obj.can_touch(other) and other.can_touch(obj):
+                    obj.main_touched(other)
+                    other.main_touched(obj)
 
-                    pair: set[GameObject] = {entity, other}
-                    if pair in collision_pairs:
-                        continue
-                    collision_pairs.append(pair)
-
-                    # only one entity can move to this cell (otherwise theres noclip hax lmao)
-                    invalidated.append(other)
         
-        # move
-        for entity in valid_movers:
-            if entity in invalidated:
-                continue
-            target_cell = moving_entities[entity]
-            entity.move_to(target_cell.x, target_cell.y)
-            self._entities[entity]["last_move_frame"] = frame_count
-
-        # trigger collision
-        for pair in collision_pairs:
-            (obj, other) = tuple(pair)
-            obj.main_collided_with(other)
-            other.main_collided_with(obj)
+        

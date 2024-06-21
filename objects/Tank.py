@@ -10,6 +10,7 @@ from objects.GameObject import GameObject
 from objects.Bullet import Bullet
 
 from misc.Signal import Signal
+from misc.Stat import Stat
 
 '''
 Tank
@@ -17,12 +18,12 @@ Tank
         - descriptor for rendering or other managers
     team: Team
     isMoving: bool
-    stats: {
-        "health": float
-        "movementSpeed: float
-        "fireRate: int
-    }
     onBulletFired: Signal[[Bullet], None]
+    stats: {
+        "health": Stat
+        "movementSpeed: Stat
+        "fireRate: Stat
+    }
 
     turn(ori: Orientation)
     start_moving()
@@ -32,8 +33,10 @@ Tank
     fire_bullet() --> Bullet | None
         - fires bullet
         - returns the bullet if successful
+        - fires onBulletFired
     
     can_fire_bullet() -> bool
+        - based on fireRate
 
 '''
 
@@ -52,12 +55,13 @@ class Tank(Entity):
         self.team = team
         self.type = tank_type
         self.isMoving = False
-        self.stats = {
-            "health": health,
-            "movementSpeed": movement_speed,
-            "fireRate": fire_rate,
-        }
         self.onBulletFired = Signal[[Bullet], None](game)
+
+        self.stats = {
+            "health": Stat(health),
+            "movementSpeed": Stat(movement_speed),
+            "fireRate": Stat(fire_rate),
+        }
 
 
 
@@ -76,7 +80,7 @@ class Tank(Entity):
     def turn(self, ori: Orientation):
         self.orientation = ori
     def start_moving(self):
-        self.speed = self.stats["movementSpeed"]
+        self.speed = self.stats["movementSpeed"].current
     def stop_moving(self):
         self.speed = 0
 
@@ -115,23 +119,25 @@ class Tank(Entity):
 
     
     def update(self, frame_count: int):
-        if self.stats["health"] <= 0:
+        if self.stats["health"].current <= 0:
             self.destroy()
             return
         if self._bulletFired:
             self._bulletFired = False
             self._lastFireFrame = frame_count
-        self._canFireBullet = not (frame_count < (self._lastFireFrame + (self.game.FPS / self.stats["fireRate"])))
 
-    def can_collide(self, other: GameObject):
+        if self.stats["fireRate"].current != 0: # sneaky
+            self._canFireBullet = not (frame_count < (self._lastFireFrame + (self.game.FPS / self.stats["fireRate"].current)))
+
+    def can_touch(self, other: GameObject):
         if isinstance(other, Bullet):
             if self.team == "enemy" and other.owner.team == "enemy":
                 return False
                 
         return True
 
-    def collided_with(self, other: GameObject):
+    def touched(self, other: GameObject):
         if isinstance(other, Bullet):
-            self.stats["health"] -= 1
+            self.stats["health"].current -= 1
                     
         
