@@ -6,7 +6,7 @@ if TYPE_CHECKING:
     from misc.util import Orientation
 
 from objects.GameObject import GameObject
-from misc.Signal import Signal
+from gamefiles.Signal import Signal
 
 
 '''

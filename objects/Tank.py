@@ -9,7 +9,7 @@ from objects.Entity import Entity
 from objects.GameObject import GameObject
 from objects.Bullet import Bullet
 
-from misc.Signal import Signal
+from gamefiles.Signal import Signal
 from misc.Stat import Stat
 
 '''

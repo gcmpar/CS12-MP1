@@ -5,7 +5,7 @@ if TYPE_CHECKING:
     from gamefiles.GameField import GameField
     from gamefiles.Cell import Cell
 
-from misc.Signal import Signal
+from gamefiles.Signal import Signal
 from gamefiles.Modifier import Modifier
 
 
@@ -22,8 +22,7 @@ GameObject
     onTouched: Signal[[GameObject], None]
     onDestroy: Signal[[], None]
 
-    modifier: Modifier | None
-        - only one modifier at a time
+    modifiers: list[Modifier]
     onModifierAdded: Signal[[Modifier], None]
     onModifierRemoved: Signal[[Modifier], None]
 
@@ -45,9 +44,8 @@ GameObject
     is_destroyed() -> bool
 
     add_modifier(mod: Modifier)
-        - stops current modifier, if any
         - sets modifier and fires onModifierAdded
-    remove_modifier()
+    remove_modifier(mod: Modifier)
         - removes modifier and fires onModifierRemoved
 
         
@@ -69,10 +67,10 @@ GameObject
     i love decoupling
     can_collide(other: GameObject) -> bool = True
         - return True if objects collide with each other (can pass through or not)
-        - modified by Modifier
+        - modified by Modifier with highest priority
     can_touch(other: GameObject) -> bool = True
         - return True if objects can touch each other (when same cell)
-        - modified by Modifier
+        - modified by Modifier with highest priority
 
     collided_with(other: GameObject)
         - called whenever a GameObject collides with another
@@ -87,7 +85,7 @@ GameObject
 
 object_id = 0
 class GameObject():
-    modifier: Modifier | None
+    modifiers: list[Modifier]
     _destroyed: bool
     def __init__(self, game: GameField, x: int, y: int):
         if type(self) == GameObject:
@@ -103,7 +101,7 @@ class GameObject():
         self.onTouched = Signal[[GameObject], None](game)
         self.onDestroy = Signal[[], None](game)
 
-        self.modifier = None
+        self.modifiers = []
         self.onModifierAdded = Signal[[Modifier], None](game)
         self.onModifierRemoved = Signal[[Modifier], None](game)
 
@@ -154,17 +152,18 @@ class GameObject():
     
 
     def add_modifier(self, mod: Modifier):
-        if self.modifier is not None:
-            self.remove_modifier()
-        self.modifier = mod
+        if mod in self.modifiers:
+            return
+        self.modifiers.append(mod)
+        self.modifiers.sort(key=lambda e: e.priority)
         mod.init()
         self.onModifierAdded.fire(mod)
 
-    def remove_modifier(self):
-        mod = self.modifier
-        if mod is None:
+    def remove_modifier(self, mod: Modifier):
+        if mod not in self.modifiers:
             return
-        self.modifier = None
+        self.modifiers.remove(mod)
+        self.modifiers.sort(key=lambda e: e.priority)
         mod.destroy()
         self.onModifierRemoved.fire(mod)
     
@@ -176,13 +175,15 @@ class GameObject():
         # if self.is_destroyed():
         #     return
         self.update(frame_count)
-        if self.modifier is not None:
-            self.modifier.update(frame_count)
+        for mod in self.modifiers:
+            mod.update(frame_count)
+
     def main_collided_with(self, other: GameObject):
         # if self.is_destroyed():
         #     return
         self.collided_with(other)
         self.onCollision.fire(other)
+
     def main_touched(self, other: GameObject):
         # if self.is_destroyed():
         #     return
@@ -197,12 +198,17 @@ class GameObject():
         pass
 
     def can_collide(self, other: GameObject) -> bool:
-        if self.modifier is not None:
-            c = self.modifier.can_collide(other)
-            if c is not None:
-                return c
+        if len(self.modifiers) != 0:
+            b = self.modifiers[-1].can_collide(other)
+            if b is not None:
+                return b
         return True
+    
     def can_touch(self, other: GameObject) -> bool:
+        if len(self.modifiers) != 0:
+            b = self.modifiers[-1].can_touch(other)
+            if b is not None:
+                return b
         return True
     
     def collided_with(self, other: GameObject):

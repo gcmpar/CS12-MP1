@@ -57,7 +57,7 @@ class PhysicsManager:
                     if isinstance(obj, Entity):
                         if obj not in self._entities.keys():
                             self._entities[obj] = {
-                                "last_move_frame": -1
+                                "lastMoveFrame": -1
                             }
                             
                     for other in cell.get_objects():
@@ -88,7 +88,7 @@ class PhysicsManager:
             # speed guard
             if entity.speed == 0:
                 continue
-            if frame_count < (data["last_move_frame"] + (self.game.FPS / entity.speed)):
+            if frame_count < (data["lastMoveFrame"] + (self.game.FPS / entity.speed)):
                 continue
             
             ori = entity.orientation
@@ -118,7 +118,7 @@ class PhysicsManager:
             if can_move_to:
                 entity.move_to(new_x, new_y)
                 moved_entities.append(entity)
-                data["last_move_frame"] = frame_count
+                data["lastMoveFrame"] = frame_count
         
         # movement touched
         for obj in moved_entities:

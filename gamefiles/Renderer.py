@@ -1,5 +1,6 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING, Any, get_args
+from collections.abc import Callable
 
 import pyxel
 
@@ -45,6 +46,11 @@ Renderer
         - game restart/next stage buttons text
         
         - draws all objects in the draw_cell() dictionary, sorted by zIndex
+        - draws all custom renders
+    
+    display_center_text(s: str, col: int, x_offset: int = 0, y_offset: int = 0)
+    render_custom(f: Callable[[], None], duration: int)
+        - call a per-frame custom renderer function for a certain duration
 '''
 
 class Renderer:
@@ -52,6 +58,7 @@ class Renderer:
         self.game = game
         self._entities: dict[Entity, dict[str, Any]] = {}
         self._zOrder = list[dict[str, Any]]()
+        self._customRenders = dict[Callable[[], None], dict[str, float]]()
     
     def init(self):
         pass
@@ -86,9 +93,9 @@ class Renderer:
 
                 if isinstance(obj, Tank):
                     offset = 0
-                    if obj.type == "light":
+                    if obj.type == "Light":
                         offset = 8
-                    elif obj.type == "armored":
+                    elif obj.type == "Armored":
                         offset = 12
                     elif obj.team == "enemy":
                         offset = 4
@@ -169,8 +176,19 @@ class Renderer:
                 colkey=0
             )
         
+        # custom renders
+        for f in list(self._customRenders):
+            data = self._customRenders[f]
+            data["frameCount"] += 1
+            if data["frameCount"] > self.game.FPS * data["duration"]:
+                del self._customRenders[f]
+                continue
+            f()
             
-            
-    
     def display_center_text(self, s: str, col: int, x_offset: int = 0, y_offset: int = 0):
         pyxel.text((pyxel.width - (len(s) * pyxel.FONT_WIDTH)) / 2 + x_offset, (pyxel.height / 2) + y_offset, s, col)
+    def render_custom(self, f: Callable[[], None], duration: int):
+        self._customRenders[f] = {
+            "duration": duration,
+            "frameCount": 0
+        }

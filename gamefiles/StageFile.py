@@ -16,7 +16,7 @@ from objects.Forest import Forest
 from objects.Home import Home
 from objects.Mirror import Mirror
 
-from misc.Signal import Signal
+from gamefiles.Signal import Signal
 
 
 '''
@@ -63,6 +63,8 @@ Stage
     onLifeChanged: Signal[[int], None]
     onStageGenerated: Signal[[], None]
 
+    init()
+
     generate_stage(filename: str)
         - defaults:
             - remaining enemy spawns: 5
@@ -96,7 +98,8 @@ class Stage():
 
         self.onLifeChanged = Signal[[int], None](game)
         self.onStageGenerated = Signal[[], None](game)
-
+    
+    def init(self):
         self.generate_stage("_empty")
 
     def generate_stage(self, filename: str, lives: int = 2):
@@ -158,6 +161,8 @@ class Stage():
         if len(self._homes) == 0:
             raise ValueError("Please specify Home!")
         
+        self._maxEnemies = self.get_total_enemy_count()
+        self._powerupSpawned = False
         self._spawnpoint = spawnpoint
         self.spawn_player()
 
@@ -181,7 +186,7 @@ class Stage():
         (x, y) = self._spawnpoint
         player = PlayerController(
             game=self.game,
-            tank=self.game.tankFactory.tank(x=x, y=y, team="player", tank_type="normal")
+            tank=self.game.tankFactory.tank(x=x, y=y, team="player", tank_type="Normal")
         )
         self._player = player
         
@@ -221,9 +226,30 @@ class Stage():
         self._enemies.append(enemy)
 
     def update(self, frame_count: int):
+        # enemy spawn
         if frame_count > (self._lastEnemySpawnFrame + (self.game.FPS * self._enemySpawnInterval)):
             self._lastEnemySpawnFrame = frame_count
             self.spawn_enemy()
+
+        # powerup spawn
+        if not self._powerupSpawned:
+            if self.get_total_enemy_count() < self._maxEnemies / 2:
+
+                empty_cells: list[Cell] = []
+                for r in range(self.game.r):
+                    for c in range(self.game.c):
+                        cell = self.game[r, c]
+                        if len(cell.get_objects()) == 0:
+                            empty_cells.append(cell)
+
+                if len(empty_cells) > 0:
+                    
+                    chosen_cell = choice(empty_cells)
+                    self.game.powerupFactory.powerup(
+                        x=chosen_cell.x,
+                        y=chosen_cell.y,
+                        powerup_type=choice(self.game.powerupFactory.get_powerup_types()))
+                    self._powerupSpawned = True
     
     def cleanup(self):
         self.get_player().tank.onDestroy.remove_listener(self._decrease_life_listener)

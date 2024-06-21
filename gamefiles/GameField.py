@@ -8,12 +8,14 @@ from gamefiles.Cell import Cell
 from gamefiles.PhysicsManager import PhysicsManager
 from gamefiles.Renderer import Renderer
 from gamefiles.SoundManager import SoundManager
+from gamefiles.GOD import God
 
 from gamefiles.TankFactory import TankFactory
+from gamefiles.PowerupFactory import PowerupFactory
 
 from gamefiles.StageFile import Stage
 from misc.util import GameState
-from misc.Signal import Signal
+from gamefiles.Signal import Signal
 
 from objects.GameObject import GameObject
 
@@ -79,32 +81,44 @@ class GameField(PyxelGrid[Cell]):
         # internals
         self._signalDestroyQueue = list[Callable[[], None]]()
 
+        self.stage = Stage(self)
         self.physics = PhysicsManager(self)
         self.renderer = Renderer(self)
         self.sounds = SoundManager(self)
         self.tankFactory = TankFactory(self)
+        self.powerupFactory = PowerupFactory(self)
+        self.GOD = God(self)
         pyxel.load("resources/spritesheet.pyxres")
 
         self.currentGameState = GameState.READY
         self.onObjectAdded = Signal[[GameObject], None](self)
 
-        self.stage = Stage(self)
+        # init
+        self.stage.init()
         self.physics.init()
         self.renderer.init()
         self.sounds.init()
+        self.GOD.init()
     
-    def start_stage(self, stage: int, lives: int):
+    def start_stage(self, stage: int, lives: int, copy_modifiers: bool):
         self.stage.cleanup()
+
+        modifiers = [mod.copy() for mod in self.stage.get_player().tank.modifiers]
 
         self.currentStage = stage
         self.stage.generate_stage(str(self.currentStage), lives)
         self.currentGameState = GameState.ONGOING
 
+        if copy_modifiers:
+            for mod in modifiers:
+                self.stage.get_player().tank.add_modifier(mod)
+
+
         # PHYSICS TEST (can remove this ig)
         from objects.Stone import Stone
         Stone(self, 1, 2)
-        t1 = self.tankFactory.tank(2, 4, "enemy", "armored")
-        t2 = self.tankFactory.tank(3, 2, "enemy", "armored")
+        t1 = self.tankFactory.tank(2, 4, "enemy", "Armored")
+        t2 = self.tankFactory.tank(3, 2, "enemy", "Armored")
         t1.turn("north")
         t2.turn("west")
         t1.start_moving()
@@ -113,16 +127,20 @@ class GameField(PyxelGrid[Cell]):
     def next_stage(self):
         self.start_stage(
             stage=self.currentStage + 1 if self.currentStage < 3 else 3,
-            lives=self.stage.get_lives()
+            lives=self.stage.get_lives(),
+            copy_modifiers=True
             )
         
 
     
     def update(self):
+        # -1 GOD
+        self.GOD.update()
+
         # 0 game state
         if self.currentGameState == GameState.READY:
             if pyxel.btn(pyxel.KEY_0):
-                self.start_stage(stage=1, lives=2)
+                self.start_stage(stage=1, lives=2,copy_modifiers=False)
             return
         elif self.currentGameState != GameState.ONGOING:
             if self.currentGameState == GameState.WIN:
@@ -130,7 +148,7 @@ class GameField(PyxelGrid[Cell]):
                     self.next_stage()
                     return
             elif pyxel.btn(pyxel.KEY_0):
-                self.start_stage(stage=1,lives=2)
+                self.start_stage(stage=1,lives=2,copy_modifiers=False)
 
             return
 
