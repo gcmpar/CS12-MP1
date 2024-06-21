@@ -53,10 +53,10 @@ GameField
                 - also checks button inputs for game restarting/next stage
 
             - inputs (PlayerController updates)
-            - physics
+            - stage-specific updates
             - GameObject updates
             - EnemyController updates
-            - stage-specific updates
+            - physics
             - signal destroy processing
 
             - GameState check (WIN/LOSE)
@@ -166,8 +166,8 @@ class GameField(PyxelGrid[Cell]):
         if not player.tank.is_destroyed():
             player.update(pyxel.frame_count)
 
-        # 2 physics
-        self.physics.update(pyxel.frame_count)
+        # 2 stage
+        self.stage.update(pyxel.frame_count)
 
         # 3 game objects
         [obj.main_update(pyxel.frame_count) for r in range(self.r) for c in range(self.c) for obj in self[c, r].get_objects()]
@@ -176,9 +176,9 @@ class GameField(PyxelGrid[Cell]):
         enemies = self.stage.get_enemies()
         for enemy in enemies:
             enemy.update(pyxel.frame_count)
-        
-        # 5 stage
-        self.stage.update(pyxel.frame_count)
+
+        # 5 physics
+        self.physics.update(pyxel.frame_count)
 
         # 6 process signal destroy
         [f() for f in self._signalDestroyQueue]
