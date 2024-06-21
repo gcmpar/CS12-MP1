@@ -40,7 +40,7 @@ class SoundManager:
             elif isinstance(obj, Tank):
 
                 def onDestroy():
-                    pyxel.play(0, pyxel.sounds[2])
+                    pyxel.play(0, pyxel.sounds[3])
                 obj.onDestroy.add_listener(onDestroy)
 
         self.game.onObjectAdded.add_listener(initialize)

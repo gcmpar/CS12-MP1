@@ -105,10 +105,15 @@ class Stage():
     def generate_stage(self, filename: str, lives: int = 2):
         spawnpoint: tuple[int, int] | None = None
 
+        self._lives = lives
+        self._remainingEnemySpawns = 0
         self._enemySpawns = []
         self._homes = []
-        
-        stage = open(f"resources/stages/{filename}.txt", "r")
+
+        self._lastEnemySpawnFrame = 0
+        self._enemySpawnInterval = 3.5
+
+        stage = open("resources/stages/"+filename+".txt", "r")
         lines = stage.readlines()
         for r in range(len(lines)):
 
@@ -120,7 +125,8 @@ class Stage():
                 id = objects[c]
                 Cell(self.game, c, r)
 
-                if id == " ":
+                # if id == " ":
+                if id in [str(x) for x in range(1, 16)] or id == " ":
                     continue
                 if id == "Brick":
                     Brick(self.game, c, r)
@@ -156,7 +162,7 @@ class Stage():
             raise ValueError("Please specify Home!")
         
         self._lives = lives
-        self._remainingEnemySpawns = 5
+        self._remainingEnemySpawns = 1
         self._enemies = []
 
         self._spawnpoint = spawnpoint

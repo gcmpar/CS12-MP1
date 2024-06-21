@@ -89,7 +89,7 @@ class GameField(PyxelGrid[Cell]):
         self.tankFactory = TankFactory(self)
         self.powerupFactory = PowerupFactory(self)
         self.GOD = God(self)
-        pyxel.load("resources/resource.pyxres")
+        pyxel.load("resources/spritesheet.pyxres")
 
         self.currentStage = 1
         self.onObjectAdded = Signal[[GameObject], None](self)
@@ -126,14 +126,14 @@ class GameField(PyxelGrid[Cell]):
         self.set_game_state(GameState.ONGOING)
         
         # PHYSICS TEST (can remove this ig)
-        from objects.Stone import Stone
-        Stone(self, 1, 2)
-        t1 = self.tankFactory.tank(2, 4, "enemy", "Armored")
-        t2 = self.tankFactory.tank(3, 2, "enemy", "Armored")
-        t1.turn("north")
-        t2.turn("west")
-        t1.start_moving()
-        t2.start_moving()
+        # from objects.Stone import Stone
+        # Stone(self, 1, 2)
+        # t1 = self.tankFactory.tank(2, 4, "enemy", "Armored")
+        # t2 = self.tankFactory.tank(3, 2, "enemy", "Armored")
+        # t1.turn("north")
+        # t2.turn("west")
+        # t1.start_moving()
+        # t2.start_moving()
 
     def next_stage(self):
         self.start_stage(
@@ -151,15 +151,15 @@ class GameField(PyxelGrid[Cell]):
         # 0 game state
         current_state = self.get_game_state()
         if current_state == GameState.READY:
-            if pyxel.btn(pyxel.KEY_0):
+            if pyxel.btn(pyxel.KEY_1):
                 self.start_stage(stage=1, lives=2,copy_modifiers=False)
             return
         elif current_state != GameState.ONGOING:
             if current_state == GameState.WIN:
-                if pyxel.btn(pyxel.KEY_1):
+                if pyxel.btn(pyxel.KEY_2):
                     self.next_stage()
                     return
-            if pyxel.btn(pyxel.KEY_0):
+            if pyxel.btn(pyxel.KEY_1):
                 self.start_stage(stage=1,lives=2,copy_modifiers=False)
 
             return

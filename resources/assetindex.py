@@ -25,10 +25,10 @@ sprites: dict[Type[GameObject] | str, Sequence[tuple[int, int]]] = {
     Home: [(3, 5)],
     Mirror: [(4, 0), (4, 1)],
     Powerup: [(2, 4)],
-    "Spawn": [(3, 6)],
-    "EnemySpawn": [(3, 7)],
+    "Spawn": [(5, 0)],
+    "EnemySpawn": [(5, 1)],
     "Spawned": [(2, 5)],
-    "Explode": [(2, 6)]
+    "Explode": [(6, 0)]
 
     
 }

@@ -1,15 +1,15 @@
- | | | | | | | | | | | | | | 
-EnemySpawn| | | | | | |EnemySpawn| | | | | | |EnemySpawn
- | | | | | | | | | | | | | | 
- | | | | | | | | | | | | | | 
- | | | | | | | | | | | | | | 
- | | | | | |MirrorSE| | | | | | | | 
- | | | | | | | | | | |Brick| | 
- | | | | | | | | | | |Stone| | 
- | | | | | | | | | | |Water| | 
- | | | | | | | | | | |CrackedBrick| | 
- | | | | | |MirrorNE| | | | |Forest| | 
- | | | | | | | | | | | | | | 
- | | | | | | | | | | | | | | 
- | | | | | | | | | | | | | | 
-Spawn|Home|Home| | | | | | | | | | | | 
+EnemySpawn| | |Stone| |Stone| | | | |Stone|Stone| | |EnemySpawn
+Stone|Stone| | | |Stone| |Stone|Stone| | | | |Stone| 
+ | | |Stone| | | |Stone| |Stone| | |Stone| | 
+Water|Stone| | | |Stone| | | | |Stone|Stone| | |Stone
+Water|Stone|Stone| |Stone| | |Stone| |Stone| |Stone| | | 
+ | | | | | | |Stone| | | | |Stone| | 
+ |Stone| | |Stone|Brick|Stone|Stone|Stone| |Stone| | |Stone| 
+ | |Stone|Stone|Stone| | |Home|Brick| |Stone| |Stone| | 
+ | | | |Stone| |Stone|Stone|Stone|Stone| | | | |Stone
+ |Stone|Stone| |Stone| | |Stone| | |Stone| |Stone|Stone|Stone
+ | | | | | | |Stone| |Stone| | |Stone| | 
+ |Stone|Stone| | |Stone| | | |Stone| | | | |Stone
+ | |Stone|Stone| | | | |Stone| | |Stone|Stone| |Stone
+Stone| | | |Stone| |Stone| |Stone| |Stone| |Stone| |Stone
+Spawn| |Stone| | | |Stone| | | | | | | |EnemySpawn

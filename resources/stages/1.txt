@@ -1,15 +1,15 @@
- | | | | | | | | | | | | | | 
-EnemySpawn| | | | | | |EnemySpawn| | | | | | |EnemySpawn
- | | | | | | | | | | | | | | 
- | | | | | | | | | | | | | | 
- | | | | | | | | | | | | | | 
- | | | | | |MirrorSE| | | | | | | | 
- | | | | | | | | | | |Brick| | 
- | | | | | | | | | | |Stone| | 
- | | | | | | | | | | |Water| | 
- | | | | | | | | | | |CrackedBrick| | 
- | | | | | |MirrorNE| | | | |Forest| | 
- | | | | | | | | | | | | | | 
- | | | | | | | | | | | | | | 
- | | | | | | | | | | | | | | 
-Spawn|Home|Home| | | | | | | | | | | | 
+EnemySpawn|2|3|4|5|6|7|EnemySpawn|9|10|11|12|13|14|EnemySpawn
+1|Stone|Stone|Stone|5|6|Brick|Brick|Brick|10|11|Stone|Stone|Stone|15
+1|2|3|4|5|6|7|8|9|10|11|12|13|14|15
+1|2|3|4|MirrorSE|6|7|8|9|10|MirrorNE|12|13|14|15
+1|2|3|4|5|6|7|8|9|10|11|12|13|14|15
+1|2|3|4|5|6|7|8|9|10|11|12|13|14|15
+1|2|3|4|5|6|7|8|9|10|11|12|13|14|15
+Water|Water|Water|Water|5|6|Water|Stone|Water|10|11|Water|Water|Water|Water
+1|2|3|4|5|6|7|8|9|10|11|12|13|14|15
+1|2|3|4|5|6|7|8|9|10|11|12|13|14|15
+1|2|3|4|5|6|7|8|9|10|11|12|13|14|15
+1|2|3|4|MirrorNE|6|7|8|9|10|MirrorSE|12|13|14|15
+1|2|3|4|5|6|7|Spawn|9|10|11|12|13|14|15
+1|Stone|Stone|Stone|5|6|Brick|Brick|Brick|10|11|Stone|Stone|Stone|15
+1|2|3|4|5|6|Brick|Home|Brick|10|11|12|13|14|15
