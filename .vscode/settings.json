@@ -1,5 +1,6 @@
 {
     "python.analysis.diagnosticSeverityOverrides": {},
     "python.analysis.typeCheckingMode": "strict",
-    "debug.console.historySuggestions": false
+    "debug.console.historySuggestions": false,
+    "liveshare.anonymousGuestApproval": "accept",
 }

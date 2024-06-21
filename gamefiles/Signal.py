@@ -10,6 +10,24 @@ from collections.abc import Callable
 P = ParamSpec("P")
 R = TypeVar("R")
 
+'''
+Events implementation
+NOTE: cleanup (destroy) is handled asynchronously
+
+Signal(Generic[P, R])
+    add_listener(f: Callable[P, R])
+    remove_listener(f: Callable[P, R])
+
+    fire(*args, **kwargs)
+        - dispatcher
+
+    remove_listeners()
+
+    is_destroyed() -> bool
+    destroy()
+
+'''
+
 class Signal(Generic[P, R]):
     _destroyed: bool
     _dq: bool
@@ -38,11 +56,11 @@ class Signal(Generic[P, R]):
         for f in self._listeners:
             f(*args, **kwargs)
     
-    def is_destroyed(self) -> bool:
-        return self._destroyed
-    
     def remove_listeners(self):
         self._listeners = []
+
+    def is_destroyed(self) -> bool:
+        return self._destroyed
 
     def destroy(self):
         if self.is_destroyed():
