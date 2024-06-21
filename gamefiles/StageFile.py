@@ -49,7 +49,7 @@ STAGE FORMAT:
      | | | |Water
      |EnemySpawn|EnemySpawn| | 
 
-    NOTE: on the left and right edges, there must still be a space if you wish to specify an empty cell!!
+    NOTE: on the left and right edges, there must still be a space if you wish to specify an empty cell !!
     NOTE: Please see resources/stages/_TEST.txt for a complete example
 
 '''
@@ -72,7 +72,7 @@ Stage
 
     get_lives() -> int
     set_lives(lives: int)
-
+    get_spawn() -> tuple[int, int]
     get_player() -> PlayerController
     spawn_player()
         - fails if lives <= 0
@@ -91,8 +91,8 @@ Stage
 
 class Stage():
     _enemySpawns: list[tuple[int, int]]
-    _enemies: list[EnemyController]
     _homes: list[Home]
+    _enemies: list[EnemyController]
     def __init__(self, game: GameField):
         self.game = game
 
@@ -182,7 +182,10 @@ class Stage():
     def get_homes(self):
         return self._homes
     
-    def get_player(self):
+    def get_spawn(self):
+        return self._spawnpoint
+    
+    def get_player(self) -> PlayerController:
         return self._player
     
     def spawn_player(self):

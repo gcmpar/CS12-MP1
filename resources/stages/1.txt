@@ -3,12 +3,12 @@ EnemySpawn| | | | | | |EnemySpawn| | | | | | |EnemySpawn
  | | | | | | | | | | | | | | 
  | | | | | | | | | | | | | | 
  | | | | | | | | | | | | | | 
- | | | | | | | | | | | | | | 
- | | | | | | | | | | | | | |Brick
- | | | | | | |MirrorSE| | | | | | |Stone
- | | | | | | | | | | | | | |Water
- | | | | | | | | | | | | | |CrackedBrick
- | | | | | | |MirrorNE| | | | | | |Forest
+ | | | | | |MirrorSE| | | | | | | | 
+ | | | | | | | | | | |Brick| | 
+ | | | | | | | | | | |Stone| | 
+ | | | | | | | | | | |Water| | 
+ | | | | | | | | | | |CrackedBrick| | 
+ | | | | | |MirrorNE| | | | |Forest| | 
  | | | | | | | | | | | | | | 
  | | | | | | | | | | | | | | 
  | | | | | | | | | | | | | | 

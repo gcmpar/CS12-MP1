@@ -21,6 +21,8 @@ CHEAT CODES (Hold CTRL key):
         - smites all enemies present on field
     Z
         - automatically win the game
+    P
+        - automatically lose the game
     X
         - spawn a random powerup
 
@@ -43,7 +45,7 @@ class God:
         pass
 
     def update(self):
-        if self.game.currentGameState == GameState.READY:
+        if self.game.get_game_state() == GameState.READY:
             return
         
         if pyxel.btn(pyxel.KEY_CTRL):
@@ -63,7 +65,7 @@ class God:
                         if home.is_destroyed():
                             homes.remove(home)
 
-                    self.game.currentGameState = GameState.ONGOING
+                    self.game.set_game_state(GameState.ONGOING)
             else:
                 self._lifeDebounce = False
             
@@ -78,7 +80,10 @@ class God:
                                     obj.destroy()
 
             if pyxel.btn(pyxel.KEY_Z):
-                self.game.currentGameState = GameState.WIN
+                self.game.set_game_state(GameState.WIN)
+            if pyxel.btn(pyxel.KEY_P):
+                self.game.stage.set_lives(0)
+                self.game.stage.get_player().tank.destroy()
             
             if pyxel.btn(pyxel.KEY_X):
                 if not self._powerupDebounce:

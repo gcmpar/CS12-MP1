@@ -6,6 +6,7 @@ import pyxel
 
 if TYPE_CHECKING:
     from gamefiles.GameField import GameField
+    from objects.GameObject import GameObject
 
 from objects.Entity import Entity
 from objects.Tank import Tank
@@ -32,10 +33,14 @@ Renderer
             - zIndex
                 - z-order of object to allow for Forest cell to cover things, as well as other necessary ordering
                 ORDER: (top-to-bottom is higher to lower priority)
+                    - Explode effect (4)
                     - Bullet (3)
                     - Forest Cell (2)
                     - Tank (1)
-                    - any other GameObject
+                    - any other GameObject (0)
+                    - Spawned (-1)
+                    - Spawn, EnemySpawn (-2)
+
     pre_draw_grid()
         - draws black background
         - resets the dictionary for every frame
@@ -50,8 +55,12 @@ Renderer
         - draws all custom renders
     
     display_center_text(s: str, col: int, x_offset: int = 0, y_offset: int = 0)
-    render_custom(f: Callable[[], None], duration: int)
+    render_custom(f: Callable[[], None], duration: float)
         - call a per-frame custom renderer function for a certain duration
+    render_z(x: int, y: int, index: tuple[int, int], zIndex: int)
+        - insert into next z-order rendering
+        - index is assetindex
+        - zIndex is z-order
 '''
 
 class Renderer:
@@ -60,27 +69,47 @@ class Renderer:
         self._entities: dict[Entity, dict[str, Any]] = {}
         self._zOrder = list[dict[str, Any]]()
         self._customRenders = dict[Callable[[], None], dict[str, float]]()
+        self._zOrderQueue = list[dict[str, Any]]()
     
     def init(self):
-        pass
+        def initialize(obj: GameObject):
+            if isinstance(obj, Bullet) or isinstance(obj, Tank):
+                stop_explode = False
+                def onExplode():
+                    nonlocal stop_explode
+                    if stop_explode:
+                        return
+                    cell = obj.get_cell()
+                    x, y = cell.x, cell.y
+                    self.render_z(x=x, y=y, index=assetindex.sprites["Explode"][0], z_index=4)
+                obj.onDestroy.add_listener(lambda: self.render_custom(onExplode, duration=0.35))
+
+                def stop(state: GameState):
+                    nonlocal stop_explode
+                    stop_explode = True
+                    self.game.onStateChanged.remove_listener(stop)
+                self.game.onStateChanged.add_listener(stop)
+        self.game.onObjectAdded.add_listener(initialize)
+
 
     def draw_cell(self, frame_count: int, i: int, j: int, x: int, y: int):
-        if self.game.currentGameState == GameState.READY:
+        if self.game.get_game_state() == GameState.READY:
             return
         
         if (x, y) in self.game.stage.get_enemy_spawns():
-            ...
-            # (u_ind, v_ind) = 
-            # pyxel.bltm(
-            #     x=x,
-            #     y=y,
-            #     w=16,
-            #     h=16,
-            #     tm=0,
-            #     u=u_ind * self.game.dim,
-            #     v=v_ind * self.game.dim,
-            #     colkey=0
-            # )
+            self._zOrder.append({
+                "x": x,
+                "y": y,
+                "index": assetindex.sprites["EnemySpawn"][0],
+                "zIndex": -2,
+            })
+        if (x, y) == self.game.stage.get_spawn():
+            self._zOrder.append({
+                "x": x,
+                "y": y,
+                "index": assetindex.sprites["Spawn"][0],
+                "zIndex": -2,
+            })
 
         cell = self.game[i, j]
         for obj in cell.get_objects():
@@ -139,7 +168,8 @@ class Renderer:
         stage_number = f"Stage {str(self.game.currentStage)}"
         pyxel.text(pyxel.width-(len(stage_number)*pyxel.FONT_WIDTH)-1,pyxel.height-pyxel.FONT_HEIGHT-1,stage_number,7)
 
-        if self.game.currentGameState == GameState.READY:
+        current_state = self.game.get_game_state()
+        if current_state == GameState.READY:
             self.display_center_text("Press 0 to Start", 11)
             return
         
@@ -158,6 +188,11 @@ class Renderer:
         # )
 
         # New 16x16 sprite rendering
+        for data in self._zOrderQueue:
+            data["x"] = self.game.x(data["x"])
+            data["y"] = self.game.y(data["y"])
+            self._zOrder.append(data)
+        self._zOrderQueue = []
         self._zOrder.sort(key=lambda e: e["zIndex"])
         for data in self._zOrder:
             (u_ind, v_ind) = data["index"]
@@ -182,20 +217,29 @@ class Renderer:
             f()
 
 
-        if self.game.currentGameState != GameState.ONGOING:
-            if self.game.currentGameState == GameState.WIN:
+        if current_state != GameState.ONGOING:
+            if current_state == GameState.WIN:
                 self.display_center_text("VICTORY", 12)
                 self.display_center_text("Press 1 to Next Stage", 11, 0, pyxel.FONT_HEIGHT * 2)
 
-            elif self.game.currentGameState == GameState.LOSE:
+            elif current_state == GameState.LOSE:
                 self.display_center_text("HOME CELL WAS DESTROYED" if True in {h.is_destroyed() for h in self.game.stage.get_homes()} else "YOU DIED", 8)
 
             self.display_center_text("Press 0 to Start at Beginning", 11, 0, pyxel.FONT_HEIGHT * 3)
             
     def display_center_text(self, s: str, col: int, x_offset: int = 0, y_offset: int = 0):
         pyxel.text((pyxel.width - (len(s) * pyxel.FONT_WIDTH)) / 2 + x_offset, (pyxel.height / 2) + y_offset, s, col)
-    def render_custom(self, f: Callable[[], None], duration: int):
+    
+    def render_custom(self, f: Callable[[], None], duration: float):
         self._customRenders[f] = {
             "duration": duration,
             "frameCount": 0
         }
+
+    def render_z(self, x: int, y: int, index: tuple[int, int], z_index: int):
+        self._zOrderQueue.append({
+            "x": x,
+            "y": y,
+            "index": index,
+            "zIndex": z_index
+        })

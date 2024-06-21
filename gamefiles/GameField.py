@@ -34,8 +34,9 @@ GameField
 
     currentStage: int
     currentGameState: GameState
-    onObjectAdded(obj: GameObject)
+    onObjectAdded: Signal[[GameObject], None]
         - fired for any GameObject creation
+    onStateChanged: Signal[[GameState], None]
     
     start_stage(stage: int, lives: int)
         - cleans the game field up
@@ -88,18 +89,25 @@ class GameField(PyxelGrid[Cell]):
         self.tankFactory = TankFactory(self)
         self.powerupFactory = PowerupFactory(self)
         self.GOD = God(self)
-        pyxel.load("resources/spritesheet.pyxres")
+        pyxel.load("resources/resource.pyxres")
 
         self.currentStage = 1
-        self.currentGameState = GameState.READY
         self.onObjectAdded = Signal[[GameObject], None](self)
+        self.onStateChanged = Signal[[GameState], None](self)
 
         # init
+        self.set_game_state(GameState.READY)
         self.stage.init()
         self.physics.init()
         self.renderer.init()
         self.sounds.init()
         self.GOD.init()
+    
+    def get_game_state(self) -> GameState:
+        return self._currentGameState
+    def set_game_state(self, state: GameState):
+        self._currentGameState = state
+        self.onStateChanged.fire(state)
     
     def start_stage(self, stage: int, lives: int, copy_modifiers: bool):
         was_destroyed = self.stage.get_player().tank.is_destroyed()
@@ -108,7 +116,6 @@ class GameField(PyxelGrid[Cell]):
 
         self.currentStage = stage
         self.stage.generate_stage(str(self.currentStage), lives)
-        self.currentGameState = GameState.ONGOING
 
         if copy_modifiers and not was_destroyed:
             player_tank = self.stage.get_player().tank
@@ -116,7 +123,8 @@ class GameField(PyxelGrid[Cell]):
                     mod.owner = player_tank
                     player_tank.add_modifier(mod)
 
-
+        self.set_game_state(GameState.ONGOING)
+        
         # PHYSICS TEST (can remove this ig)
         from objects.Stone import Stone
         Stone(self, 1, 2)
@@ -141,24 +149,25 @@ class GameField(PyxelGrid[Cell]):
         self.GOD.update()
 
         # 0 game state
-        if self.currentGameState == GameState.READY:
+        current_state = self.get_game_state()
+        if current_state == GameState.READY:
             if pyxel.btn(pyxel.KEY_0):
                 self.start_stage(stage=1, lives=2,copy_modifiers=False)
             return
-        elif self.currentGameState != GameState.ONGOING:
-            if self.currentGameState == GameState.WIN:
+        elif current_state != GameState.ONGOING:
+            if current_state == GameState.WIN:
                 if pyxel.btn(pyxel.KEY_1):
                     self.next_stage()
                     return
-            elif pyxel.btn(pyxel.KEY_0):
+            if pyxel.btn(pyxel.KEY_0):
                 self.start_stage(stage=1,lives=2,copy_modifiers=False)
 
             return
 
         if self.stage.get_lives() == 0 or True in {h.is_destroyed() for h in self.stage.get_homes()}:
-            self.currentGameState = GameState.LOSE
+            self.set_game_state(GameState.LOSE)
         elif self.stage.get_total_enemy_count() == 0:
-            self.currentGameState = GameState.WIN
+            self.set_game_state(GameState.WIN)
 
         # 1 input handling
         player = self.stage.get_player()

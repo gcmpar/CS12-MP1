@@ -11,7 +11,7 @@ from objects.Home import Home
 from objects.Mirror import Mirror
 from objects.Powerup import Powerup
 
-sprites: dict[Type[GameObject], Sequence[tuple[int, int]]] = {
+sprites: dict[Type[GameObject] | str, Sequence[tuple[int, int]]] = {
     Tank: [(0, y) for y in range(4)]
         + [(1, y) for y in range(4)] # enemy
         + [(0, y) for y in range(4, 8)] # Light
@@ -24,6 +24,11 @@ sprites: dict[Type[GameObject], Sequence[tuple[int, int]]] = {
     Forest: [(3, 4)],
     Home: [(3, 5)],
     Mirror: [(4, 0), (4, 1)],
-    Powerup: [(3, 5)]
+    Powerup: [(2, 4)],
+    "Spawn": [(3, 6)],
+    "EnemySpawn": [(3, 7)],
+    "Spawned": [(2, 5)],
+    "Explode": [(2, 6)]
+
     
 }
