@@ -105,16 +105,10 @@ class Stage():
     def generate_stage(self, filename: str, lives: int = 2):
         spawnpoint: tuple[int, int] | None = None
 
-        self._lives = lives
-        self._remainingEnemySpawns = 5
         self._enemySpawns = []
-        self._enemies = []
         self._homes = []
-
-        self._lastEnemySpawnFrame = 0
-        self._enemySpawnInterval = 3.5
-
-        stage = open("resources/stages/"+filename+".txt", "r")
+        
+        stage = open(f"resources/stages/{filename}.txt", "r")
         lines = stage.readlines()
         for r in range(len(lines)):
 
@@ -161,9 +155,20 @@ class Stage():
         if len(self._homes) == 0:
             raise ValueError("Please specify Home!")
         
+        self._lives = lives
+        self._remainingEnemySpawns = 5
+        self._enemies = []
+
+        self._spawnpoint = spawnpoint
+        # placeholder
+        self._player = PlayerController(self.game, self.game.tankFactory.tank(x=0,y=0,team="player",tank_type="Normal"))
+
         self._maxEnemies = self.get_total_enemy_count()
         self._powerupSpawned = False
-        self._spawnpoint = spawnpoint
+
+        self._lastEnemySpawnFrame = 0
+        self._enemySpawnInterval = 3.5
+
         self.spawn_player()
 
         self.onStageGenerated.fire()
@@ -183,6 +188,8 @@ class Stage():
     def spawn_player(self):
         if self.get_lives() <= 0:
             return
+        self.get_player().tank.destroy()
+
         (x, y) = self._spawnpoint
         player = PlayerController(
             game=self.game,

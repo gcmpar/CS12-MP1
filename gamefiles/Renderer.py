@@ -42,6 +42,7 @@ Renderer
     post_draw_grid()
         - lives counter
         - enemy counter
+        - stage number
         - victory/lose text
         - game restart/next stage buttons text
         
@@ -129,10 +130,14 @@ class Renderer:
         self._zOrder = list[dict[str, Any]]()
     
     def post_draw_grid(self):
-        pyxel.text(1,1,f"Lives: {self.game.stage.get_lives()}",12)
+        lives_count = f"Lives: {self.game.stage.get_lives()}"
+        pyxel.text(1,1,lives_count,12)
 
         enemy_count = f"Enemies Left: {self.game.stage.get_total_enemy_count()}"
         pyxel.text(pyxel.width-(len(enemy_count)*pyxel.FONT_WIDTH)-1,1,enemy_count,8)
+
+        stage_number = f"Stage {str(self.game.currentStage)}"
+        pyxel.text(pyxel.width-(len(stage_number)*pyxel.FONT_WIDTH)-1,pyxel.height-pyxel.FONT_HEIGHT-1,stage_number,7)
 
         if self.game.currentGameState == GameState.READY:
             self.display_center_text("Press 0 to Start", 11)

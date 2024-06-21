@@ -6,8 +6,8 @@ import pyxel
 
 if TYPE_CHECKING:
     from gamefiles.GameField import GameField
-    from objects.Tank import Tank
 
+from objects.Tank import Tank
 from objects.Powerup import Powerup
 from gamefiles.Modifier import Modifier
 
@@ -43,9 +43,11 @@ def _(game: GameField, tank: Tank):
 @create(powerup_type="ExtraSpeed")
 def _(game: GameField, tank: Tank):
     def update(self: Modifier, frame_count: int):
-        tank.stats["movementSpeed"].current = tank.stats["movementSpeed"].base*1.5
+        if isinstance(self.owner, Tank):
+            self.owner.stats["movementSpeed"].current = tank.stats["movementSpeed"].base*1.5
     def destroy(self: Modifier):
-        tank.stats["movementSpeed"].current = tank.stats["movementSpeed"].base
+        if isinstance(self.owner, Tank):
+            self.owner.stats["movementSpeed"].current = tank.stats["movementSpeed"].base
         
     mod = Modifier(
         game=game,

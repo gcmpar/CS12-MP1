@@ -158,7 +158,7 @@ class GameObject():
             return
         self.modifiers.append(mod)
         self.modifiers.sort(key=lambda e: e.priority)
-        mod.init()
+        mod.init(mod)
         self.onModifierAdded.fire(mod)
 
     def remove_modifier(self, mod: Modifier):
@@ -166,7 +166,7 @@ class GameObject():
             return
         self.modifiers.remove(mod)
         self.modifiers.sort(key=lambda e: e.priority)
-        mod.destroy()
+        mod.destroy(mod)
         self.onModifierRemoved.fire(mod)
     
     
@@ -178,18 +178,20 @@ class GameObject():
         #     return
         self.update(frame_count)
         for mod in self.modifiers:
-            mod.update(frame_count)
+            mod.update(mod, frame_count)
 
     def main_can_collide(self, other: GameObject) -> bool:
         if len(self.modifiers) != 0:
-            b = self.modifiers[-1].can_collide(other)
+            mod = self.modifiers[-1]
+            b = mod.can_collide(mod, other)
             if b is not None:
                 return b
         return self.can_collide(other)
 
     def main_can_touch(self, other: GameObject) -> bool:
         if len(self.modifiers) != 0:
-            b = self.modifiers[-1].can_touch(other)
+            mod = self.modifiers[-1]
+            b = mod.can_touch(mod, other)
             if b is not None:
                 return b
         return self.can_touch(other)

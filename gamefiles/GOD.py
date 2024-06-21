@@ -1,10 +1,12 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
+from random import choice
 
 import pyxel
 
 if TYPE_CHECKING:
     from gamefiles.GameField import GameField
+    from gamefiles.Cell import Cell
 
 from misc.util import GameState
 
@@ -17,6 +19,10 @@ CHEAT CODES (Hold CTRL key):
         - extra life, respawns player and continues game even if win/lose
     K
         - smites all enemies present on field
+    Z
+        - automatically win the game
+    X
+        - spawn a random powerup
 
 God
     game: GameField
@@ -31,6 +37,7 @@ class God:
         self.game = game
 
         self._lifeDebounce = False
+        self._powerupDebounce = False
     
     def init(self):
         pass
@@ -46,10 +53,10 @@ class God:
 
                     stage = self.game.stage
                     current_lives = stage.get_lives()
-
-                    stage.get_player().tank.destroy()
+                    
                     stage.set_lives(current_lives+1)
-                    stage.spawn_player()
+                    if stage.get_player().tank.is_destroyed():
+                        stage.spawn_player()
 
                     homes = stage.get_homes()
                     for home in homes:
@@ -69,3 +76,23 @@ class God:
                             if isinstance(obj, Tank):
                                 if obj.team == "enemy":
                                     obj.destroy()
+
+            if pyxel.btn(pyxel.KEY_Z):
+                self.game.currentGameState = GameState.WIN
+            
+            if pyxel.btn(pyxel.KEY_X):
+                if not self._powerupDebounce:
+                    self._powerupDebounce = True
+                    empty_cells: list[Cell] = []
+                    for r in range(self.game.r):
+                        for c in range(self.game.c):
+                            cell = self.game[r, c]
+                            if len(cell.get_objects()) == 0:
+                                empty_cells.append(cell)
+
+                    if len(empty_cells) > 0:
+                        
+                        chosen_cell = choice(empty_cells)
+                        self.game.powerupFactory.powerup(x=chosen_cell.x, y=chosen_cell.y, powerup_type=choice(self.game.powerupFactory.get_powerup_types()))
+            else:
+                self._powerupDebounce = False

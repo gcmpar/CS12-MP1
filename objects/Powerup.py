@@ -34,5 +34,7 @@ class Powerup(Item):
     def touched(self, other: GameObject):
         if not isinstance(other, Tank):
             return
+        if other.team == "enemy":
+            return
         self.execute(other)
         self.destroy()

@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 from collections.abc import Callable
 
 if TYPE_CHECKING:
@@ -9,10 +9,12 @@ if TYPE_CHECKING:
 '''
 Manipulator of the whole game
 NOTE: if modifier needs to remove itself, please call object.remove_modifier() instead of modifier.destroy() !!
+NOTE: modifier function must access tank with self.owner !!
 
 Modifier
     game: GameField
-    owner: GameObject | None
+    owner: GameObject
+        - can be transferred!!
     priority: int
         - higher = run last
     
@@ -46,17 +48,18 @@ class Modifier:
     destroy: Callable[[Modifier], None]
     can_collide: Callable[[Modifier, GameObject], bool | None]
     can_touch: Callable[[Modifier, GameObject], bool | None]
-    def __init__(self, game: GameField, owner: GameObject | None = None, priority: int | None = None,
+    def __init__(self, game: GameField, owner: GameObject, priority: int | None = None,
                  init: Callable[[Modifier], None] | None = None,
                  update: Callable[[Modifier, int], None] | None = None,
                  destroy: Callable[[Modifier], None] | None = None,
                  can_collide: Callable[[Modifier, GameObject], bool | None] | None = None,
                  can_touch: Callable[[Modifier, GameObject], bool | None] | None = None,
-                 ):
+                 data: dict[str, Any] | None = None):
         
         self.game = game
         self.owner = owner
         self.priority = priority if priority is not None else 0
+        self.data = data if data is not None else dict[str, Any]()
 
         self.init = init if init is not None else lambda _: None
         self.update = update if update is not None else lambda _, f: None
@@ -73,7 +76,8 @@ class Modifier:
             update=self.update,
             destroy=self.destroy,
             can_collide=self.can_collide,
-            can_touch=self.can_touch
+            can_touch=self.can_touch,
+            data=self.data if copy_data else None
         )
 
 

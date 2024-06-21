@@ -90,6 +90,7 @@ class GameField(PyxelGrid[Cell]):
         self.GOD = God(self)
         pyxel.load("resources/spritesheet.pyxres")
 
+        self.currentStage = 1
         self.currentGameState = GameState.READY
         self.onObjectAdded = Signal[[GameObject], None](self)
 
@@ -101,17 +102,19 @@ class GameField(PyxelGrid[Cell]):
         self.GOD.init()
     
     def start_stage(self, stage: int, lives: int, copy_modifiers: bool):
-        self.stage.cleanup()
-
+        was_destroyed = self.stage.get_player().tank.is_destroyed()
         modifiers = [mod.copy() for mod in self.stage.get_player().tank.modifiers]
+        self.stage.cleanup()
 
         self.currentStage = stage
         self.stage.generate_stage(str(self.currentStage), lives)
         self.currentGameState = GameState.ONGOING
 
-        if copy_modifiers:
+        if copy_modifiers and not was_destroyed:
+            player_tank = self.stage.get_player().tank
             for mod in modifiers:
-                self.stage.get_player().tank.add_modifier(mod)
+                    mod.owner = player_tank
+                    player_tank.add_modifier(mod)
 
 
         # PHYSICS TEST (can remove this ig)
