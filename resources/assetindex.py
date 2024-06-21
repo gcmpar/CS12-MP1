@@ -20,8 +20,8 @@ sprites: dict[Type[GameObject], Sequence[tuple[int, int]]] = {
     Brick: [(3, 0), (3, 1)],
     Stone: [(3, 2)],
     Water: [(3, 3)],
-    Forest: [(3, 3)],
-    Home: [(3, 3)],
+    Forest: [(3, 4)],
+    Home: [(3, 5)],
     Mirror: [(4, 0), (4, 1)],
     
 }

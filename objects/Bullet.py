@@ -6,6 +6,8 @@ if TYPE_CHECKING:
     from misc.util import Orientation
     from objects.Tank import Tank
 
+import pyxel
+
 from objects.GameObject import GameObject
 from objects.Entity import Entity
 from objects.Mirror import Mirror
@@ -38,6 +40,7 @@ class Bullet(Entity):
     def __init__(self, game: GameField, x: int, y: int, owner: Tank, ori: Orientation, speed: int=15):
         self._lastMirrorHit = None
         self.owner = owner
+        pyxel.play(0,pyxel.sounds[0])
 
         super().__init__(game=game, x=x, y=y, ori=ori, speed=speed)
         def on_move(x: int, y: int):
@@ -58,6 +61,7 @@ class Bullet(Entity):
 
     def collided_with(self, other: GameObject):
         self.destroy()
+        pyxel.play(0,pyxel.sounds[1])
     
     def touched(self, other: GameObject):
         if isinstance(other, Mirror) and self._lastMirrorHit != other: # debounce
@@ -75,3 +79,4 @@ class Bullet(Entity):
     
     def out_of_bounds(self):
         self.destroy()
+        
