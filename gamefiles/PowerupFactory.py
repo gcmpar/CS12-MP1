@@ -17,7 +17,7 @@ Factory for Powerup and Modifier creation
 
 PowerupFactory:
     - powerup(x: int, y: int, powerup_type: str)
-        - selects executor functions from dictionary above based on powerup_type
+        - selects executor functions from dictionary below based on powerup_type
         
     - get_powerup_types() -> list[str]
 '''
