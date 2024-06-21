@@ -68,10 +68,10 @@ class PhysicsManager:
                             continue
                         collision_pairs.append(pair)
 
-                        if obj.can_collide(other) and other.can_collide(obj):
+                        if obj.main_can_collide(other) and other.main_can_collide(obj):
                             obj.main_collided_with(other)
                             other.main_collided_with(obj)
-                        if obj.can_touch(other) and other.can_touch(obj):
+                        if obj.main_can_touch(other) and other.main_can_touch(obj):
                             obj.main_touched(other)
                             other.main_touched(obj)
         
@@ -110,7 +110,7 @@ class PhysicsManager:
                 if other == entity:
                     continue
 
-                if entity.can_collide(other) and other.can_collide(entity):
+                if entity.main_can_collide(other) and other.main_can_collide(entity):
                     entity.main_collided_with(other)
                     other.main_collided_with(entity)
                     can_move_to = False
@@ -127,7 +127,7 @@ class PhysicsManager:
                 if other == obj:
                     continue
 
-                if obj.can_touch(other) and other.can_touch(obj):
+                if obj.main_can_touch(other) and other.main_can_touch(obj):
                     obj.main_touched(other)
                     other.main_touched(obj)
 
