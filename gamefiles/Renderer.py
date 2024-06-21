@@ -137,17 +137,8 @@ class Renderer:
         if self.game.currentGameState == GameState.READY:
             self.display_center_text("Press 0 to Start", 11)
             return
-
-        elif self.game.currentGameState != GameState.ONGOING:
-            if self.game.currentGameState == GameState.WIN:
-                self.display_center_text("VICTORY", 12)
-                self.display_center_text("Press 1 to Next Stage", 11, 0, pyxel.FONT_HEIGHT * 2)
-
-            elif self.game.currentGameState == GameState.LOSE:
-                self.display_center_text("HOME CELL WAS DESTROYED" if True in {h.is_destroyed() for h in self.game.stage.get_homes()} else "YOU DIED", 8)
-
-            self.display_center_text("Press 0 to Start at Beginning", 11, 0, pyxel.FONT_HEIGHT * 3)
         
+
         # Old 8x8 sprite rendering
         # (u_ind, v_ind) = index
         # pyxel.bltm(
@@ -184,6 +175,17 @@ class Renderer:
                 del self._customRenders[f]
                 continue
             f()
+
+
+        if self.game.currentGameState != GameState.ONGOING:
+            if self.game.currentGameState == GameState.WIN:
+                self.display_center_text("VICTORY", 12)
+                self.display_center_text("Press 1 to Next Stage", 11, 0, pyxel.FONT_HEIGHT * 2)
+
+            elif self.game.currentGameState == GameState.LOSE:
+                self.display_center_text("HOME CELL WAS DESTROYED" if True in {h.is_destroyed() for h in self.game.stage.get_homes()} else "YOU DIED", 8)
+
+            self.display_center_text("Press 0 to Start at Beginning", 11, 0, pyxel.FONT_HEIGHT * 3)
             
     def display_center_text(self, s: str, col: int, x_offset: int = 0, y_offset: int = 0):
         pyxel.text((pyxel.width - (len(s) * pyxel.FONT_WIDTH)) / 2 + x_offset, (pyxel.height / 2) + y_offset, s, col)
