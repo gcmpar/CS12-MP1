@@ -152,6 +152,11 @@ class GameField(PyxelGrid[Cell]):
 
             return
 
+        if self.stage.get_lives() == 0 or True in {h.is_destroyed() for h in self.stage.get_homes()}:
+            self.currentGameState = GameState.LOSE
+        elif self.stage.get_total_enemy_count() == 0:
+            self.currentGameState = GameState.WIN
+
         # 1 input handling
         player = self.stage.get_player()
         if player.tank.is_destroyed():
@@ -178,12 +183,6 @@ class GameField(PyxelGrid[Cell]):
         # 6 process signal destroy
         [f() for f in self._signalDestroyQueue]
         self._signalDestroyQueue = []
-        
-        # 7 check game state
-        if self.stage.get_lives() == 0 or True in {h.is_destroyed() for h in self.stage.get_homes()}:
-            self.currentGameState = GameState.LOSE
-        elif self.stage.get_total_enemy_count() == 0:
-            self.currentGameState = GameState.WIN
 
     def draw_cell(self, i: int, j: int, x: int, y: int) -> None:
         self.renderer.draw_cell(pyxel.frame_count, i, j, x, y)
