@@ -54,8 +54,8 @@ GameObject
         - basically middlemen before the actual overriden method is called
 
     main_update(frame_count: int)
-    main_can_collide(other: GameObject)
-    main_can_touch(other: GameObject)
+    main_can_collide(other: GameObject) -> bool
+    main_can_touch(other: GameObject) -> bool
     main_collided_with(other: GameObject)
     main_touched(other: GameObject)
     
@@ -180,19 +180,19 @@ class GameObject():
         for mod in self.modifiers:
             mod.update(frame_count)
 
-    def main_can_collide(self, other: GameObject):
+    def main_can_collide(self, other: GameObject) -> bool:
         if len(self.modifiers) != 0:
             b = self.modifiers[-1].can_collide(other)
             if b is not None:
                 return b
-        self.can_collide(other)
+        return self.can_collide(other)
 
-    def main_can_touch(self, other: GameObject):
+    def main_can_touch(self, other: GameObject) -> bool:
         if len(self.modifiers) != 0:
             b = self.modifiers[-1].can_touch(other)
             if b is not None:
                 return b
-        self.can_touch(other)
+        return self.can_touch(other)
     
     def main_collided_with(self, other: GameObject):
         # if self.is_destroyed():
