@@ -16,7 +16,7 @@ CHEAT CODES (Hold CTRL key):
     L
         - extra life, respawns player and continues game even if win/lose
     K
-        - smites all enemies and automatically wins the game
+        - smites all enemies present on field
 
 God
     game: GameField
