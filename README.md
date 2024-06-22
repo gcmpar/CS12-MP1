@@ -250,4 +250,4 @@ A **newline** for each **ROW**<br>
 <br>
 
 ***...let's think of something.***
-![ENDPOINT___Our Spiral.](https://drive.google.com/uc?export=view&id=1E2eW1mRyY0Hhv_J3BPIXDXaafsEwl7uK)
+![ENDPOINT______Our Spiral.](https://drive.google.com/uc?export=view&id=1E2eW1mRyY0Hhv_J3BPIXDXaafsEwl7uK)
