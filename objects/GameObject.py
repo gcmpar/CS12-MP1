@@ -179,9 +179,9 @@ class GameObject():
     def main_update(self, frame_count: int):
         # if self.is_destroyed():
         #     return
-        self.update(frame_count)
         for mod in self.modifiers:
             mod.update(mod, frame_count)
+        self.update(frame_count)
 
     def main_can_collide(self, other: GameObject) -> bool:
         if len(self.modifiers) != 0:
