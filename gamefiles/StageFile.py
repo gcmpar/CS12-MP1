@@ -165,7 +165,6 @@ class Stage():
 
         self._spawnpoint = spawnpoint
         self._maxEnemies = self.get_total_enemy_count()
-        self._powerupSpawned = False
 
         self._lastEnemySpawnFrame = -696969
         self._enemySpawnInterval = 3.5
@@ -256,6 +255,26 @@ class Stage():
             if enemy not in self._enemies:
                 return
             self._enemies.remove(enemy)
+
+            # powerup spawn
+            enemy_count = self.get_total_enemy_count()
+            if self._maxEnemies > 1 and enemy_count >= 1 and enemy_count <= self._maxEnemies / 2:
+
+                empty_cells: list[Cell] = []
+                for r in range(self.game.r):
+                    for c in range(self.game.c):
+                        cell = self.game[r, c]
+                        if len(cell.get_objects()) == 0:
+                            empty_cells.append(cell)
+
+                if len(empty_cells) > 0:
+                    
+                    chosen_cell = choice(empty_cells)
+                    self.game.powerupFactory.powerup(
+                        x=chosen_cell.x,
+                        y=chosen_cell.y,
+                        powerup_type=choice(self.game.powerupFactory.get_powerup_types()))
+                    
         enemy.tank.onDestroy.add_listener(remove_enemy)
         self._enemies.append(enemy)
 
@@ -291,27 +310,6 @@ class Stage():
                     self.game.onStateChanged.remove_listener(stop)
                     self.game.renderer.stop_render_custom(on_spawn)
                 self.game.onStateChanged.add_listener(stop)
-
-
-        # powerup spawn
-        if not self._powerupSpawned:
-            if self._maxEnemies > 1 and self.get_total_enemy_count() <= self._maxEnemies / 2:
-
-                empty_cells: list[Cell] = []
-                for r in range(self.game.r):
-                    for c in range(self.game.c):
-                        cell = self.game[r, c]
-                        if len(cell.get_objects()) == 0:
-                            empty_cells.append(cell)
-
-                if len(empty_cells) > 0:
-                    
-                    chosen_cell = choice(empty_cells)
-                    self.game.powerupFactory.powerup(
-                        x=chosen_cell.x,
-                        y=chosen_cell.y,
-                        powerup_type=choice(self.game.powerupFactory.get_powerup_types()))
-                    self._powerupSpawned = True
     
     def cleanup(self):
         [f() for f in self._eventCleanups]
