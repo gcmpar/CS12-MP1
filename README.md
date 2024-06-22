@@ -81,6 +81,7 @@ A **newline** for each **ROW**<br>
 
 ## Game Info
 **Powerups:**
+***Powerups start spawning for each enemy kill when there are less than half of the maximum number of enemies from the start of the stage.***
 + **ExtraLife**
     - Gives the player an extra life that carries over to the next stage
 + **Zoooom**
