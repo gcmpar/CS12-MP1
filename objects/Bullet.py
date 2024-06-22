@@ -64,7 +64,7 @@ class Bullet(Entity):
                     c = (-c[0], -c[1])
 
                 new_ori = ref_map_inv[c]
-                self.orientation = new_ori
+                self.set_orientation(new_ori)
         elif not isinstance(other, Water):
             self.destroy()
     

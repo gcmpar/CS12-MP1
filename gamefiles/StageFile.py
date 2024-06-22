@@ -271,7 +271,7 @@ class Stage():
                 # spawn render
                 (x, y) = enemy_spawns[self._enemySpawnIndex]
                 def on_spawn():
-                    self.game.renderer.render_z(x=self.game.x(x), y=self.game.y(y), index=assetindex.sprites["Spawned"][0], z_index=-1)
+                    self.game.renderer.render_z(x=self.game.x(x), y=self.game.y(y), index=assetindex.sprites["Spawning"][0], z_index=-1)
                 self.game.renderer.render_custom(on_spawn,
                                                  duration=self._enemySpawnDelayInterval, 
                                                  callback=lambda: self.game.onStateChanged.remove_listener(stop))

@@ -37,6 +37,7 @@ GameField
     onObjectAdded: Signal[[GameObject], None]
         - fired for any GameObject creation
     onStateChanged: Signal[[GameState], None]
+    onUpdate: Signal[[int], None]
     
     start_stage(stage: int, lives: int)
         - cleans the game field up
@@ -54,9 +55,10 @@ GameField
                 - also checks button inputs for game restarting/next stage
 
             - inputs (PlayerController updates)
+            - EnemyController updates
             - stage-specific updates
             - GameObject updates
-            - EnemyController updates
+            - onUpdate signal
             - physics
             - signal destroy processing
 
@@ -97,6 +99,7 @@ class GameField(PyxelGrid[Cell]):
         self.currentStage = 1
         self.onObjectAdded = Signal[[GameObject], None](self)
         self.onStateChanged = Signal[[GameState], None](self)
+        self.onUpdate = Signal[[int], None](self)
 
         # init
         self.set_game_state(GameState.READY)
@@ -135,8 +138,8 @@ class GameField(PyxelGrid[Cell]):
         # Stone(self, 1, 2)
         # t1 = self.tankFactory.tank(2, 4, "enemy", "Armored")
         # t2 = self.tankFactory.tank(3, 2, "enemy", "Armored")
-        # t1.turn("north")
-        # t2.turn("west")
+        # t1.set_orientation("north")
+        # t2.set_orientation("west")
         # t1.start_moving()
         # t2.start_moving()
 
@@ -189,17 +192,19 @@ class GameField(PyxelGrid[Cell]):
 
         if not player.tank.is_destroyed():
             player.update(pyxel.frame_count)
-
-        # 2 stage
-        self.stage.update(pyxel.frame_count)
-
-        # 3 game objects
-        [obj.main_update(pyxel.frame_count) for r in range(self.r) for c in range(self.c) for obj in self[c, r].get_objects()]
-
-        # 4 enemy
+        
+        # 2 enemy
         enemies = self.stage.get_enemies()
         for enemy in enemies:
             enemy.update(pyxel.frame_count)
+
+        # 3 stage
+        self.stage.update(pyxel.frame_count)
+
+        # 4 game objects
+        [obj.main_update(pyxel.frame_count) for r in range(self.r) for c in range(self.c) for obj in self[c, r].get_objects()]
+
+        self.onUpdate.fire(pyxel.frame_count)
 
         # 5 physics
         self.physics.update(pyxel.frame_count)

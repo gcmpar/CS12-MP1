@@ -3,10 +3,11 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from gamefiles.GameField import GameField
-    from misc.util import Orientation
 
 from objects.GameObject import GameObject
 from gamefiles.Signal import Signal
+
+from misc.util import Orientation
 
 
 '''
@@ -14,9 +15,14 @@ A game object that has velocity
 
 Entity:
     orientation: Orientation
-    speed: int
+    speed: float
 
+    onOrientationChanged: Signal[[Orientation], None]
+    onSpeedChanged: Signal[float], None]
     onOutOfBounds = Signal[[], None](game)
+
+    set_orientation(ori: Orientation)
+    set_speed(speed: float)
 
     ---------------------------------
     INTERNALS
@@ -35,17 +41,30 @@ Entity:
 '''
 class Entity(GameObject):
     orientation: Orientation
-    def __init__(self, game: GameField, x: int, y: int, ori: Orientation, speed: int = 0):
+    def __init__(self, game: GameField, x: int, y: int, ori: Orientation, speed: float = 0):
         if type(self) == Entity:
             raise ValueError("Superclass cannot be instantiated.")
         self.orientation = ori
         self.speed = speed
+        self.onOrientationChanged = Signal[[Orientation], None](game)
+        self.onSpeedChanged = Signal[[float], None](game)
         self.onOutOfBounds = Signal[[], None](game)
 
         super().__init__(game, x, y)
         def d():
             self.onOutOfBounds.destroy()
         self.onDestroy.add_listener(d)
+    
+    def set_orientation(self, ori: Orientation):
+        if ori == self.orientation:
+            return
+        self.orientation = ori
+        self.onOrientationChanged.fire(ori)
+    def set_speed(self, speed: float):
+        if speed == self.speed:
+            return
+        self.speed = speed
+        self.onSpeedChanged.fire(speed)
 
     # ---------------------------------
     # internal

@@ -27,8 +27,7 @@ sprites: dict[Type[GameObject] | str, Sequence[tuple[int, int]]] = {
     Powerup: [(6, 0)],
     "Spawn": [(5, 1)],
     "EnemySpawn": [(6, 1)],
-    "Spawned": [(4, 2)],
-    "Explode": [(5, 0)]
-
+    "Spawning": [(4, 2)],
+    "Explode": [(5, 0), (5, 2)],
     
 }

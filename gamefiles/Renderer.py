@@ -33,8 +33,9 @@ Renderer
             - zIndex
                 - z-order of object to allow for Forest cell to cover things, as well as other necessary ordering
                 ORDER: (top-to-bottom is higher to lower priority)
-                    - Explode effect (4)
-                    - Bullet (3)
+                    - Explode effect (5)
+                    - Bullet (4)
+                    - Fire Effect (3)
                     - Forest Cell (2)
                     - Tank (1)
                     - any other GameObject (0)
@@ -80,24 +81,41 @@ class Renderer:
             if self.game.get_game_state() == GameState.GENERATING:
                 return
             if isinstance(obj, Bullet) or isinstance(obj, Tank):
-                def on_explode():
-                    cell = obj.get_cell()
-                    x, y = cell.x, cell.y
-                    self.render_z(x=self.game.x(x), y=self.game.y(y), index=assetindex.sprites["Explode"][0], z_index=4)
-                def render():
-                    self.render_custom(on_explode, 
-                                        duration=0.35,
-                                        callback=lambda: self.game.onStateChanged.remove_listener(stop)
-                                        )
-                obj.onDestroy.add_listener(render)
+                # bullet fire
+                if isinstance(obj, Bullet):
+                    def scope(o: GameObject):
+                        duration = 0.1
+                        f = 0
+                        def fire_render():
+                            if self.game.get_game_state() == GameState.GENERATING:
+                                return
+                            nonlocal f
+                            f += 1
+                            index = 0 if f <= self.game.FPS * duration/2 else 1
 
-                def stop(state: GameState):
-                    self.game.onStateChanged.remove_listener(stop)
+                            cell = o.get_cell()
+                            x, y = cell.x, cell.y
+                            self.render_z(x=self.game.x(x), y=self.game.y(y), index=assetindex.sprites["Explode"][index], z_index=3)
+                        self.render_custom(fire_render, duration=duration)
+                    scope(obj)
 
-                    obj.onDestroy.remove_listener(render)
-                    self.stop_render_custom(on_explode)
+                # on destroy
+                def scope2(o: GameObject):
+                    def render():
+                        if self.game.get_game_state() == GameState.GENERATING:
+                            return
+                        
+                        cell = o.get_cell()
+                        x, y = cell.x, cell.y
+                        self.render_z(x=self.game.x(x), y=self.game.y(y), index=assetindex.sprites["Explode"][0], z_index=5)
+                    
+                    def on_explode():
+                        if self.game.get_game_state() == GameState.GENERATING:
+                            return
+                        self.render_custom(render, duration=0.35)
 
-                self.game.onStateChanged.add_listener(stop)
+                    o.onDestroy.add_listener(on_explode)
+                scope2(obj)
                 
         self.game.onObjectAdded.add_listener(initialize)
 
@@ -143,7 +161,7 @@ class Renderer:
                     z_index = 1
                 elif isinstance(obj, Bullet):
                     index = index[get_args(Orientation).index(obj.orientation)]
-                    z_index = 3
+                    z_index = 4
                 else:
                     index = index[0]
 

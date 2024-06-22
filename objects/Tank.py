@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from gamefiles.GameField import GameField
-    from misc.util import Orientation, Team
+    from misc.util import Team
 
 from objects.Entity import Entity
 from objects.GameObject import GameObject
@@ -25,7 +25,6 @@ Tank
         "fireRate: Stat
     }
 
-    turn(ori: Orientation)
     start_moving()
     stop_moving()
         
@@ -74,15 +73,10 @@ class Tank(Entity):
             self.onBulletFired.destroy()
         self.onDestroy.add_listener(d)
 
-
-
-    
-    def turn(self, ori: Orientation):
-        self.orientation = ori
     def start_moving(self):
-        self.speed = self.stats["movementSpeed"].current
+        self.isMoving = True
     def stop_moving(self):
-        self.speed = 0
+        self.isMoving = False
 
     def fire_bullet(self) -> Bullet | None:
         if self.is_destroyed():
@@ -122,6 +116,9 @@ class Tank(Entity):
         if self.stats["health"].current <= 0:
             self.destroy()
             return
+        
+        self.set_speed(0 if not self.isMoving else self.stats["movementSpeed"].current)
+
         if self._bulletFired:
             self._bulletFired = False
             self._lastFireFrame = frame_count
@@ -141,9 +138,5 @@ class Tank(Entity):
     def touched(self, other: GameObject):
         if isinstance(other, Bullet):
             self.stats["health"].current -= 1
-
-        # yeah no
-        elif self.main_can_collide(other) and other.main_can_collide(self):
-            self.destroy()
                     
         

@@ -51,7 +51,7 @@ class EnemyController():
             self._lastRotateTime = frame_count
             self._rotateInterval = random_interval()
 
-            self.tank.turn(random.choice(get_args(Orientation)))
+            self.tank.set_orientation(random.choice(get_args(Orientation)))
 
         # move
         if self._moveCount <= 0 and frame_count > self._lastMoveTime + (self.game.FPS * self._moveInterval):
