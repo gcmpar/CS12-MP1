@@ -4,9 +4,10 @@ from typing import TYPE_CHECKING, Any
 if TYPE_CHECKING:
     from gamefiles.GameField import GameField
     from objects.GameObject import GameObject
-    from gamefiles.Cell import Cell
 
 from objects.Entity import Entity
+from objects.Tank import Tank
+from gamefiles.Cell import Cell
 
 '''
 Singleton for managing physics and Entity movement
@@ -56,7 +57,7 @@ class PhysicsManager:
                     if isinstance(obj, Entity):
                         if obj not in self._entities.keys():
                             self._entities[obj] = {
-                                "lastMoveFrame": -1
+                                "lastMoveFrame": -6969
                             }
                             
                     for other in cell.get_objects():
@@ -122,7 +123,15 @@ class PhysicsManager:
                 moved_entities[entity] = new_cell
         
         # move entities that can move (+ trigger touched for each)
+        sorted = list[tuple[Entity, Cell]]()
         for entity, new_cell in moved_entities.items():
+            sorted.append((entity, new_cell))
+
+        # grr
+        def key(e: tuple[Entity, Cell]):
+            return 1 if isinstance(e[0], Tank) else 0
+        sorted.sort(key=key)
+        for (entity, new_cell) in sorted:
             entity.move_to(new_cell.x, new_cell.y)
             self._entities[entity]["lastMoveFrame"] = frame_count
 
