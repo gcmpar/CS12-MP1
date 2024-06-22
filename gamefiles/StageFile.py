@@ -28,7 +28,9 @@ STAGE FORMAT:
     separated by NEWLINE for each row
     
     Object Disriminators:
-        " " -- empty cell
+        " " OR str(1 to 15) -- empty cell
+            - numbers are for easier counting and positioning
+            - this is only for the designer, as they can put any number in any designated empty cell regardless of where it is
         "Brick"
         "CrackedBrick"
         "Stone"
@@ -43,7 +45,7 @@ STAGE FORMAT:
     EXAMPLE: (5x5 grid for brevity)
 
      | | | | 
-    Spawn| | | | 
+    Spawn|2|3|4|5
     MirrorNE| | | | 
      | |Home| | 
      | | | |Water
@@ -105,15 +107,10 @@ class Stage():
     def generate_stage(self, filename: str, lives: int = 2):
         spawnpoint: tuple[int, int] | None = None
 
-        self._lives = lives
-        self._remainingEnemySpawns = 0
         self._enemySpawns = []
         self._homes = []
 
-        self._lastEnemySpawnFrame = 0
-        self._enemySpawnInterval = 3.5
-
-        stage = open("resources/stages/"+filename+".txt", "r")
+        stage = open(f"resources/stages/{filename}.txt", "r")
         lines = stage.readlines()
         for r in range(len(lines)):
 
@@ -125,7 +122,6 @@ class Stage():
                 id = objects[c]
                 Cell(self.game, c, r)
 
-                # if id == " ":
                 if id in [str(x) for x in range(1, 16)] or id == " ":
                     continue
                 if id == "Brick":
@@ -158,8 +154,6 @@ class Stage():
                     
         if spawnpoint is None:
             raise ValueError("Please specify player spawn!")
-        if len(self._homes) == 0:
-            raise ValueError("Please specify Home!")
         
         self._lives = lives
         self._remainingEnemySpawns = 1

@@ -89,7 +89,7 @@ class GameField(PyxelGrid[Cell]):
         self.tankFactory = TankFactory(self)
         self.powerupFactory = PowerupFactory(self)
         self.GOD = God(self)
-        pyxel.load("resources/spritesheet.pyxres")
+        pyxel.load("resources/resource.pyxres")
 
         self.currentStage = 1
         self.onObjectAdded = Signal[[GameObject], None](self)
