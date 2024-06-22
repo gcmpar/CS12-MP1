@@ -24,6 +24,12 @@ To run the game, please run [main.py](main.py)
     - Move tank towards north, west, south, and east respectively
 + **SPACE**
     - Fire bullet
++ **R**
+    - Respawn if dead
++ **1**
+    - Restart game on Stage 1
++ **2**
+    - Advance to next stage if won
 
 ## GOD Commands (DEBUG MODE):
 ***NOTE: Hold CTRL for all keys below***
