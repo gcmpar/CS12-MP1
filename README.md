@@ -1,5 +1,6 @@
 # Battle Tanks Bootleg™
 ~~(Oh wait it was named Battle City)~~
+
 To run the game, please run [main.py](main.py)
 
 ## Contributors
@@ -242,9 +243,11 @@ A **newline** for each **ROW**<br>
 <br>
 <br>
 <br>
+<br>
 
 ***and after that...***
 <br>
 <br>
+
 ***...let's think of something.***
 ![Our Spiral.](https://drive.google.com/uc?export=view&id=1E2eW1mRyY0Hhv_J3BPIXDXaafsEwl7uK)
