@@ -84,6 +84,7 @@ class EnemyController():
                 if self._fireCount <= 0:
                     self._lastFireTime = frame_count
                     self._fireInterval = random_interval()
+                    self.tank.onBulletFired.remove_listener(fireOnce)
 
             self.tank.onBulletFired.add_listener(fireOnce)
             
