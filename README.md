@@ -110,7 +110,7 @@ A **newline** for each **ROW**<br>
 <br>
 <br>
 
-***And after that...***
+***and after that...***
 <br>
 <br>
 ***...let's think of something.***
