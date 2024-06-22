@@ -1,5 +1,6 @@
 # Battle Tanks Bootleg™
 ~~(Oh wait it was named Battle City)~~
+To run the game, please run [main.py](main.py)
 
 ## Contributors
 + **Glenn Paragas**
