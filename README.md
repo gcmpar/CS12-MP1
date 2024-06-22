@@ -1,1 +1,3 @@
-and after that, let's think of something
+CONTRIBUTORS:
+Glenn Paragas
+Neil Alcantara
