@@ -110,6 +110,7 @@ class PhysicsManager:
             target_cell_map[entity] = new_cell
 
         # store entities that CAN move (+ trigger collision if can't)
+        collision_pairs: list[set[GameObject]] = []
         for entity, new_cell in target_cell_map.items():
             can_move_to: bool = True
             cell = entity.get_cell()
@@ -117,6 +118,7 @@ class PhysicsManager:
                 if entity.main_can_collide(other) and other.main_can_collide(entity):
                     entity.main_collided_with(other)
                     other.main_collided_with(entity)
+                    collision_pairs.append({entity, other})
                     can_move_to = False
             
             if can_move_to:
@@ -132,13 +134,25 @@ class PhysicsManager:
             return 1 if isinstance(e[0], Tank) else 0
         sorted.sort(key=key)
         for (entity, new_cell) in sorted:
+            can_move_to: bool = True
+            for other in new_cell.get_objects():
+                if other == entity:
+                    continue
+                if entity.main_can_collide(other) and other.main_can_collide(entity):
+                    if {entity, other} not in collision_pairs:
+                        entity.main_collided_with(other)
+                        other.main_collided_with(entity)
+                        collision_pairs.append({entity, other})
+                    can_move_to = False
+
+            if not can_move_to:
+                continue
             entity.move_to(new_cell.x, new_cell.y)
             self._entities[entity]["lastMoveFrame"] = frame_count
 
             for other in new_cell.get_objects():
                 if other == entity:
                     continue
-                
                 if entity.main_can_touch(other) and other.main_can_touch(entity):
                     entity.main_touched(other)
                     other.main_touched(entity)
