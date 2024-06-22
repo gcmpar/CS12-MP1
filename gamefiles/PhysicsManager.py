@@ -111,6 +111,7 @@ class PhysicsManager:
 
         # store entities that CAN move (+ trigger collision if can't)
         collision_pairs: list[set[GameObject]] = []
+        touched_pairs: list[set[GameObject]] = []
         for entity, new_cell in target_cell_map.items():
             can_move_to: bool = True
             cell = entity.get_cell()
@@ -154,8 +155,10 @@ class PhysicsManager:
                 if other == entity:
                     continue
                 if entity.main_can_touch(other) and other.main_can_touch(entity):
-                    entity.main_touched(other)
-                    other.main_touched(entity)
+                    if {entity, other} not in touched_pairs:
+                        entity.main_touched(other)
+                        other.main_touched(entity)
+                        touched_pairs.append({entity, other})
 
         
         
