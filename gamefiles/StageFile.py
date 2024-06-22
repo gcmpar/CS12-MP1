@@ -1,9 +1,10 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
+from collections.abc import Callable
 if TYPE_CHECKING:
     from gamefiles.GameField import GameField
 
-from random import choice
+from random import choice, randint
 
 from gamefiles.Cell import Cell
 from gamefiles.PlayerController import PlayerController
@@ -17,6 +18,9 @@ from objects.Home import Home
 from objects.Mirror import Mirror
 
 from gamefiles.Signal import Signal
+from misc.util import GameState
+
+import resources.assetindex as assetindex
 
 
 '''
@@ -69,7 +73,6 @@ Stage
 
     generate_stage(filename: str)
         - defaults:
-            - remaining enemy spawns: 5
             - enemy spawn interval: 3.5
 
     get_lives() -> int
@@ -102,9 +105,11 @@ class Stage():
         self.onStageGenerated = Signal[[], None](game)
     
     def init(self):
-        self.generate_stage("_empty")
+        # placeholder
+        self._player = PlayerController(self.game, self.game.tankFactory.tank(x=0,y=0,team="player",tank_type="Normal"))
+        self.generate_stage("_empty", lives=2, remaining_enemy_spawns=1)
 
-    def generate_stage(self, filename: str, lives: int = 2):
+    def generate_stage(self, filename: str, lives: int, remaining_enemy_spawns: int):
         spawnpoint: tuple[int, int] | None = None
 
         self._enemySpawns = []
@@ -120,8 +125,7 @@ class Stage():
             for c in range(len(objects)):
                 
                 id = objects[c]
-                Cell(self.game, c, r)
-
+                
                 if id in [str(x) for x in range(1, 16)] or id == " ":
                     continue
                 if id == "Brick":
@@ -156,18 +160,22 @@ class Stage():
             raise ValueError("Please specify player spawn!")
         
         self._lives = lives
-        self._remainingEnemySpawns = 1
+        self._remainingEnemySpawns = remaining_enemy_spawns
         self._enemies = []
 
         self._spawnpoint = spawnpoint
-        # placeholder
-        self._player = PlayerController(self.game, self.game.tankFactory.tank(x=0,y=0,team="player",tank_type="Normal"))
-
         self._maxEnemies = self.get_total_enemy_count()
         self._powerupSpawned = False
 
         self._lastEnemySpawnFrame = 0
         self._enemySpawnInterval = 3.5
+
+        self._enemySpawnDelayFrame = 0
+        self._enemySpawnDelayInterval = 0.75
+        self._enemySpawnIndex = 0
+        self._enemySpawnTriggered = False
+
+        self._eventCleanups = list[Callable[[], None]]()
 
         self.spawn_player()
 
@@ -203,8 +211,12 @@ class Stage():
         def decrease_life():
             self.set_lives(self.get_lives()-1)
             self.onLifeChanged.fire(self.get_lives())
-        self._decrease_life_listener = decrease_life
         self._player.tank.onDestroy.add_listener(decrease_life)
+
+        def remove_listener():
+            self._player.tank.onDestroy.remove_listener(decrease_life)
+        self._eventCleanups.append(remove_listener)
+
     
     def get_enemies(self):
         return self._enemies
@@ -215,7 +227,7 @@ class Stage():
     def get_total_enemy_count(self) -> int:
         return len(self.get_enemies()) + (self._remainingEnemySpawns if len(self.get_enemy_spawns()) > 0 else 0)
 
-    def spawn_enemy(self):
+    def spawn_enemy(self, spawn_index: int):
         if self._remainingEnemySpawns <= 0:
             return
         if len(self._enemySpawns) == 0:
@@ -223,27 +235,56 @@ class Stage():
         self._remainingEnemySpawns -= 1
 
         enemy_spawns = self.get_enemy_spawns()
-        coords = choice(enemy_spawns)
-        x, y = coords
+        x, y = enemy_spawns[spawn_index]
 
         enemy = EnemyController(
             game=self.game,
             tank=self.game.tankFactory.tank(x=x, y=y, team="enemy", tank_type=choice(self.game.tankFactory.get_tank_types()))
         )
         def remove_enemy():
+            if enemy not in self._enemies:
+                return
             self._enemies.remove(enemy)
         enemy.tank.onDestroy.add_listener(remove_enemy)
         self._enemies.append(enemy)
 
+        def remove_listener():
+            enemy.tank.onDestroy.remove_listener(remove_enemy)
+        self._eventCleanups.append(remove_listener)
+
     def update(self, frame_count: int):
         # enemy spawn
-        if frame_count > (self._lastEnemySpawnFrame + (self.game.FPS * self._enemySpawnInterval)):
-            self._lastEnemySpawnFrame = frame_count
-            self.spawn_enemy()
+        if not(self._remainingEnemySpawns <= 0 or len(self._enemySpawns) == 0):
+            if self._enemySpawnTriggered:
+                if frame_count > (self._enemySpawnDelayFrame + (self.game.FPS * self._enemySpawnDelayInterval)):
+                    self._enemySpawnTriggered = False
+                    self._lastEnemySpawnFrame = frame_count
+
+                    self.spawn_enemy(self._enemySpawnIndex)
+
+            elif frame_count > (self._lastEnemySpawnFrame + (self.game.FPS * self._enemySpawnInterval)):
+                enemy_spawns = self.get_enemy_spawns()
+                self._enemySpawnDelayFrame = frame_count
+                self._enemySpawnTriggered = True
+                self._enemySpawnIndex = randint(0, len(enemy_spawns)-1)
+                
+                # spawn render
+                (x, y) = enemy_spawns[self._enemySpawnIndex]
+                def on_spawn():
+                    self.game.renderer.render_z(x=self.game.x(x), y=self.game.y(y), index=assetindex.sprites["Spawned"][0], z_index=-1)
+                self.game.renderer.render_custom(on_spawn,
+                                                 duration=self._enemySpawnDelayInterval, 
+                                                 callback=lambda: self.game.onStateChanged.remove_listener(stop))
+
+                def stop(state: GameState):
+                    self.game.onStateChanged.remove_listener(stop)
+                    self.game.renderer.stop_render_custom(on_spawn)
+                self.game.onStateChanged.add_listener(stop)
+
 
         # powerup spawn
         if not self._powerupSpawned:
-            if self.get_total_enemy_count() < self._maxEnemies / 2:
+            if self._maxEnemies > 1 and self.get_total_enemy_count() <= self._maxEnemies / 2:
 
                 empty_cells: list[Cell] = []
                 for r in range(self.game.r):
@@ -262,7 +303,7 @@ class Stage():
                     self._powerupSpawned = True
     
     def cleanup(self):
-        self.get_player().tank.onDestroy.remove_listener(self._decrease_life_listener)
+        [f() for f in self._eventCleanups]
         [obj.destroy() for r in range(self.game.r) for c in range(self.game.c) for obj in self.game[c, r].get_objects()]
 
 

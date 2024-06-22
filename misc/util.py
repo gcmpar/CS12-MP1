@@ -11,6 +11,7 @@ class GameState(enum.Enum):
     ONGOING = 1
     WIN = 2
     LOSE = 3
+    GENERATING = 4
 
 def clamp(v: float, l: float, h: float):
     return max(l, min(h, v))

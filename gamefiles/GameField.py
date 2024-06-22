@@ -80,6 +80,9 @@ class GameField(PyxelGrid[Cell]):
 
     def init(self):
         # internals
+        for r in range(self.r):
+            for c in range(self.c):
+                Cell(self, c, r)
         self._signalDestroyQueue = list[Callable[[], None]]()
 
         self.stage = Stage(self)
@@ -109,13 +112,15 @@ class GameField(PyxelGrid[Cell]):
         self._currentGameState = state
         self.onStateChanged.fire(state)
     
-    def start_stage(self, stage: int, lives: int, copy_modifiers: bool):
+    def start_stage(self, stage: int, lives: int, remaining_enemy_spawns: int, copy_modifiers: bool):
+        self.set_game_state(GameState.GENERATING)
+
         was_destroyed = self.stage.get_player().tank.is_destroyed()
         modifiers = [mod.copy() for mod in self.stage.get_player().tank.modifiers]
         self.stage.cleanup()
 
         self.currentStage = stage
-        self.stage.generate_stage(str(self.currentStage), lives)
+        self.stage.generate_stage(str(self.currentStage), lives=lives, remaining_enemy_spawns=remaining_enemy_spawns)
 
         if copy_modifiers and not was_destroyed:
             player_tank = self.stage.get_player().tank
@@ -136,9 +141,14 @@ class GameField(PyxelGrid[Cell]):
         # t2.start_moving()
 
     def next_stage(self):
+        stage_number = self.currentStage + 1 if self.currentStage < 3 else 3
+        remaining_enemy_spawns = 1 if stage_number == 1 \
+                                else 3 if stage_number == 2 \
+                                else 5
         self.start_stage(
-            stage=self.currentStage + 1 if self.currentStage < 3 else 3,
+            stage=stage_number,
             lives=self.stage.get_lives(),
+            remaining_enemy_spawns=remaining_enemy_spawns,
             copy_modifiers=True
             )
         
@@ -152,16 +162,18 @@ class GameField(PyxelGrid[Cell]):
         current_state = self.get_game_state()
         if current_state == GameState.READY:
             if pyxel.btn(pyxel.KEY_1):
-                self.start_stage(stage=1, lives=2,copy_modifiers=False)
+                self.start_stage(stage=1, lives=2,remaining_enemy_spawns=1,copy_modifiers=False)
             return
-        elif current_state != GameState.ONGOING:
+        elif current_state == GameState.WIN or current_state == GameState.LOSE:
             if current_state == GameState.WIN:
                 if pyxel.btn(pyxel.KEY_2):
                     self.next_stage()
                     return
             if pyxel.btn(pyxel.KEY_1):
-                self.start_stage(stage=1,lives=2,copy_modifiers=False)
+                self.start_stage(stage=1,lives=2,remaining_enemy_spawns=1,copy_modifiers=False)
 
+            return
+        elif current_state != GameState.ONGOING:
             return
 
         if self.stage.get_lives() == 0 or True in {h.is_destroyed() for h in self.stage.get_homes()}:

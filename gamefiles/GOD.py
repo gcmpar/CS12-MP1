@@ -45,7 +45,7 @@ class God:
         pass
 
     def update(self):
-        if self.game.get_game_state() == GameState.READY:
+        if self.game.get_game_state() == GameState.READY or self.game.get_game_state() == GameState.GENERATING:
             return
         
         if pyxel.btn(pyxel.KEY_CTRL):

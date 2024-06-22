@@ -57,10 +57,14 @@ Renderer
     display_center_text(s: str, col: int, x_offset: int = 0, y_offset: int = 0)
     render_custom(f: Callable[[], None], duration: float)
         - call a per-frame custom renderer function for a certain duration
+    stop_render_custom(f: Callable[[], None])
+        
     render_z(x: int, y: int, index: tuple[int, int], zIndex: int)
         - insert into next z-order rendering
         - index is assetindex
         - zIndex is z-order
+        - NOTE: x, y are WINDOW width/height, NOT cell index
+        - NOTE: use self.game.x/self.game.y to convert cell coords
 '''
 
 class Renderer:
@@ -68,27 +72,33 @@ class Renderer:
         self.game = game
         self._entities: dict[Entity, dict[str, Any]] = {}
         self._zOrder = list[dict[str, Any]]()
-        self._customRenders = dict[Callable[[], None], dict[str, float]]()
+        self._customRenders = dict[Callable[[], None], dict[str, Any]]()
         self._zOrderQueue = list[dict[str, Any]]()
     
     def init(self):
         def initialize(obj: GameObject):
+            if self.game.get_game_state() == GameState.GENERATING:
+                return
             if isinstance(obj, Bullet) or isinstance(obj, Tank):
-                stop_explode = False
-                def onExplode():
-                    nonlocal stop_explode
-                    if stop_explode:
-                        return
+                def on_explode():
                     cell = obj.get_cell()
                     x, y = cell.x, cell.y
-                    self.render_z(x=x, y=y, index=assetindex.sprites["Explode"][0], z_index=4)
-                obj.onDestroy.add_listener(lambda: self.render_custom(onExplode, duration=0.35))
+                    self.render_z(x=self.game.x(x), y=self.game.y(y), index=assetindex.sprites["Explode"][0], z_index=4)
+                def render():
+                    self.render_custom(on_explode, 
+                                        duration=0.35,
+                                        callback=lambda: self.game.onStateChanged.remove_listener(stop)
+                                        )
+                obj.onDestroy.add_listener(render)
 
                 def stop(state: GameState):
-                    nonlocal stop_explode
-                    stop_explode = True
                     self.game.onStateChanged.remove_listener(stop)
+
+                    obj.onDestroy.remove_listener(render)
+                    self.stop_render_custom(on_explode)
+
                 self.game.onStateChanged.add_listener(stop)
+                
         self.game.onObjectAdded.add_listener(initialize)
 
 
@@ -96,14 +106,14 @@ class Renderer:
         if self.game.get_game_state() == GameState.READY:
             return
         
-        if (x, y) in self.game.stage.get_enemy_spawns():
+        if (j, i) in self.game.stage.get_enemy_spawns():
             self._zOrder.append({
                 "x": x,
                 "y": y,
                 "index": assetindex.sprites["EnemySpawn"][0],
                 "zIndex": -2,
             })
-        if (x, y) == self.game.stage.get_spawn():
+        if (j, i) == self.game.stage.get_spawn():
             self._zOrder.append({
                 "x": x,
                 "y": y,
@@ -189,8 +199,6 @@ class Renderer:
 
         # New 16x16 sprite rendering
         for data in self._zOrderQueue:
-            data["x"] = self.game.x(data["x"])
-            data["y"] = self.game.y(data["y"])
             self._zOrder.append(data)
         self._zOrderQueue = []
         self._zOrder.sort(key=lambda e: e["zIndex"])
@@ -212,12 +220,12 @@ class Renderer:
             data = self._customRenders[f]
             data["frameCount"] += 1
             if data["frameCount"] > self.game.FPS * data["duration"]:
-                del self._customRenders[f]
+                self.stop_render_custom(f)
                 continue
             f()
 
 
-        if current_state != GameState.ONGOING:
+        if current_state == GameState.WIN or current_state == GameState.LOSE:
             if current_state == GameState.WIN:
                 self.display_center_text("VICTORY", 12)
                 self.display_center_text("Press 2 to Advance", 11, 0, pyxel.FONT_HEIGHT * 2)
@@ -230,11 +238,22 @@ class Renderer:
     def display_center_text(self, s: str, col: int, x_offset: int = 0, y_offset: int = 0):
         pyxel.text((pyxel.width - (len(s) * pyxel.FONT_WIDTH)) / 2 + x_offset, (pyxel.height / 2) + y_offset, s, col)
     
-    def render_custom(self, f: Callable[[], None], duration: float):
+    def render_custom(self, f: Callable[[], None], duration: float, callback: Callable[[], None] | None = None):
+        if f in self._customRenders.keys():
+            return
+        def c():
+            pass
         self._customRenders[f] = {
             "duration": duration,
-            "frameCount": 0
+            "frameCount": 0,
+            "callback": callback if callback is not None else c
         }
+    def stop_render_custom(self, f: Callable[[], None]):
+        if f not in self._customRenders.keys():
+            return
+        c = self._customRenders[f]["callback"]
+        del self._customRenders[f]
+        c()
 
     def render_z(self, x: int, y: int, index: tuple[int, int], z_index: int):
         self._zOrderQueue.append({
