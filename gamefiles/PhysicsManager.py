@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, Any
 if TYPE_CHECKING:
     from gamefiles.GameField import GameField
     from objects.GameObject import GameObject
+    from gamefiles.Cell import Cell
 
 from objects.Entity import Entity
 
@@ -23,11 +24,9 @@ update()
                 (this is for if there's somehow two GameObjects that were able to move into each other even if collidable)
         
         - MOVEMENT COLLISION
-            - for entities that need to move to a target cell at this exact frame
-            - call collided_with() on (entity, other) where other is a collidable object on the target cell
-
-        - MOVEMENT TOUCHED
-            - trigger touched() on all entities that moved
+            - store entities that need to move (+ trigger OOB)
+            - store entities that CAN move (+ trigger collision if can't)
+            - move entities that can move (+ trigger touched for each)
 
 
 
@@ -76,11 +75,15 @@ class PhysicsManager:
                             other.main_touched(obj)
         
         # movement collision
+        target_cell_map: dict[Entity, Cell] = {}
+        moved_entities: dict[Entity, Cell] = {}
+
+        # store entities that are supposed to move (+ trigger OOB)
         for entity in list(self._entities):
             if entity.is_destroyed():
                 del self._entities[entity]
                 continue
-            
+
             cell = entity.get_cell()
             data = self._entities[entity]
 
@@ -102,29 +105,34 @@ class PhysicsManager:
                 entity.main_out_of_bounds()
                 continue
             
-            # check collision
             new_cell = self.game[new_y, new_x]
-            can_move_to: bool = True
-            for other in new_cell.get_objects():
-                if other == entity:
-                    continue
+            target_cell_map[entity] = new_cell
 
+        # store entities that CAN move (+ trigger collision if can't)
+        for entity, new_cell in target_cell_map.items():
+            can_move_to: bool = True
+            cell = entity.get_cell()
+            for other in new_cell.get_objects():
                 if entity.main_can_collide(other) and other.main_can_collide(entity):
                     entity.main_collided_with(other)
                     other.main_collided_with(entity)
                     can_move_to = False
             
             if can_move_to:
-                entity.move_to(new_x, new_y)
-                data["lastMoveFrame"] = frame_count
+                moved_entities[entity] = new_cell
+        
+        # move entities that can move (+ trigger touched for each)
+        for entity, new_cell in moved_entities.items():
+            entity.move_to(new_cell.x, new_cell.y)
+            self._entities[entity]["lastMoveFrame"] = frame_count
 
-                for other in new_cell.get_objects():
-                    if other == entity:
-                        continue
-
-                    if entity.main_can_touch(other) and other.main_can_touch(entity):
-                        entity.main_touched(other)
-                        other.main_touched(entity)
+            for other in new_cell.get_objects():
+                if other == entity:
+                    continue
+                
+                if entity.main_can_touch(other) and other.main_can_touch(entity):
+                    entity.main_touched(other)
+                    other.main_touched(entity)
 
         
         
