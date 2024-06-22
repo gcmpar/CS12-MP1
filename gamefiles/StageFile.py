@@ -167,7 +167,7 @@ class Stage():
         self._maxEnemies = self.get_total_enemy_count()
         self._powerupSpawned = False
 
-        self._lastEnemySpawnFrame = 0
+        self._lastEnemySpawnFrame = -696969
         self._enemySpawnInterval = 3.5
 
         self._enemySpawnDelayFrame = 0

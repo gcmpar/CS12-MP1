@@ -39,6 +39,7 @@ GameObject
     destroy()
         - cleanup/deletion function
         - removes the object from game
+        - removes all modifiers
         - fires onDestroy
         - disconnects all listeners for onDestroy
     is_destroyed() -> bool
@@ -143,6 +144,8 @@ class GameObject():
         self.onMove.destroy()
         self.onCollision.destroy()
         self.onTouched.destroy()
+
+        [self.remove_modifier(mod) for mod in self.modifiers]
 
         self.onDestroy.fire()
         self.onDestroy.destroy()

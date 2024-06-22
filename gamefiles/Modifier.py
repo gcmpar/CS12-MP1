@@ -15,8 +15,13 @@ Modifier
     game: GameField
     owner: GameObject
         - can be transferred!!
+    type: str
+        - descriptor for rendering or other managers
     priority: int
         - higher = run last
+    stageTranferrable: bool = True
+        - for GameField use
+        - if can be transferred to next stage
     
     data: dict[str, Any]
         - where modifier's functions can store its any data it needs throughout its lifetime
@@ -48,7 +53,7 @@ class Modifier:
     destroy: Callable[[Modifier], None]
     can_collide: Callable[[Modifier, GameObject], bool | None]
     can_touch: Callable[[Modifier, GameObject], bool | None]
-    def __init__(self, game: GameField, owner: GameObject, priority: int | None = None,
+    def __init__(self, game: GameField, owner: GameObject, type: str, priority: int | None = None, stage_transferrable: bool = True,
                  init: Callable[[Modifier], None] | None = None,
                  update: Callable[[Modifier, int], None] | None = None,
                  destroy: Callable[[Modifier], None] | None = None,
@@ -58,7 +63,9 @@ class Modifier:
         
         self.game = game
         self.owner = owner
+        self.type = type
         self.priority = priority if priority is not None else 0
+        self.stageTransferrable = stage_transferrable
         self.data = data if data is not None else dict[str, Any]()
 
         self.init = init if init is not None else lambda _: None
@@ -71,6 +78,7 @@ class Modifier:
         return Modifier(
             game=self.game,
             owner=self.owner,
+            type=self.type,
             priority=self.priority,
             init=self.init,
             update=self.update,

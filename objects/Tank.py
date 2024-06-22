@@ -126,7 +126,9 @@ class Tank(Entity):
             self._bulletFired = False
             self._lastFireFrame = frame_count
 
-        if self.stats["fireRate"].current != 0: # sneaky
+        if self.stats["fireRate"].current == 0: # sneaky
+            self._canFireBullet = False
+        else:
             self._canFireBullet = not (frame_count < (self._lastFireFrame + (self.game.FPS / self.stats["fireRate"].current)))
 
     def can_touch(self, other: GameObject):
