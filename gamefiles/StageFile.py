@@ -55,7 +55,7 @@ STAGE FORMAT:
      | | | |Water
      |EnemySpawn|EnemySpawn| | 
 
-    NOTE: on the left and right edges, there must still be a space if you wish to specify an empty cell !!
+    NOTE: on the left and right edges, there must still be a space or number if you wish to specify an empty cell !!
     NOTE: Please see resources/stages/_TEST.txt for a complete example
 
 '''
