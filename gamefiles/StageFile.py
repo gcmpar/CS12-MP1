@@ -114,15 +114,20 @@ class Stage():
 
         self._enemySpawns = []
         self._homes = []
-
+        
         stage = open(f"resources/stages/{filename}.txt", "r")
         lines = stage.readlines()
-        for r in range(len(lines)):
-
+        for r in range(self.game.r):
+            
+            if len(lines) != self.game.r:
+                raise ValueError(f"There must be {self.game.r} rows!")
             line = lines[r].rstrip("\n")
+            
             objects = line.split("|")
+            if len(objects) != self.game.c:
+                raise ValueError(f"There must be {self.game.c} columns!")
 
-            for c in range(len(objects)):
+            for c in range(self.game.c):
                 
                 id = objects[c]
                 
