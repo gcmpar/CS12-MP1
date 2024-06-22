@@ -151,6 +151,7 @@ class GameField(PyxelGrid[Cell]):
         # t2.start_moving()
 
     def next_stage(self):
+        # Change this for more stages ig
         stage_number = self.currentStage + 1 if self.currentStage < 3 else 3
         remaining_enemy_spawns = 1 if stage_number == 1 \
                                 else 3 if stage_number == 2 \

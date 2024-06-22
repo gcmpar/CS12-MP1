@@ -87,7 +87,7 @@ A **newline** for each **ROW**<br>
 + Please see [resources/stages/_TEST.txt](resources/stages/_TEST.txt) for a complete example.
 
 ## Video Demo
-**Link to video demo:** [Video Demo](https://drive.google.com/file/d/1crLGKkDuElTDd-_8w_MuMgPRSOfbxdGt/view?usp=sharing)
+**Link to video demo:** [Video Demo](https://drive.google.com/drive/folders/1Yg5bWrrXWPdPOV6-iUUohP-61r_4qJi7?usp=sharing)
 
 
 ## Game Info

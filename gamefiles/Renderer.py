@@ -263,8 +263,13 @@ class Renderer:
 
         if current_state == GameState.WIN or current_state == GameState.LOSE:
             if current_state == GameState.WIN:
-                self.display_center_text("VICTORY", 12)
-                self.display_center_text("Press 2 to Advance", 11, 0, pyxel.FONT_HEIGHT * 2)
+                # Change this for more stages ig
+                if self.game.currentStage >= 3:
+                    self.display_center_text("GAME WON !!! :D", 10)
+                    self.display_center_text("Press 2 to Repeat", 11, 0, pyxel.FONT_HEIGHT * 2)
+                else:
+                    self.display_center_text("VICTORY", 12)
+                    self.display_center_text("Press 2 to Advance", 11, 0, pyxel.FONT_HEIGHT * 2)
 
             elif current_state == GameState.LOSE:
                 self.display_center_text("HOME CELL WAS DESTROYED" if True in {h.is_destroyed() for h in self.game.stage.get_homes()} else "YOU DIED", 8)
