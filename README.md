@@ -114,7 +114,7 @@ A **newline** for each **ROW**<br>
 
 <br>
 
-**Singletons**
+**Singletons:**
 
 `GameField` [GameField](gamefiles/GameField.py)
 - the World class
@@ -142,7 +142,7 @@ A **newline** for each **ROW**<br>
 
 <br>
 
-**Factories**
+**Factories:**
 
 `TankFactory` [TankFactory](gamefiles/TankFactory.py)
 - Generates tanks with differing stats
@@ -154,7 +154,7 @@ A **newline** for each **ROW**<br>
 
 <br>
 
-**Other Game Files**
+**Other Game Files:**
 
 `Cell` [Cell](gamefiles/Cell.py)
 - Container for all game objects
@@ -177,7 +177,7 @@ A **newline** for each **ROW**<br>
 
 <br>
 
-**Game Objects**
+**Game Objects:**
 
 `GameObject` [GameObject](objects/GameObject.py)
 - Base class for all game objects
@@ -215,7 +215,7 @@ A **newline** for each **ROW**<br>
 - Reflects bullets
 - Can reflect northeast or southeast
 
-**Miscellaneous**
+**Miscellaneous:**
 
 `util` [util](misc/util.py)
 - Contains utilities for tank team, orientation, mirror reflect orientation, and GameState as well as other functions
@@ -223,7 +223,7 @@ A **newline** for each **ROW**<br>
 `Stat` [Stat](misc/Stat.py)
 - Container for base and current stat values
 
-**Resources**
+**Resource Files:**
 
 `assetindex` [assetindex](resources/assetindex.py)
 - Contains indices for sprite loading (u, v) map
