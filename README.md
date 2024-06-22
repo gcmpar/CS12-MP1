@@ -1,4 +1,4 @@
-# Battle Tanks Bootleg:tm:
+# Battle Tanks Bootleg™
 ~~(Oh wait it was named Battle City)~~
 
 ## Contributors
