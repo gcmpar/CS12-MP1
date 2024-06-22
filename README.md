@@ -51,7 +51,7 @@ To run the game, please run [main.py](main.py)
 
 ## Stage File Format
 
-The stage file a **15x15** grid consisting of object discriminators for specifying each cell type and spawnpoint. Each descriminator is separated by:<br>
+The stage file is a **15x15** grid .txt file consisting of object discriminators for specifying each cell type and spawnpoint. Each descriminator is separated by:<br>
 A bar ("**|**") for each **COLUMN**<br>
 A **newline** for each **ROW**<br>
 <br>

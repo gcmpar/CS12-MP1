@@ -204,6 +204,7 @@ class Renderer:
         current_state = self.game.get_game_state()
         if current_state == GameState.READY:
             self.display_center_text("Press 1 to Start", 11)
+            self.display_center_text("Battle Tanks Bootleg TM", 2, 0, -pyxel.FONT_HEIGHT*2)
             return
         
 
