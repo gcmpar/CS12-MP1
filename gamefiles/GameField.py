@@ -98,6 +98,7 @@ class GameField(PyxelGrid[Cell]):
         pyxel.load("resources/resource.pyxres")
 
         self.currentStage = 1
+        self._currentGameState = GameState.READY
         self.onObjectAdded = Signal[[GameObject], None](self)
         self.onStateChanged = Signal[[GameState], None](self)
         self.onUpdate = Signal[[int], None](self)
@@ -113,6 +114,8 @@ class GameField(PyxelGrid[Cell]):
     def get_game_state(self) -> GameState:
         return self._currentGameState
     def set_game_state(self, state: GameState):
+        if state == self._currentGameState:
+            return
         self._currentGameState = state
         self.onStateChanged.fire(state)
     
