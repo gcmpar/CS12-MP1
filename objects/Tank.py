@@ -139,5 +139,9 @@ class Tank(Entity):
     def touched(self, other: GameObject):
         if isinstance(other, Bullet):
             self.stats["health"].current -= 1
+
+        # yeah no
+        elif self.main_can_collide(other) and other.main_can_collide(self):
+            self.destroy()
                     
         

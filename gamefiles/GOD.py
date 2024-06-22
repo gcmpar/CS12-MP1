@@ -22,7 +22,7 @@ CHEAT CODES (Hold CTRL key):
     Z
         - automatically win the game
     P
-        - automatically lose the game
+        - keep yourself safe
     X
         - spawn a random powerup
 
@@ -39,6 +39,7 @@ class God:
         self.game = game
 
         self._lifeDebounce = False
+        self._LTGDebounce = False
         self._powerupDebounce = False
     
     def init(self):
@@ -82,8 +83,11 @@ class God:
             if pyxel.btn(pyxel.KEY_Z):
                 self.game.set_game_state(GameState.WIN)
             if pyxel.btn(pyxel.KEY_P):
-                self.game.stage.set_lives(0)
-                self.game.stage.get_player().tank.destroy()
+                if not self._LTGDebounce:
+                    self._LTGDebounce = True
+                    self.game.stage.get_player().tank.destroy()
+            else:
+                self._LTGDebounce = False
             
             if pyxel.btn(pyxel.KEY_X):
                 if not self._powerupDebounce:
