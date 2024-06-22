@@ -46,7 +46,6 @@ class PlayerController():
         self._movementLastOri = "north"
 
         self._bullet = None
-        self._bulletDebounce = False
 
         def record_bullet(bullet: Bullet):
             self._bullet = bullet
@@ -88,15 +87,10 @@ class PlayerController():
         
         # fire
         if pyxel.btn(controls["fire"]):
-            if not self._bulletDebounce:
-                self._bulletDebounce = True
-
-                allow = self._bullet is None
-                for mod in self.tank.modifiers:
-                    if mod.type == "TimeStopBuff":
-                        allow = True
-                if allow:
-                    self._bullet = self.tank.fire_bullet()
-        else:
-            self._bulletDebounce = False
+            allow = self._bullet is None
+            for mod in self.tank.modifiers:
+                if mod.type == "TimeStopBuff":
+                    allow = True
+            if allow:
+                self._bullet = self.tank.fire_bullet()
             

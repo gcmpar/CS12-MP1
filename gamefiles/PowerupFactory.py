@@ -161,11 +161,11 @@ def _(game: GameField, tank: Tank):
     game.onUpdate.add_listener(update)
     game.onObjectAdded.add_listener(on_object_added)
 
-    # self-modifier buff and tag for PlayerController use
+    # self-modifier buff and tag for PlayerController use (one-bullet-only rule bypass)
     def mod_update(self: Modifier, frame_count: int):
         owner = self.owner
         if isinstance(owner, Tank):
-            owner.stats["fireRate"].current = 6969
+            owner.stats["fireRate"].current = 5
     def mod_destroy(self: Modifier):
         owner = self.owner
         if isinstance(owner, Tank):

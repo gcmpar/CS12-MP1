@@ -162,19 +162,18 @@ class GameField(PyxelGrid[Cell]):
         self.GOD.update()
 
         # 0 game state
+        if pyxel.btn(pyxel.KEY_1):
+            self.start_stage(stage=1,lives=2,remaining_enemy_spawns=1,copy_modifiers=False)
+            return
+        
         current_state = self.get_game_state()
         if current_state == GameState.READY:
-            if pyxel.btn(pyxel.KEY_1):
-                self.start_stage(stage=1, lives=2,remaining_enemy_spawns=1,copy_modifiers=False)
             return
         elif current_state == GameState.WIN or current_state == GameState.LOSE:
             if current_state == GameState.WIN:
                 if pyxel.btn(pyxel.KEY_2):
                     self.next_stage()
                     return
-            if pyxel.btn(pyxel.KEY_1):
-                self.start_stage(stage=1,lives=2,remaining_enemy_spawns=1,copy_modifiers=False)
-
             return
         elif current_state != GameState.ONGOING:
             return
