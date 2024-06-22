@@ -186,6 +186,7 @@ def _(game: GameField, tank: Tank):
 
 
     def stop():
+        tank.onDestroy.remove_listener(stop)
         game.onStateChanged.remove_listener(stop_listener)
 
         game.onPreObjectUpdate.remove_listener(update)
@@ -198,6 +199,7 @@ def _(game: GameField, tank: Tank):
 
     def stop_listener(state: GameState):
         stop()
+    tank.onDestroy.add_listener(stop)
     game.onStateChanged.add_listener(stop_listener)
 
 @create(powerup_type="Mirage")

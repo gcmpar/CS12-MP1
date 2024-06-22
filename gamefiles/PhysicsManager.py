@@ -76,7 +76,6 @@ class PhysicsManager:
                             other.main_touched(obj)
         
         # movement collision
-        moved_entities: list[Entity] = []
         for entity in list(self._entities):
             if entity.is_destroyed():
                 del self._entities[entity]
@@ -117,19 +116,15 @@ class PhysicsManager:
             
             if can_move_to:
                 entity.move_to(new_x, new_y)
-                moved_entities.append(entity)
                 data["lastMoveFrame"] = frame_count
-        
-        # movement touched
-        for obj in moved_entities:
-            cell = obj.get_cell()
-            for other in cell.get_objects():
-                if other == obj:
-                    continue
 
-                if obj.main_can_touch(other) and other.main_can_touch(obj):
-                    obj.main_touched(other)
-                    other.main_touched(obj)
+                for other in new_cell.get_objects():
+                    if other == entity:
+                        continue
+
+                    if entity.main_can_touch(other) and other.main_can_touch(entity):
+                        entity.main_touched(other)
+                        other.main_touched(entity)
 
         
         
