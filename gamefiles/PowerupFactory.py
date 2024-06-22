@@ -77,7 +77,7 @@ def _(game: GameField, tank: Tank):
         nonlocal f
         powerup_text = f"The World! {duration-int(f/game.FPS)}"
         pyxel.text(pyxel.width/2-(len(powerup_text)*pyxel.FONT_WIDTH)/2,1,powerup_text,7)
-    game.renderer.render_custom(text, duration=duration,callback=lambda: stop())
+    game.renderer.render_custom(text, duration=duration)
 
     def stop_entity(entity: Entity):
         def init(self: Modifier):
@@ -130,6 +130,9 @@ def _(game: GameField, tank: Tank):
                 return False
             
         if entity in record.keys():
+            return False
+        
+        if entity == tank:
             return False
 
         return True
@@ -199,7 +202,37 @@ def _(game: GameField, tank: Tank):
 
 @create(powerup_type="Mirage")
 def _(game: GameField, tank: Tank):
-    pass
+    duration = 5
+
+    f = 0
+    def text():
+        nonlocal f
+        powerup_text = f"-- MIRAGE -- {duration-int(f/game.FPS)}\nFloat out of this Reality."
+        pyxel.text(pyxel.width/2-(len(powerup_text)*pyxel.FONT_WIDTH)/2,1,powerup_text,7)
+    game.renderer.render_custom(text, duration=duration)
+
+    def init(self: Modifier):
+        self.data["f"] = 0
+    def update(self: Modifier, frame_count: int):
+        nonlocal f
+        self.data["f"] += 1
+        f = self.data["f"]
+        if self.data["f"] > game.FPS * duration:
+            self.owner.remove_modifier(self)
+    def can_touch(self: Modifier, other: GameObject):
+        return False
+    
+    mod = Modifier(
+        game=game,
+        owner=tank,
+        type="Mirage",
+        priority=6969,
+        init=init,
+        update=update,
+        can_touch=can_touch,
+        stage_transferrable=False
+    )
+    tank.add_modifier(mod)
 
 
 class PowerupFactory:
@@ -207,7 +240,7 @@ class PowerupFactory:
         self.game = game
     
     def powerup(self, x: int, y: int, powerup_type: str) -> Powerup:
-        powerup_type="TimeStop"
+        powerup_type="Mirage"
         def execute(tank: Tank):
             powerups[powerup_type](self.game, tank)
         return Powerup(

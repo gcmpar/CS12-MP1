@@ -41,6 +41,7 @@ Renderer
                     - any other GameObject (0)
                     - Spawned (-1)
                     - Spawn, EnemySpawn (-2)
+                    - POWERUP: Mirage effect (-3)
 
     pre_draw_grid()
         - draws black background
@@ -159,6 +160,19 @@ class Renderer:
                         offset = 4
                     index = index[offset + get_args(Orientation).index(obj.orientation)]
                     z_index = 1
+                    has_mirage: bool = False
+                    for mod in obj.modifiers:
+                        if mod.type == "Mirage":
+                            self._zOrder.append({
+                                "x": x,
+                                "y": y,
+                                "index": assetindex.sprites["Mirage"][0],
+                                "zIndex": -3,
+                            })
+                            has_mirage = True
+                            break
+                    if has_mirage:
+                        continue
                 elif isinstance(obj, Bullet):
                     index = index[get_args(Orientation).index(obj.orientation)]
                     z_index = 4

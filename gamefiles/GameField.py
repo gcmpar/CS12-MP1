@@ -86,6 +86,7 @@ class GameField(PyxelGrid[Cell]):
             for c in range(self.c):
                 Cell(self, c, r)
         self._signalDestroyQueue = list[Callable[[], None]]()
+        self._restartDebounce = False
 
         self.stage = Stage(self)
         self.physics = PhysicsManager(self)
@@ -163,8 +164,12 @@ class GameField(PyxelGrid[Cell]):
 
         # 0 game state
         if pyxel.btn(pyxel.KEY_1):
-            self.start_stage(stage=1,lives=2,remaining_enemy_spawns=1,copy_modifiers=False)
-            return
+            if not self._restartDebounce:
+                self._restartDebounce = True
+                self.start_stage(stage=1,lives=2,remaining_enemy_spawns=1,copy_modifiers=False)
+                return
+        else:
+            self._restartDebounce = False
         
         current_state = self.get_game_state()
         if current_state == GameState.READY:
