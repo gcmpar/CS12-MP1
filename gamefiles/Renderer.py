@@ -201,6 +201,10 @@ class Renderer:
         self._zOrder = list[dict[str, Any]]()
     
     def post_draw_grid(self):
+        if pyxel.btn(pyxel.KEY_CTRL):
+            debug_text = "DEBUG"
+            pyxel.text(1,pyxel.height-pyxel.FONT_HEIGHT-1,debug_text,8)
+
         current_state = self.game.get_game_state()
         if current_state == GameState.READY:
             self.display_center_text("Press 1 to Start", 11)
@@ -256,7 +260,7 @@ class Renderer:
 
         stage_number = f"Stage {str(self.game.currentStage)}"
         pyxel.text(pyxel.width-(len(stage_number)*pyxel.FONT_WIDTH)-1,pyxel.height-pyxel.FONT_HEIGHT-1,stage_number,7)
-        
+
         if current_state == GameState.WIN or current_state == GameState.LOSE:
             if current_state == GameState.WIN:
                 self.display_center_text("VICTORY", 12)
