@@ -1,7 +1,15 @@
 # Battle Tanks Bootleg™
 ~~(Oh wait it was named Battle City)~~
 
-To run the game, please run [main.py](main.py)
+
+**Installations**:
++ [Python](https://www.python.org/downloads/)
++ [Pyxel](https://github.com/kitao/pyxel)
++ [PyxelGrid](https://github.com/UPD-CS12-232/pyxelgrid)
+
+**To run the game, please run [main.py](main.py)**
+<br>
+<br>
 
 ## Contributors
 + **Glenn Paragas**
