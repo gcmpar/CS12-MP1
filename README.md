@@ -105,4 +105,4 @@ A **newline** for each **ROW**<br>
 
 ***And after that...***
 ***...let's think of something.***
-![](https://drive.google.com/uc?export=view&id=1E2eW1mRyY0Hhv_J3BPIXDXaafsEwl7uK)
+![Our Spiral.](https://drive.google.com/uc?export=view&id=1E2eW1mRyY0Hhv_J3BPIXDXaafsEwl7uK)
