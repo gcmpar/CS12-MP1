@@ -16,6 +16,8 @@ from objects.Water import Water
 from objects.Forest import Forest
 from objects.Home import Home
 from objects.Mirror import Mirror
+from objects.Bullet import Bullet
+from objects.Powerup import Powerup
 
 from gamefiles.Signal import Signal
 from misc.util import GameState
@@ -247,15 +249,19 @@ class Stage():
             return
         if len(self._enemySpawns) == 0:
             return
-        self._remainingEnemySpawns -= 1
-
         enemy_spawns = self.get_enemy_spawns()
         x, y = enemy_spawns[spawn_index]
 
+        for obj in self.game[y, x].get_objects():
+            if not isinstance(obj, Bullet) and not isinstance(obj, Powerup):
+                return
+        enemy_tank = self.game.tankFactory.tank(x=x, y=y, team="enemy", tank_type=choice(self.game.tankFactory.get_tank_types())) 
         enemy = EnemyController(
             game=self.game,
-            tank=self.game.tankFactory.tank(x=x, y=y, team="enemy", tank_type=choice(self.game.tankFactory.get_tank_types()))
+            tank=enemy_tank
         )
+        self._remainingEnemySpawns -= 1
+
         def remove_enemy():
             if enemy not in self._enemies:
                 return

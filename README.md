@@ -18,6 +18,7 @@ To run the game, please run [main.py](main.py)
         - SFX
         - Enemy AI
         - StageFile
+        - Video Demo
 
 ## Highest Phase: Phase 3
 ## Controls:
