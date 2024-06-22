@@ -240,7 +240,6 @@ class PowerupFactory:
         self.game = game
     
     def powerup(self, x: int, y: int, powerup_type: str) -> Powerup:
-        powerup_type="Mirage"
         def execute(tank: Tank):
             powerups[powerup_type](self.game, tank)
         return Powerup(

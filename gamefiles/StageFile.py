@@ -217,6 +217,17 @@ class Stage():
             self._player.tank.onDestroy.remove_listener(decrease_life)
         self._eventCleanups.append(remove_listener)
 
+        def on_spawn():
+            self.game.renderer.render_z(x=self.game.x(x), y=self.game.y(y), index=assetindex.sprites["Spawning"][0], z_index=-1)
+        self.game.renderer.render_custom(on_spawn,
+                                        duration=0.25, 
+                                        callback=lambda: self.game.onStateChanged.remove_listener(stop))
+
+        def stop(state: GameState):
+            self.game.onStateChanged.remove_listener(stop)
+            self.game.renderer.stop_render_custom(on_spawn)
+        self.game.onStateChanged.add_listener(stop)
+
     
     def get_enemies(self):
         return self._enemies

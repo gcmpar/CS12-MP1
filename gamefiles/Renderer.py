@@ -39,7 +39,7 @@ Renderer
                     - Forest Cell (2)
                     - Tank (1)
                     - any other GameObject (0)
-                    - Spawned (-1)
+                    - Tank Spawning (-1)
                     - Spawn, EnemySpawn (-2)
                     - POWERUP: Mirage effect (-3)
 
