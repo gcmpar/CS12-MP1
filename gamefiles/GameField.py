@@ -138,6 +138,8 @@ class GameField(PyxelGrid[Cell]):
                     mod.owner = player_tank
                     player_tank.add_modifier(mod)
 
+        self.renderer.init_stage()
+        self.sounds.init_stage()
         self.set_game_state(GameState.ONGOING)
         
         # PHYSICS TEST (can remove this ig)

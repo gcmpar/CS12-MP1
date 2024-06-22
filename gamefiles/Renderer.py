@@ -24,6 +24,9 @@ Singleton for rendering
 Renderer
     init()
         - called on GameField initialization
+    init_stage(obj: GameObject)
+        - called after stage generation
+    init_object(obj: GameObject)
     draw_cell()
         - store all objects into a dictionary
             - x
@@ -81,44 +84,53 @@ class Renderer:
         def initialize(obj: GameObject):
             if self.game.get_game_state() == GameState.GENERATING:
                 return
-            if isinstance(obj, Bullet) or isinstance(obj, Tank):
-                # bullet fire
-                if isinstance(obj, Bullet):
-                    def scope(o: GameObject):
-                        duration = 0.1
-                        f = 0
-                        def fire_render():
-                            if self.game.get_game_state() == GameState.GENERATING:
-                                return
-                            nonlocal f
-                            f += 1
-                            index = 0 if f <= self.game.FPS * duration/2 else 1
-
-                            cell = o.get_cell()
-                            x, y = cell.x, cell.y
-                            self.render_z(x=self.game.x(x), y=self.game.y(y), index=assetindex.sprites["Explode"][index], z_index=3)
-                        self.render_custom(fire_render, duration=duration)
-                    scope(obj)
-
-                # on destroy
-                def scope2(o: GameObject):
-                    def render():
-                        if self.game.get_game_state() == GameState.GENERATING:
-                            return
-                        
-                        cell = o.get_cell()
-                        x, y = cell.x, cell.y
-                        self.render_z(x=self.game.x(x), y=self.game.y(y), index=assetindex.sprites["Explode"][0], z_index=5)
-                    
-                    def on_explode():
-                        if self.game.get_game_state() == GameState.GENERATING:
-                            return
-                        self.render_custom(render, duration=0.35)
-
-                    o.onDestroy.add_listener(on_explode)
-                scope2(obj)
+            self.init_object(obj)
                 
         self.game.onObjectAdded.add_listener(initialize)
+
+    def init_stage(self):
+        for r in range(self.game.r):
+            for c in range(self.game.c):
+                for obj in self.game[r, c].get_objects():
+                    self.init_object(obj)
+
+    def init_object(self, obj: GameObject):
+        if isinstance(obj, Bullet) or isinstance(obj, Tank):
+            # bullet fire
+            if isinstance(obj, Bullet):
+                def scope(o: GameObject):
+                    duration = 0.1
+                    f = 0
+                    def fire_render():
+                        if self.game.get_game_state() == GameState.GENERATING:
+                            return
+                        nonlocal f
+                        f += 1
+                        index = 0 if f <= self.game.FPS * duration/2 else 1
+
+                        cell = o.get_cell()
+                        x, y = cell.x, cell.y
+                        self.render_z(x=self.game.x(x), y=self.game.y(y), index=assetindex.sprites["Explode"][index], z_index=3)
+                    self.render_custom(fire_render, duration=duration)
+                scope(obj)
+
+            # on destroy
+            def scope2(o: GameObject):
+                def render():
+                    if self.game.get_game_state() == GameState.GENERATING:
+                        return
+                    
+                    cell = o.get_cell()
+                    x, y = cell.x, cell.y
+                    self.render_z(x=self.game.x(x), y=self.game.y(y), index=assetindex.sprites["Explode"][0], z_index=5)
+                
+                def on_explode():
+                    if self.game.get_game_state() == GameState.GENERATING:
+                        return
+                    self.render_custom(render, duration=0.35)
+
+                o.onDestroy.add_listener(on_explode)
+            scope2(obj)
 
 
     def draw_cell(self, frame_count: int, i: int, j: int, x: int, y: int):
