@@ -161,7 +161,7 @@ def _(game: GameField, tank: Tank):
         if not stop_conditions(obj):
             return
         stop_entity(obj)
-    game.onUpdate.add_listener(update)
+    game.onPreObjectUpdate.add_listener(update)
     game.onObjectAdded.add_listener(on_object_added)
 
     # self-modifier buff and tag for PlayerController use (one-bullet-only rule bypass)
@@ -188,7 +188,7 @@ def _(game: GameField, tank: Tank):
     def stop():
         game.onStateChanged.remove_listener(stop_listener)
 
-        game.onUpdate.remove_listener(update)
+        game.onPreObjectUpdate.remove_listener(update)
         game.onObjectAdded.remove_listener(on_object_added)
         game.renderer.stop_render_custom(text)
 

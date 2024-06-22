@@ -30,6 +30,7 @@ GameObject
 
     _cell: Cell
     _destroyed: bool
+    _lastFrameCount: int
         
     get_cell() -> Cell
     move_to(x: int, y: int):
@@ -66,6 +67,8 @@ GameObject
 
     update(frame_count: int)
         - called every game loop
+        - called AFTER all modifiers are updated
+        - NOTE: the object's whole update is REPEATED if modifier list is changed while updating
 
     i love decoupling
     can_collide(other: GameObject) -> bool = True
@@ -112,6 +115,7 @@ class GameObject():
         self._cell = game[y, x]
         self._cell.add_object(self)
         self._destroyed = False
+        self._lastFrameCount = 0
         self.game.onObjectAdded.fire(self)
 
     def __hash__(self):
@@ -163,6 +167,7 @@ class GameObject():
         self.modifiers.sort(key=lambda e: e.priority)
         mod.init(mod)
         self.onModifierAdded.fire(mod)
+        self.main_update(self._lastFrameCount)
 
     def remove_modifier(self, mod: Modifier):
         if mod not in self.modifiers:
@@ -171,6 +176,7 @@ class GameObject():
         self.modifiers.sort(key=lambda e: e.priority)
         mod.destroy(mod)
         self.onModifierRemoved.fire(mod)
+        self.main_update(self._lastFrameCount)
     
     
     # ---------------------------------
@@ -179,8 +185,12 @@ class GameObject():
     def main_update(self, frame_count: int):
         # if self.is_destroyed():
         #     return
+        self._lastFrameCount = frame_count
+        copy = self.modifiers.copy()
         for mod in self.modifiers:
             mod.update(mod, frame_count)
+            if self.modifiers != copy:
+                return
         self.update(frame_count)
 
     def main_can_collide(self, other: GameObject) -> bool:

@@ -37,6 +37,7 @@ Modifier
 
     update(frame_count: int)
         - called everytime object is updated
+        - NOTE: the object's whole update is REPEATED if modifier list is changed while updating
 
     destroy()
         - called whenever removed from object

@@ -37,7 +37,9 @@ GameField
     onObjectAdded: Signal[[GameObject], None]
         - fired for any GameObject creation
     onStateChanged: Signal[[GameState], None]
-    onUpdate: Signal[[int], None]
+    onPreObjectUpdate: Signal[[int], None]
+    onPostObjectUpdate: Signal[[int], None]
+    onPostPhysicsUpdate: Signal[[int], None]
     
     start_stage(stage: int, lives: int)
         - cleans the game field up
@@ -58,7 +60,6 @@ GameField
             - EnemyController updates
             - stage-specific updates
             - GameObject updates
-            - onUpdate signal
             - physics
             - signal destroy processing
 
@@ -101,7 +102,9 @@ class GameField(PyxelGrid[Cell]):
         self._currentGameState = GameState.READY
         self.onObjectAdded = Signal[[GameObject], None](self)
         self.onStateChanged = Signal[[GameState], None](self)
-        self.onUpdate = Signal[[int], None](self)
+        self.onPreObjectUpdate = Signal[[int], None](self)
+        self.onPostObjectUpdate = Signal[[int], None](self)
+        self.onPostPhysicsUpdate = Signal[[int], None](self)
 
         # init
         self.set_game_state(GameState.READY)
@@ -208,13 +211,17 @@ class GameField(PyxelGrid[Cell]):
         # 3 stage
         self.stage.update(pyxel.frame_count)
 
+        self.onPreObjectUpdate.fire(pyxel.frame_count)
+
         # 4 game objects
         [obj.main_update(pyxel.frame_count) for r in range(self.r) for c in range(self.c) for obj in self[c, r].get_objects()]
 
-        self.onUpdate.fire(pyxel.frame_count)
+        self.onPostObjectUpdate.fire(pyxel.frame_count)
 
         # 5 physics
         self.physics.update(pyxel.frame_count)
+
+        self.onPostPhysicsUpdate.fire(pyxel.frame_count)
 
         # 6 process signal destroy
         [f() for f in self._signalDestroyQueue]
