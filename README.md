@@ -10,6 +10,7 @@ To run the game, please run [main.py](main.py)
         - Game objects and Managers
         - Game loop
         - Stage file format
+        - README
 + **Neil Alcantara**
     - **GitHub Account:** AlphaUMi-git
     - **Contributions:**
@@ -81,7 +82,9 @@ A **newline** for each **ROW**<br>
 
 ## Game Info
 **Powerups:**
-***Powerups start spawning for each enemy kill when there are less than half of the maximum number of enemies from the start of the stage.***
+
+*Powerups start spawning for each enemy kill when there are less than half of the maximum number of enemies from the start of the stage.*
+
 + **ExtraLife**
     - Gives the player an extra life that carries over to the next stage
 + **Zoooom**
@@ -103,7 +106,135 @@ A **newline** for each **ROW**<br>
 
 ## Other Info
 <details>
-<summary>API Reference</summary>
+<summary>API Reference (SUMMARY)</summary>
+
+<br>
+
+*Please see in-code documentation for further details.*
+
+<br>
+
+**Singletons**
+
+`GameField` [GameField](gamefiles/GameField.py)
+- the World class
+- Container for the stage cells
+- Handles the main game update loop, as well as input for stage loading
+- Manages all other singletons
+
+`GOD` [GOD](gamefiles/GOD.py)
+- Handles debug mode and cheat codes
+
+`PhysicsManager` [PhysicsManager](gamefiles/PhysicsManager.py)
+- Handles object collision/touch physics triggering
+- Handles entity movement
+
+`Renderer` [Renderer](gamefiles/Renderer.py)
+- Handles all rendering for grid, text displays, and effects
+
+`SoundManager` [SoundManager](gamefiles/SoundManager.py)
+- Handles audio for bullet firing, bullet exploding, and tank destruction
+
+`StageFile` [StageFile](gamefiles/StageFile.py)
+- Handles stage file format and loading/generation
+- Handles player/enemy spawning
+- Interface for checking current GameState
+
+<br>
+
+**Factories**
+
+`TankFactory` [TankFactory](gamefiles/TankFactory.py)
+- Generates tanks with differing stats
+- Please see [Game Info](#game-info) section for more details.
+
+`Powerups` [PowerupFactory](gamefiles/PowerupFactory.py)
+- Generates powerups with differing effects
+- Please see [Game Info](#game-info) section for more details.
+
+<br>
+
+**Other Game Files**
+
+`Cell` [Cell](gamefiles/Cell.py)
+- Container for all game objects
+
+`Signal` [Signal](gamefiles/Signal.py)
+- Events implementation
+- Cleanup is handled asynchronously
+
+`Modifier` [Modifier](gamefiles/Modifier.py)
+- Manipulator of the whole game
+- Inteded for tank stat manipulation, as well as object collision/touch override
+- Can also include other external updates
+- Can be transferred between stages
+
+`PlayerController` [PlayerController](gamefiles/PlayerController.py)
+- Handles player input
+
+`EnemyController` [EnemyController](gamefiles/EnemyController.py)
+- Handles enemy AI
+
+<br>
+
+**Game Objects**
+
+`GameObject` [GameObject](objects/GameObject.py)
+- Base class for all game objects
+- Interface for physics collision/touch, and modifiers
+
+`Entity` [Entity](objects/Entity.py)
+- Base class for all objects with velocity (orientation + speed)
+
+`Bullet` [Bullet](objects/Bullet.py)
+- Constantly moving projectile
+- Can collide with other bullets
+
+`Tank` [Tank](objects/Tank.py)
+- Contains Stats and can fire Bullets
+- Controlled by PlayerController or EnemyController
+- Can be destroyed by a bullet
+
+
+`Item` [Item](objects/Item.py)
+- Base class for all objects that determines a cell's type
+- Only one Item can be in a cell at a time as a consequence
+
+`Brick` [Brick](objects/Brick.py)
+
+`Stone` [Stone](objects/Stone.py)
+
+`Water` [Water](objects/Water.py)
+
+`Forest` [Forest](objects/Forest.py)
+
+`Home` [Home](objects/Home.py)
+- Ends game immediately if one is destroyed
+
+`Mirror` [Mirror](objects/Mirror.py)
+- Reflects bullets
+- Can reflect northeast or southeast
+
+**Miscellaneous**
+
+`util` [util](misc/util.py)
+- Contains utilities for tank team, orientation, mirror reflect orientation, and GameState as well as other functions
+
+`Stat` [Stat](misc/Stat.py)
+- Container for base and current stat values
+
+**Resources**
+
+`assetindex` [assetindex](resources/assetindex.py)
+- Contains indices for sprite loading (u, v) map
+
+`resource` [resource](resources/resource.pyxres)
+- The pyxel resource file
+
+`stages Folder` [stages](resources/stages)
+- Container for all stage .txt files
+
+<br>
 
 </details>
 
