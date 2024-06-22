@@ -150,7 +150,7 @@ A **newline** for each **ROW**<br>
 - Generates tanks with differing stats
 - Please see [Game Info](#game-info) section for more details.
 
-`Powerups` [PowerupFactory](gamefiles/PowerupFactory.py)
+`PowerupFactory` [PowerupFactory](gamefiles/PowerupFactory.py)
 - Generates powerups with differing effects
 - Please see [Game Info](#game-info) section for more details.
 
