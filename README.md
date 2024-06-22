@@ -81,11 +81,11 @@ A **newline** for each **ROW**<br>
 
 ## Game Info
 **Powerups:**
-+ **Extra Life**
++ **ExtraLife**
     - Gives the player an extra life that carries over to the next stage
 + **Zoooom**
     - Gives the player extra speed that can carry over to the next stage
-+ **The World**
++ **TheWorld**
     - :)
 + **Mirage**
     - Float out of this Reality.
