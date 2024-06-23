@@ -165,7 +165,7 @@ class Stage():
                 elif id == "EnemySpawn":
                     self._enemySpawns.append((c,r))
                 else:
-                    raise ValueError("Invalid stage file!")
+                    raise ValueError(f"Invalid stage file! ID: \"{id}\", Row: {r+1}, Column: {c+1}")
                     
         if spawnpoint is None:
             raise ValueError("Please specify player spawn!")

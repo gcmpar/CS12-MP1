@@ -134,6 +134,9 @@ class GameField(PyxelGrid[Cell]):
         self.onStateChanged.fire(state)
     
     def start_stage(self, stage: str, lives: int, remaining_enemy_spawns: int, copy_modifiers: bool):
+        if stage not in STAGE_PARAMS.keys():
+            raise ValueError(f"Please specify stage settings for {stage}!")
+
         self.set_game_state(GameState.GENERATING)
 
         was_destroyed = self.stage.get_player().tank.is_destroyed()
