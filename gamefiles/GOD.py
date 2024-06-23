@@ -120,6 +120,6 @@ class God:
                 if not self._karmaDebounce:
                     self._karmaDebounce = True
                     
-                    self.game.start_stage("kaRMa", lives=1,remaining_enemy_spawns=8,copy_modifiers=False)
+                    self.game.start_stage("kaRMa")
             else:
                 self._karmaDebounce = False
