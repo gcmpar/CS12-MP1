@@ -23,10 +23,14 @@ Powerup
 
 class Powerup(Item):
     execute: Callable[[Tank], None]
-    def __init__(self, game: GameField, x: int, y: int, type: str, execute: Callable[[Tank], None]):
-        super().__init__(game, x, y)
+    def __init__(self, game: GameField, x: int, y: int,
+                 type: str, execute: Callable[[Tank], None],
+                 
+                 pre_added: Callable[[GameObject], bool] | None = None,
+                 ):
         self.type = type
         self.execute = execute
+        super().__init__(game=game, x=x, y=y, pre_added=pre_added)
 
     def can_collide(self, other: GameObject) -> bool:
         return False

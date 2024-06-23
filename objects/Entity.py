@@ -1,5 +1,6 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
+from collections.abc import Callable
 
 if TYPE_CHECKING:
     from gamefiles.GameField import GameField
@@ -41,7 +42,11 @@ Entity:
 '''
 class Entity(GameObject):
     orientation: Orientation
-    def __init__(self, game: GameField, x: int, y: int, ori: Orientation, speed: float = 0):
+    def __init__(self, game: GameField, x: int, y: int,
+                 ori: Orientation, speed: float,
+                 
+                 pre_added: Callable[[GameObject], bool] | None = None,
+                 ):
         if type(self) == Entity:
             raise ValueError("Superclass cannot be instantiated.")
         self.orientation = ori
@@ -50,7 +55,7 @@ class Entity(GameObject):
         self.onSpeedChanged = Signal[[float], None](game)
         self.onOutOfBounds = Signal[[], None](game)
 
-        super().__init__(game, x, y)
+        super().__init__(game=game, x=x, y=y, pre_added=pre_added)
         def d():
             self.onOutOfBounds.destroy()
         self.onDestroy.add_listener(d)

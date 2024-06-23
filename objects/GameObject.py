@@ -1,5 +1,6 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
+from collections.abc import Callable
 
 if TYPE_CHECKING:
     from gamefiles.GameField import GameField
@@ -14,6 +15,13 @@ from gamefiles.Modifier import Modifier
 Base class for all game objects
 
 GameObject
+    ARGS:
+        - x: int
+        - y: int
+        - pre_added: Callable[[GameObject], bool]
+            - called right before object is actually added
+            - return False to discontinue creation
+
     game: GameField
     id: int
         - object id
@@ -54,8 +62,9 @@ GameObject
 
         
     ---------------------------------
-    INTERNALS
+    MAIN FUNCTIONS
         - basically middlemen before the actual overriden method is called
+        - intended to be used instead of the overriden method itself
 
     main_update(frame_count: int)
     main_can_collide(other: GameObject) -> bool
@@ -95,7 +104,7 @@ object_id = 0
 class GameObject():
     _modifiers: list[Modifier]
     _destroyed: bool
-    def __init__(self, game: GameField, x: int, y: int):
+    def __init__(self, game: GameField, x: int, y: int, pre_added: Callable[[GameObject], bool] | None = None):
         if type(self) == GameObject:
             raise ValueError("Superclass cannot be instantiated.")
         
@@ -118,6 +127,14 @@ class GameObject():
         self._cell.add_object(self)
         self._destroyed = False
         self._lastFrameCount = 0
+
+
+        if pre_added:
+            if (not pre_added(self)):
+                self.destroy()
+            if self.is_destroyed():
+                return
+            
         self.game.onObjectAdded.fire(self)
 
     def __hash__(self):

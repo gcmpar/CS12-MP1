@@ -1,5 +1,6 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
+from collections.abc import Callable
 
 if TYPE_CHECKING:
     from gamefiles.GameField import GameField
@@ -44,11 +45,14 @@ class Tank(Entity):
     isMoving: bool
     _bulletFired: bool
     _canFireBullet: bool
-    def __init__(self, game: GameField, x: int, y: int, team: Team, tank_type: str,
+    def __init__(self, game: GameField, x: int, y: int,
                  
+                 team: Team, tank_type: str,
                  health: float,
                  movement_speed: float,
-                 fire_rate: float
+                 fire_rate: float,
+
+                 pre_added: Callable[[GameObject], bool] | None = None
                 
                 ):
         self.team = team
@@ -68,7 +72,7 @@ class Tank(Entity):
         self._bulletFired = False
         self._canFireBullet = True
 
-        super().__init__(game, x, y, ori="north", speed=0)
+        super().__init__(game=game, x=x, y=y, pre_added=pre_added, ori="north", speed=0)
         def d():
             self.onBulletFired.destroy()
         self.onDestroy.add_listener(d)

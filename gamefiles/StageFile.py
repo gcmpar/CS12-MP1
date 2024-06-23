@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING
 from collections.abc import Callable
 if TYPE_CHECKING:
     from gamefiles.GameField import GameField
+    from objects.GameObject import GameObject
 
 from random import choice, randint
 
@@ -16,8 +17,6 @@ from objects.Water import Water
 from objects.Forest import Forest
 from objects.Home import Home
 from objects.Mirror import Mirror
-from objects.Bullet import Bullet
-from objects.Powerup import Powerup
 
 from gamefiles.Signal import Signal
 from misc.util import GameState
@@ -218,9 +217,16 @@ class Stage():
         self.get_player().tank.destroy()
 
         (x, y) = self._spawnpoint
+        def occupied_check(obj: GameObject) -> bool:
+            for other in self.game[y, x].get_objects():
+                    if obj.main_can_collide(other) and other.main_can_collide(obj):
+                        obj.destroy()
+                        return False
+            return True
         player = PlayerController(
             game=self.game,
-            tank=self.game.tankFactory.tank(x=x, y=y, team="player", tank_type="Normal")
+            tank=self.game.tankFactory.tank(x=x, y=y, team="player", tank_type="Normal",
+                                            pre_added=occupied_check),
         )
         self._player = player
         
@@ -262,10 +268,14 @@ class Stage():
             return
         x, y = enemy_spawns[spawn_index]
 
-        for obj in self.game[y, x].get_objects():
-            if not isinstance(obj, Bullet) and not isinstance(obj, Powerup):
-                return
-        enemy_tank = self.game.tankFactory.tank(x=x, y=y, team="enemy", tank_type=choice(self.game.tankFactory.get_tank_types())) 
+        def occupied_check(obj: GameObject) -> bool:
+            for other in self.game[y, x].get_objects():
+                    if obj.main_can_collide(other) and other.main_can_collide(obj):
+                        obj.destroy()
+                        return False
+            return True
+        enemy_tank = self.game.tankFactory.tank(x=x, y=y, team="enemy", tank_type=choice(self.game.tankFactory.get_tank_types()),
+                                                pre_added = occupied_check) 
         enemy = EnemyController(
             game=self.game,
             tank=enemy_tank

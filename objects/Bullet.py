@@ -1,5 +1,6 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
+from collections.abc import Callable
 
 if TYPE_CHECKING:
     from gamefiles.GameField import GameField
@@ -35,11 +36,16 @@ ref_map_inv: dict[tuple[int, int], Orientation] = {v: k for k, v in ref_map.item
 class Bullet(Entity):
     orientation: Orientation
     _lastMirrorHit: Mirror | None
-    def __init__(self, game: GameField, x: int, y: int, owner: Tank, ori: Orientation, speed: int=15):
+    def __init__(self, game: GameField, x: int, y: int,
+                 ori: Orientation, speed: float,
+                 owner: Tank,
+                 
+                 pre_added: Callable[[GameObject], bool] | None = None
+                 ):
         self._lastMirrorHit = None
         self.owner = owner
 
-        super().__init__(game=game, x=x, y=y, ori=ori, speed=speed)
+        super().__init__(game=game, x=x, y=y, pre_added=pre_added, ori=ori, speed=speed)
         def on_move(x: int, y: int):
             cell = self.get_cell()
             if self._lastMirrorHit is not None:
