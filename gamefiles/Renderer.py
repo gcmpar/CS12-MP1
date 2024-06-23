@@ -97,7 +97,7 @@ class Renderer:
         def reset(state: GameState):
             if state != GameState.GENERATING:
                 return
-            self._customRenders = []
+            self._customRenders = {}
         self.game.onStateChanged.add_listener(reset)
 
     def init_stage(self):
