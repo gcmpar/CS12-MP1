@@ -19,6 +19,10 @@ from gamefiles.Signal import Signal
 
 from objects.GameObject import GameObject
 
+from resources.stageparams import STAGE_PARAMS
+from resources.controls import CONTROLS
+
+
 
 '''
 the World class
@@ -32,7 +36,9 @@ GameField
     stage: Stage
     tankFactory: TankFactory
 
-    currentStage: int
+    maxStages: int
+        - must be manually changed
+
     currentGameState: GameState
     onObjectAdded: Signal[[GameObject], None]
         - fired for any GameObject creation
@@ -41,14 +47,18 @@ GameField
     onPostObjectUpdate: Signal[[int], None]
     onPostPhysicsUpdate: Signal[[int], None]
     
-    start_stage(stage: int, lives: int)
+    start_stage_beginning()
+        - starts stage "1.txt"
+    start_stage(stage: str, lives: int)
         - cleans the game field up
         - loads the stage with path "resources/stages/{stage}.txt"
         - sets GameState to ONGOING
     
     next_stage()
-        - calls start_stage for currentStage + 1, or stays in same stage if file does not exist
-        - also passes in lives value of previous stage via stage.get_lives()
+        - calls start_stage for str(int(Stage.name) + 1)
+        - stays in same stage if not a positive integer
+        - stays the same stage if reached end (Stage.name >= maxStages) (with lives equal to what's specified in resources/stageparams.py)
+        - passes in lives value of previous stage via stage.get_lives() if not reached end
     
     update()
         - the main game loop
@@ -98,7 +108,8 @@ class GameField(PyxelGrid[Cell]):
         self.GOD = God(self)
         pyxel.load("resources/resource.pyxres")
 
-        self.currentStage = 1
+
+        self.maxStages = 3
         self._currentGameState = GameState.READY
         self.onObjectAdded = Signal[[GameObject], None](self)
         self.onStateChanged = Signal[[GameState], None](self)
@@ -122,15 +133,14 @@ class GameField(PyxelGrid[Cell]):
         self._currentGameState = state
         self.onStateChanged.fire(state)
     
-    def start_stage(self, stage: int, lives: int, remaining_enemy_spawns: int, copy_modifiers: bool):
+    def start_stage(self, stage: str, lives: int, remaining_enemy_spawns: int, copy_modifiers: bool):
         self.set_game_state(GameState.GENERATING)
 
         was_destroyed = self.stage.get_player().tank.is_destroyed()
         modifiers = [mod.copy() for mod in self.stage.get_player().tank.get_modifiers() if mod.stageTransferrable]
         self.stage.cleanup()
 
-        self.currentStage = stage
-        self.stage.generate_stage(str(self.currentStage), lives=lives, remaining_enemy_spawns=remaining_enemy_spawns)
+        self.stage.generate_stage(stage, lives=lives, remaining_enemy_spawns=remaining_enemy_spawns)
 
         if copy_modifiers and not was_destroyed:
             player_tank = self.stage.get_player().tank
@@ -152,15 +162,26 @@ class GameField(PyxelGrid[Cell]):
         # t1.start_moving()
         # t2.start_moving()
 
+    def start_stage_beginning(self):
+        self.start_stage(stage="1",lives=STAGE_PARAMS["1"]["lives"],remaining_enemy_spawns=STAGE_PARAMS["1"]["remainingEnemySpawns"],copy_modifiers=False)
+
     def next_stage(self):
-        # Change this for more stages ig
-        stage_number = self.currentStage + 1 if self.currentStage < 3 else 3
-        remaining_enemy_spawns = 1 if stage_number == 1 \
-                                else 3 if stage_number == 2 \
-                                else 5
+        stage = self.stage.name
+        if not str.isdecimal(stage):
+            lives = STAGE_PARAMS[stage]["lives"]
+        else:
+            stage_number = min(int(stage) + 1, self.maxStages)
+            if str(stage_number) == stage:
+                lives = STAGE_PARAMS[stage]["lives"]
+            else:
+                # carry over lives
+                lives = self.stage.get_lives()
+                stage = str(stage_number)
+
+        remaining_enemy_spawns = STAGE_PARAMS[stage]["remainingEnemySpawns"]
         self.start_stage(
-            stage=stage_number,
-            lives=self.stage.get_lives(),
+            stage=stage,
+            lives=lives,
             remaining_enemy_spawns=remaining_enemy_spawns,
             copy_modifiers=True
             )
@@ -172,10 +193,10 @@ class GameField(PyxelGrid[Cell]):
         self.GOD.update()
 
         # 0 game state
-        if pyxel.btn(pyxel.KEY_1):
+        if pyxel.btn(CONTROLS["restart"]["btn"]):
             if not self._restartDebounce:
                 self._restartDebounce = True
-                self.start_stage(stage=1,lives=2,remaining_enemy_spawns=1,copy_modifiers=False)
+                self.start_stage_beginning()
                 return
         else:
             self._restartDebounce = False
@@ -185,7 +206,7 @@ class GameField(PyxelGrid[Cell]):
             return
         elif current_state == GameState.WIN or current_state == GameState.LOSE:
             if current_state == GameState.WIN:
-                if pyxel.btn(pyxel.KEY_2):
+                if pyxel.btn(CONTROLS["next"]["btn"]):
                     self.next_stage()
                     return
             return
@@ -200,7 +221,7 @@ class GameField(PyxelGrid[Cell]):
         # 1 input handling
         player = self.stage.get_player()
         if player.tank.is_destroyed():
-            if pyxel.btn(pyxel.KEY_R):
+            if pyxel.btn(CONTROLS["respawn"]["btn"]):
                 self.stage.spawn_player()
 
         if not player.tank.is_destroyed():

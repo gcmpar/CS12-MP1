@@ -235,11 +235,17 @@ A **newline** for each **ROW**<br>
 
 **Resource Files:**
 
+`resource` [resource](resources/resource.pyxres)
+- The pyxel resource file
+
 `assetindex` [assetindex](resources/assetindex.py)
 - Contains indices for sprite loading (u, v) map
 
-`resource` [resource](resources/resource.pyxres)
-- The pyxel resource file
+`controls` [controls](resources/controls.py)
+- Contains player and debug controls
+
+`stageparams` [stageparams](resources/stageparams.py)
+- Contains stage parameters and settings
 
 `stages Folder` [stages](resources/stages)
 - Container for all stage .txt files

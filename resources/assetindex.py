@@ -11,7 +11,7 @@ from objects.Home import Home
 from objects.Mirror import Mirror
 from objects.Powerup import Powerup
 
-sprites: dict[Type[GameObject] | str, Sequence[tuple[int, int]]] = {
+ASSET_INDEX: dict[Type[GameObject] | str, Sequence[tuple[int, int]]] = {
     Tank: [(0, y) for y in range(4)]
         + [(1, y) for y in range(4)] # enemy
         + [(0, y) for y in range(4, 8)] # Light

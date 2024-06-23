@@ -9,22 +9,29 @@ if TYPE_CHECKING:
     from gamefiles.Cell import Cell
 
 from misc.util import GameState
-
 from objects.Tank import Tank
+
+from resources.controls import DEBUG_CONTROLS
 
 '''
 Singleton for Debug mode and cheat codes
+NOTE: See resources/controls.py for debug controls
+
 CHEAT CODES (Hold CTRL key):
-    L
+    life
         - extra life, respawns player and continues game even if win/lose
-    K
+    smite
         - smites all enemies present on field
-    Z
+    win
         - automatically win the game
-    P
+    safe
         - keep yourself safe
-    X
+    powerup
         - spawn a random powerup
+    
+        
+    ???
+        - kaRMa.
 
 God
     game: GameField
@@ -41,6 +48,8 @@ class God:
         self._lifeDebounce = False
         self._LTGDebounce = False
         self._powerupDebounce = False
+
+        self._karmaDebounce = False
     
     def init(self):
         pass
@@ -49,8 +58,9 @@ class God:
         if self.game.get_game_state() == GameState.READY or self.game.get_game_state() == GameState.GENERATING:
             return
         
-        if pyxel.btn(pyxel.KEY_CTRL):
-            if pyxel.btn(pyxel.KEY_L):
+        if pyxel.btn(DEBUG_CONTROLS["debug"]["btn"]):
+
+            if pyxel.btn(DEBUG_CONTROLS["life"]["btn"]):
                 if not self._lifeDebounce:
                     self._lifeDebounce = True
 
@@ -70,7 +80,7 @@ class God:
             else:
                 self._lifeDebounce = False
             
-            if pyxel.btn(pyxel.KEY_K):
+            if pyxel.btn(DEBUG_CONTROLS["smite"]["btn"]):
                 for r in range(self.game.r):
                     for c in range(self.game.c):
                         cell = self.game[r, c]
@@ -80,16 +90,16 @@ class God:
                                 if obj.team == "enemy":
                                     obj.destroy()
 
-            if pyxel.btn(pyxel.KEY_Z):
+            if pyxel.btn(DEBUG_CONTROLS["win"]["btn"]):
                 self.game.set_game_state(GameState.WIN)
-            if pyxel.btn(pyxel.KEY_P):
+            if pyxel.btn(DEBUG_CONTROLS["safe"]["btn"]):
                 if not self._LTGDebounce:
                     self._LTGDebounce = True
                     self.game.stage.get_player().tank.destroy()
             else:
                 self._LTGDebounce = False
             
-            if pyxel.btn(pyxel.KEY_X):
+            if pyxel.btn(DEBUG_CONTROLS["powerup"]["btn"]):
                 if not self._powerupDebounce:
                     self._powerupDebounce = True
                     empty_cells: list[Cell] = []
@@ -105,3 +115,11 @@ class God:
                         self.game.powerupFactory.powerup(x=chosen_cell.x, y=chosen_cell.y, powerup_type=choice(self.game.powerupFactory.get_powerup_types()))
             else:
                 self._powerupDebounce = False
+            
+            if pyxel.btn(DEBUG_CONTROLS["???"]["btn"]):
+                if not self._karmaDebounce:
+                    self._karmaDebounce = True
+                    
+                    self.game.start_stage("kaRMa", lives=1,remaining_enemy_spawns=8,copy_modifiers=False)
+            else:
+                self._karmaDebounce = False

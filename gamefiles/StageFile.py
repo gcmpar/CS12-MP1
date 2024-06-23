@@ -22,7 +22,7 @@ from objects.Powerup import Powerup
 from gamefiles.Signal import Signal
 from misc.util import GameState
 
-import resources.assetindex as assetindex
+from resources.assetindex import ASSET_INDEX
 
 
 '''
@@ -68,6 +68,9 @@ STAGE FORMAT:
 Stage interface for GameField use
 
 Stage
+    name: str
+        - descriptor for rendering or other managers
+        - stage's name (without .txt extension)
     onLifeChanged: Signal[[int], None]
     onStageGenerated: Signal[[], None]
 
@@ -103,6 +106,7 @@ class Stage():
     def __init__(self, game: GameField):
         self.game = game
 
+        self.name = ""
         self.onLifeChanged = Signal[[int], None](game)
         self.onStageGenerated = Signal[[], None](game)
     
@@ -116,7 +120,7 @@ class Stage():
 
         self._enemySpawns = []
         self._homes = []
-        
+        #filename="kaRMa"
         stage = open(f"resources/stages/{filename}.txt", "r")
         lines = stage.readlines()
         for r in range(self.game.r):
@@ -166,6 +170,7 @@ class Stage():
         if spawnpoint is None:
             raise ValueError("Please specify player spawn!")
         
+        self.name = filename
         self._lives = lives
         self._remainingEnemySpawns = remaining_enemy_spawns
         self._enemies = []
@@ -229,7 +234,7 @@ class Stage():
         self._eventCleanups.append(remove_listener)
 
         def on_spawn():
-            self.game.renderer.render_z(x=self.game.x(x), y=self.game.y(y), index=assetindex.sprites["Spawning"][0], z_index=-1)
+            self.game.renderer.render_z(x=self.game.x(x), y=self.game.y(y), index=ASSET_INDEX["Spawning"][0], z_index=-1)
         self.game.renderer.render_custom(on_spawn,
                                         duration=0.25, 
                                         callback=lambda: self.game.onStateChanged.remove_listener(stop))
@@ -247,7 +252,7 @@ class Stage():
         return self._enemySpawns.copy()
 
     def get_total_enemy_count(self) -> int:
-        return len(self.get_enemies()) + (self._remainingEnemySpawns if len(self.get_enemy_spawns()) > 0 else 0)
+        return len(self.get_enemies()) + self._remainingEnemySpawns
 
     def spawn_enemy(self, spawn_index: int):
         if self._remainingEnemySpawns <= 0:
@@ -317,7 +322,7 @@ class Stage():
                 # spawn render
                 (x, y) = enemy_spawns[self._enemySpawnIndex]
                 def on_spawn():
-                    self.game.renderer.render_z(x=self.game.x(x), y=self.game.y(y), index=assetindex.sprites["Spawning"][0], z_index=-1)
+                    self.game.renderer.render_z(x=self.game.x(x), y=self.game.y(y), index=ASSET_INDEX["Spawning"][0], z_index=-1)
                 self.game.renderer.render_custom(on_spawn,
                                                  duration=self._enemySpawnDelayInterval, 
                                                  callback=lambda: self.game.onStateChanged.remove_listener(stop))

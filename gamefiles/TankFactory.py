@@ -16,7 +16,7 @@ TankFactory:
     - get_tank_types() -> list[str]
 '''
 
-tank_stats: dict[str, dict[str, float]]  = {
+TANK_TYPES: dict[str, dict[str, float]]  = {
     "Normal": {
         "health": 1,
         "movementSpeed": 5,
@@ -39,7 +39,7 @@ class TankFactory:
         self.game = game
     
     def tank(self, x: int, y: int, team: Team, tank_type: str) -> Tank:
-        stats = tank_stats[tank_type]
+        stats = TANK_TYPES[tank_type]
         return Tank(game=self.game, x=x, y=y, team=team,tank_type=tank_type,
                     
                     health=stats["health"],
@@ -49,4 +49,4 @@ class TankFactory:
                     )
 
     def get_tank_types(self) -> list[str]:
-        return list(tank_stats)
+        return list(TANK_TYPES)

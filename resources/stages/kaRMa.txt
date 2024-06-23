@@ -1,0 +1,15 @@
+MirrorNE|1|2|3|4|5|6|7|8|9|10|11|12|13|MirrorSE
+1|2|MirrorNE|1|2|MirrorSE|1|EnemySpawn|1|2|3|MirrorNE|1|2|3
+ | | | | | | | | | | | | |MirrorSE| 
+1|MirrorSE|1|2|3|4|5|MirrorNE|1|2|MirrorNE|1|2|3|4
+1|2|3|MirrorSE|1|2|MirrorNE|1|2|3|4|5|MirrorNE|1|2
+ | | | | | | | | | | | | | | 
+1|MirrorSE|1|2|3|4|MirrorNE|CrackedBrick|MirrorSE|1|2|3|4|5|6
+1|EnemySpawn|1|MirrorSE|1|2|CrackedBrick|Home|CrackedBrick|1|2|3|MirrorNE|EnemySpawn|1
+1|2|3|4|5|6|MirrorSE|CrackedBrick|MirrorNE|1|2|3|4|5|6
+1|2|3|MirrorSE|1|2|3|4|5|6|7|MirrorSE|1|2|3
+ | | | | | | | | | | | | | | 
+1|MirrorNE|1|2|3|MirrorNE|1|MirrorSE|1|2|MirrorSE|1|2|MirrorNE|1
+1|2|3|4|5|6|7|8|MirrorSE|1|2|3|4|5|6
+1|2|MirrorSE|1|2|3|4|Spawn|1|2|3|MirrorNE|1|2|3
+MirrorSE| | | | | | | | | | | | | |MirrorNE

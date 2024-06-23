@@ -17,7 +17,9 @@ from objects.Mirror import Mirror
 
 from misc.util import Orientation, GameState
 
-import resources.assetindex as assetindex
+from resources.assetindex import ASSET_INDEX
+from resources.stageparams import STAGE_PARAMS
+from resources.controls import CONTROLS
 
 '''
 Singleton for rendering
@@ -79,6 +81,9 @@ class Renderer:
         self._zOrder = list[dict[str, Any]]()
         self._customRenders = dict[Callable[[], None], dict[str, Any]]()
         self._zOrderQueue = list[dict[str, Any]]()
+        self._centerTexts = list[dict[str, Any]]()
+
+        self._karmaDebounce = 0
     
     def init(self):
         def initialize(obj: GameObject):
@@ -110,7 +115,7 @@ class Renderer:
 
                         cell = o.get_cell()
                         x, y = cell.x, cell.y
-                        self.render_z(x=self.game.x(x), y=self.game.y(y), index=assetindex.sprites["Explode"][index], z_index=3)
+                        self.render_z(x=self.game.x(x), y=self.game.y(y), index=ASSET_INDEX["Explode"][index], z_index=3)
                     self.render_custom(fire_render, duration=duration)
                 scope(obj)
 
@@ -122,7 +127,7 @@ class Renderer:
                     
                     cell = o.get_cell()
                     x, y = cell.x, cell.y
-                    self.render_z(x=self.game.x(x), y=self.game.y(y), index=assetindex.sprites["Explode"][0], z_index=5)
+                    self.render_z(x=self.game.x(x), y=self.game.y(y), index=ASSET_INDEX["Explode"][0], z_index=5)
                 
                 def on_explode():
                     if self.game.get_game_state() == GameState.GENERATING:
@@ -141,14 +146,14 @@ class Renderer:
             self._zOrder.append({
                 "x": x,
                 "y": y,
-                "index": assetindex.sprites["EnemySpawn"][0],
+                "index": ASSET_INDEX["EnemySpawn"][0],
                 "zIndex": -2,
             })
         if (j, i) == self.game.stage.get_spawn():
             self._zOrder.append({
                 "x": x,
                 "y": y,
-                "index": assetindex.sprites["Spawn"][0],
+                "index": ASSET_INDEX["Spawn"][0],
                 "zIndex": -2,
             })
 
@@ -156,7 +161,7 @@ class Renderer:
         for obj in cell.get_objects():
 
             obj_class = type(obj)
-            index = assetindex.sprites[obj_class]
+            index = ASSET_INDEX[obj_class]
             z_index = 0
             
 
@@ -178,7 +183,7 @@ class Renderer:
                             self._zOrder.append({
                                 "x": x,
                                 "y": y,
-                                "index": assetindex.sprites["Mirage"][0],
+                                "index": ASSET_INDEX["Mirage"][0],
                                 "zIndex": -3,
                             })
                             has_mirage = True
@@ -209,87 +214,123 @@ class Renderer:
             
     
     def pre_draw_grid(self):
-        pyxel.rect(0, 0, self.game.c*self.game.dim, self.game.r*self.game.dim, 0)
+        pyxel.rect(0, 0, pyxel.width, pyxel.height, 0)
         self._zOrder = list[dict[str, Any]]()
+
+        if self.game.stage.name == "kaRMa":
+            pyxel.rect(0, 0, pyxel.width, pyxel.height, 5)
+            if self._karmaDebounce < self.game.FPS:
+                self._karmaDebounce += 1
+                if self._karmaDebounce < self.game.FPS * 0.075:
+                    pyxel.rect(0, 0, pyxel.width, pyxel.height, 12)
+                elif self._karmaDebounce < self.game.FPS * 0.075 * 2:
+                    pyxel.rect(0, 0, pyxel.width, pyxel.height, 4)
+                elif self._karmaDebounce < self.game.FPS * 0.1 * 3:
+                    pyxel.rect(0, 0, pyxel.width, pyxel.height, 0)
+        else:
+            self._karmaDebounce = 0
+
     
     def post_draw_grid(self):
         current_state = self.game.get_game_state()
         if current_state == GameState.READY:
-            self.display_center_text("Press 1 to Start", 11)
             self.display_center_text("Battle Tanks Bootleg TM", 2, 0, -pyxel.FONT_HEIGHT*2)
-            return
-        
-
-        # Old 8x8 sprite rendering
-        # (u_ind, v_ind) = index
-        # pyxel.bltm(
-        #     x=x,
-        #     y=y,
-        #     w=8,
-        #     h=8,
-        #     tm=0,
-        #     u=u_ind * self.game.dim,
-        #     v=v_ind * self.game.dim,
-        #     colkey=0
-        # )
-
-        # New 16x16 sprite rendering
-        for data in self._zOrderQueue:
-            self._zOrder.append(data)
-        self._zOrderQueue = []
-        self._zOrder.sort(key=lambda e: e["zIndex"])
-        for data in self._zOrder:
-            (u_ind, v_ind) = data["index"]
-            pyxel.bltm(
-                x=data["x"],
-                y=data["y"],
-                w=16,
-                h=16,
-                tm=0,
-                u=u_ind * self.game.dim,
-                v=v_ind * self.game.dim,
-                colkey=0
-            )
-        
-        # custom renders
-        for f in list(self._customRenders):
-            data = self._customRenders[f]
-            data["frameCount"] += 1
-            if data["frameCount"] > self.game.FPS * data["duration"]:
-                self.stop_render_custom(f)
-                continue
-            f()
-
-        lives_count = f"Lives: {self.game.stage.get_lives()}"
-        pyxel.text(1,1,lives_count,12)
-
-        enemy_count = f"Enemies Left: {self.game.stage.get_total_enemy_count()}"
-        pyxel.text(pyxel.width-(len(enemy_count)*pyxel.FONT_WIDTH)-1,1,enemy_count,8)
-
-        stage_number = f"Stage {str(self.game.currentStage)}"
-        pyxel.text(pyxel.width-(len(stage_number)*pyxel.FONT_WIDTH)-1,pyxel.height-pyxel.FONT_HEIGHT-1,stage_number,7)
-
-        if current_state == GameState.WIN or current_state == GameState.LOSE:
-            if current_state == GameState.WIN:
-                # Change this for more stages ig
-                if self.game.currentStage >= 3:
-                    self.display_center_text("GAME WON !!! :D", 10)
-                    self.display_center_text("Press 2 to Repeat", 11, 0, pyxel.FONT_HEIGHT * 2)
-                else:
-                    self.display_center_text("VICTORY", 12)
-                    self.display_center_text("Press 2 to Advance", 11, 0, pyxel.FONT_HEIGHT * 2)
-
-            elif current_state == GameState.LOSE:
-                self.display_center_text("HOME CELL WAS DESTROYED" if True in {h.is_destroyed() for h in self.game.stage.get_homes()} else "YOU DIED", 8)
-
-            self.display_center_text("Press 1 to Restart", 11, 0, pyxel.FONT_HEIGHT * 3)
-        
-        if pyxel.btn(pyxel.KEY_CTRL):
-            debug_text = "DEBUG"
-            pyxel.text(1,pyxel.height-pyxel.FONT_HEIGHT-1,debug_text,8)
+            self.display_center_text(f"Press {CONTROLS["restart"]["name"]} to Start", 11, 0, pyxel.FONT_HEIGHT)
+        else:
             
-    def display_center_text(self, s: str, col: int, x_offset: int = 0, y_offset: int = 0):
-        pyxel.text((pyxel.width - (len(s) * pyxel.FONT_WIDTH)) / 2 + x_offset, (pyxel.height / 2) + y_offset, s, col)
+
+            # Old 8x8 sprite rendering
+            # (u_ind, v_ind) = index
+            # pyxel.bltm(
+            #     x=x,
+            #     y=y,
+            #     w=8,
+            #     h=8,
+            #     tm=0,
+            #     u=u_ind * self.game.dim,
+            #     v=v_ind * self.game.dim,
+            #     colkey=0
+            # )
+
+            # New 16x16 sprite rendering
+            for data in self._zOrderQueue:
+                self._zOrder.append(data)
+            self._zOrderQueue = []
+            self._zOrder.sort(key=lambda e: e["zIndex"])
+            for data in self._zOrder:
+                (u_ind, v_ind) = data["index"]
+                pyxel.bltm(
+                    x=data["x"],
+                    y=data["y"],
+                    w=16,
+                    h=16,
+                    tm=0,
+                    u=u_ind * self.game.dim,
+                    v=v_ind * self.game.dim,
+                    colkey=0
+                )
+            
+            # custom renders
+            for f in list(self._customRenders):
+                data = self._customRenders[f]
+                data["frameCount"] += 1
+                if data["frameCount"] > self.game.FPS * data["duration"]:
+                    self.stop_render_custom(f)
+                    continue
+                f()
+
+            lives_count = f"Lives: {self.game.stage.get_lives()}"
+            pyxel.text(1,1,lives_count,12)
+
+            enemy_count = f"Enemies Left: {self.game.stage.get_total_enemy_count()}"
+            pyxel.text(pyxel.width-(len(enemy_count)*pyxel.FONT_WIDTH)-1,1,enemy_count,8)
+
+            current_stage = self.game.stage.name
+            stage_display = f"STAGE {str(current_stage)}"
+            pyxel.text(pyxel.width-(len(stage_display)*pyxel.FONT_WIDTH)-1,pyxel.height-pyxel.FONT_HEIGHT-1,stage_display,7)
+
+            if current_state == GameState.WIN or current_state == GameState.LOSE:
+                params = STAGE_PARAMS[current_stage]
+                if current_state == GameState.WIN:
+                    self.display_center_text(params["winText"], params["winTextColor"], 0, -pyxel.FONT_HEIGHT*2)
+                    self.display_center_text(f"Press {CONTROLS["next"]["name"]} to {params["nextText"]}", params["nextTextColor"], 0, pyxel.FONT_HEIGHT)
+
+                else:
+                    if "loseText" in params.keys():
+                        lose_text = params["loseText"]
+                    else:
+                        lose_text = "HOME CELL WAS DESTROYED" if True in {h.is_destroyed() for h in self.game.stage.get_homes()} else "YOU DIED"
+                    self.display_center_text(lose_text, params["loseTextColor"])
+
+                self.display_center_text(f"Press {CONTROLS["restart"]["name"]} to Restart", 11, 0, pyxel.FONT_HEIGHT * 2.5)
+            
+            if pyxel.btn(pyxel.KEY_CTRL):
+                debug_text = "DEBUG"
+                pyxel.text(1,pyxel.height-pyxel.FONT_HEIGHT-1,debug_text,8)
+        
+        if len(self._centerTexts) > 0:
+            # draw bg first
+            padding = 2
+            for data in self._centerTexts:
+                pyxel.rect(data["x"]-padding, data["y"]-padding, data["textWidth"]+padding*2, pyxel.FONT_HEIGHT+padding*2, 0)
+            for data in self._centerTexts:
+                pyxel.text(data["x"], data["y"], data["s"], data["col"])
+
+        self._centerTexts = []
+            
+    def display_center_text(self, s: str, col: int, x_offset: float = 0, y_offset: float = 0):
+
+        text_width = (len(s) * pyxel.FONT_WIDTH)
+        text_x = (pyxel.width - text_width) / 2 + x_offset
+        text_y = (pyxel.height / 2) + y_offset
+
+        self._centerTexts.append({
+            "textWidth": text_width,
+            "x": text_x,
+            "y": text_y,
+            "s": s,
+            "col": col,
+        })
     
     def render_custom(self, f: Callable[[], None], duration: float, callback: Callable[[], None] | None = None):
         if f in self._customRenders.keys():

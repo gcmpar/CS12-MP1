@@ -28,10 +28,10 @@ PowerupFactory:
 '''
 
 
-powerups: dict[str, Callable[[GameField, Tank], None]] = {}
+POWERUPS: dict[str, Callable[[GameField, Tank], None]] = {}
 def create(powerup_type: str):
     def i(f: Callable[[GameField, Tank], None]):
-        powerups[powerup_type] = f
+        POWERUPS[powerup_type] = f
         return f
     return i
 
@@ -243,7 +243,7 @@ class PowerupFactory:
     
     def powerup(self, x: int, y: int, powerup_type: str) -> Powerup:
         def execute(tank: Tank):
-            powerups[powerup_type](self.game, tank)
+            POWERUPS[powerup_type](self.game, tank)
         return Powerup(
             game=self.game,
             x=x,
@@ -253,4 +253,4 @@ class PowerupFactory:
         )
         
     def get_powerup_types(self) -> list[str]:
-        return list(powerups)
+        return list(POWERUPS)

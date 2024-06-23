@@ -10,14 +10,7 @@ if TYPE_CHECKING:
 from objects.Tank import Tank
 from misc.util import Orientation
 
-
-controls = {
-    "east": pyxel.KEY_D,
-    "north": pyxel.KEY_W,
-    "west": pyxel.KEY_A,
-    "south": pyxel.KEY_S,
-    "fire": pyxel.KEY_SPACE,
-}
+from resources.controls import CONTROLS
 
 '''
 input checker for player
@@ -41,7 +34,7 @@ class PlayerController():
         self.tank = tank
 
         self._movementHeld: dict[str, int] = {}
-        for c in controls.keys():
+        for c in CONTROLS.keys():
             self._movementHeld[c] = 0
         self._movementLastOri = "north"
 
@@ -55,8 +48,8 @@ class PlayerController():
         self.tank.onBulletFired.add_listener(record_bullet)
     
     def update(self, frame_count: int):
-        for c, btn in controls.items():
-            if pyxel.btn(btn):
+        for c, data in CONTROLS.items():
+            if pyxel.btn(data["btn"]):
                 self._movementHeld[c] += 1
             else:
                 self._movementHeld[c] = 0
@@ -86,7 +79,7 @@ class PlayerController():
         self.tank.set_orientation(ori_priority)
         
         # fire
-        if pyxel.btn(controls["fire"]):
+        if pyxel.btn(CONTROLS["fire"]["btn"]):
             allow = self._bullet is None
             for mod in self.tank.get_modifiers():
                 if mod.type == "TimeStopBuff":
