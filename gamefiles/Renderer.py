@@ -217,7 +217,7 @@ class Renderer:
         pyxel.rect(0, 0, pyxel.width, pyxel.height, 0)
         self._zOrder = list[dict[str, Any]]()
 
-        if self.game.stage.name == "kaRMa":
+        if self.game.stage.name == "_kaRMa":
             pyxel.rect(0, 0, pyxel.width, pyxel.height, 5)
             if self._karmaDebounce < self.game.FPS:
                 self._karmaDebounce += 1

@@ -38,7 +38,7 @@ STAGE_PARAMS: dict[str, dict[str, Any]] = {
 
         "nextText": "Repeat",
     },
-    "kaRMa": {
+    "_kaRMa": {
         "lives": 1,
         "remainingEnemySpawns": 15,
 

@@ -114,11 +114,12 @@ def _(game: GameField):
 
 
 
-    
 
+# ,..reviR derorriM
+# .dlrow derorrim
 @create(c="???")
 def _(game: GameField):
-    game.start_stage("kaRMa")
+    game.start_stage("_kaRMa")
 
 
 

@@ -119,7 +119,7 @@ class Stage():
 
         self._enemySpawns = []
         self._homes = []
-        #filename="kaRMa"
+        #filename="_kaRMa"
         stage = open(f"resources/stages/{filename}.txt", "r")
         lines = stage.readlines()
         for r in range(self.game.r):
