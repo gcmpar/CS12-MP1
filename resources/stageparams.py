@@ -2,7 +2,7 @@ from typing import Any
 '''
 REQUIRED:
 lives
-remainingEnemySpawns
+enemySpawns
 
 OPTIONAL:
 winText
@@ -18,29 +18,35 @@ loseTextColor
 STAGE_PARAMS: dict[str, dict[str, Any]] = {
     "1": {
         "lives": 2,
-        "remainingEnemySpawns": 1,
+        "enemySpawns": 1,
 
         "winText": "VICTORY",
     },
     "2": {
         "lives": 2,
-        "remainingEnemySpawns": 3,
+        "enemySpawns": 3,
 
         "winText": "VICTORY",
 
     },
     "3": {
         "lives": 2,
-        "remainingEnemySpawns": 5,
+        "enemySpawns": 5,
 
         "winText": "GAME WON!!! :D",
         "winTextColor": 10,
 
         "nextText": "Repeat",
     },
+
+
+
+
+
+
     "_kaRMa": {
         "lives": 1,
-        "remainingEnemySpawns": 13,
+        "enemySpawns": 13,
 
         "winText": "- The Limitless Garden. -",
         "winTextColor": 8,
@@ -49,14 +55,21 @@ STAGE_PARAMS: dict[str, dict[str, Any]] = {
 
         "loseText": "- The Limitless Garden. -",
     },
+
+
+
+    "_empty": {
+        "lives": 1,
+        "enemySpawns": 0,
+    },
     "_TEST": {
         "lives": 999,
-        "remainingEnemySpawns": 999,
+        "enemySpawns": 999,
     }
 }
 
 
-for name, d in STAGE_PARAMS.items():
+for d in STAGE_PARAMS.values():
     d.setdefault("winText", "STAGE FINISHED")
     d.setdefault("winTextColor", 12)
 

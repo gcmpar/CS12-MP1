@@ -148,7 +148,7 @@ class GameField(PyxelGrid[Cell]):
 
         self.stage.generate_stage(stage,
                                   lives=lives if lives is not None else STAGE_PARAMS[stage]["lives"],
-                                  remaining_enemy_spawns=remaining_enemy_spawns if remaining_enemy_spawns is not None else STAGE_PARAMS[stage]["remainingEnemySpawns"])
+                                  remaining_enemy_spawns=remaining_enemy_spawns if remaining_enemy_spawns is not None else STAGE_PARAMS[stage]["enemySpawns"])
 
         if copy_modifiers and not was_destroyed:
             player_tank = self.stage.get_player().tank

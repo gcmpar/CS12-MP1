@@ -1,13 +1,10 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 from collections.abc import Callable
 if TYPE_CHECKING:
     from gamefiles.GameField import GameField
     from objects.GameObject import GameObject
 
-from random import choice, randint
-
-from gamefiles.Cell import Cell
 from gamefiles.PlayerController import PlayerController
 from gamefiles.EnemyController import EnemyController
 
@@ -22,6 +19,7 @@ from gamefiles.Signal import Signal
 from misc.util import GameState
 
 from resources.assetindex import ASSET_INDEX
+from resources.stagefunctions import STAGE_FUNCTIONS
 
 
 '''
@@ -70,8 +68,11 @@ Stage
     name: str
         - descriptor for rendering or other managers
         - stage's name (without .txt extension)
-    onLifeChanged: Signal[[int], None]
     onStageGenerated: Signal[[], None]
+    onPlayerAdded: Signal[[PlayerController], None]
+    onLifeChanged: Signal[[int], None]
+    onEnemyAdded: Signal[[EnemyController], None]
+    onEnemyRemoved: Signal[[EnemyController], None]
 
     init()
 
@@ -86,10 +87,16 @@ Stage
     spawn_player()
         - fails if lives <= 0
 
-    get_enemies()
-    get_total_enemy_count()
+    get_enemies() -> list[EnemyController]
+    get_enemy_spawns() -> int
+    get_remaining_enemy_spawns() -> int
+    get_total_enemy_count() -> int
         - enemies on screen + remaining enemy spawns
-    spawn_enemy()
+    get_max_enemies() -> int
+        - max number of enemies (how many enemies from start of stage)
+    spawn_enemy(spawn_index: int)
+    spawn_enemy_delayed(spawn_index: int)
+        - delayed spawn with star effect
     
     update(frame_count: int)
         - called every game loop
@@ -99,15 +106,15 @@ Stage
 '''
 
 class Stage():
-    _enemySpawns: list[tuple[int, int]]
-    _homes: list[Home]
-    _enemies: list[EnemyController]
     def __init__(self, game: GameField):
         self.game = game
 
         self.name = ""
-        self.onLifeChanged = Signal[[int], None](game)
         self.onStageGenerated = Signal[[], None](game)
+        self.onPlayerAdded = Signal[[PlayerController], None](game)
+        self.onLifeChanged = Signal[[int], None](game)
+        self.onEnemyAdded = Signal[[EnemyController], None](game)
+        self.onEnemyRemoved = Signal[[EnemyController], None](game)
     
     def init(self):
         # placeholder
@@ -117,8 +124,8 @@ class Stage():
     def generate_stage(self, filename: str, lives: int, remaining_enemy_spawns: int):
         spawnpoint: tuple[int, int] | None = None
 
-        self._enemySpawns = []
-        self._homes = []
+        self._enemySpawns = list[tuple[int, int]]()
+        self._homes = list[Home]()
         #filename="_kaRMa"
         stage = open(f"resources/stages/{filename}.txt", "r")
         lines = stage.readlines()
@@ -172,24 +179,19 @@ class Stage():
         self.name = filename
         self._lives = lives
         self._remainingEnemySpawns = remaining_enemy_spawns
-        self._enemies = []
+        self._enemies = list[EnemyController]()
 
         self._spawnpoint = spawnpoint
         self._maxEnemies = self.get_total_enemy_count()
 
-        self._lastEnemySpawnFrame = -696969
-        self._enemySpawnInterval = 3.5
-
-        self._enemySpawnDelayFrame = 0
+        self._enemyDelayedSpawns = list[dict[str, Any]]()
         self._enemySpawnDelayInterval = 0.75
-        self._enemySpawnIndex = 0
-        self._enemySpawnTriggered = False
 
         self._eventCleanups = list[Callable[[], None]]()
 
         self.spawn_player()
-
         self.onStageGenerated.fire()
+        STAGE_FUNCTIONS[self.name]["init"](self.game, self)
 
     def get_lives(self):
         return self._lives
@@ -253,22 +255,33 @@ class Stage():
             self.game.renderer.stop_render_custom(on_spawn)
         self.game.onStateChanged.add_listener(stop)
 
+        self.onPlayerAdded.fire(player)
+
     
     def get_enemies(self):
         return self._enemies.copy()
     
     def get_enemy_spawns(self):
         return self._enemySpawns.copy()
+    
+    def get_remaining_enemy_spawns(self):
+        return self._remainingEnemySpawns
 
-    def get_total_enemy_count(self) -> int:
-        return len(self.get_enemies()) + self._remainingEnemySpawns
+    def get_total_enemy_count(self):
+        return len(self._enemies) + self.get_remaining_enemy_spawns()
 
-    def spawn_enemy(self, spawn_index: int):
+    def get_max_enemies(self):
+        return self._maxEnemies
+
+    def spawn_enemy(self, spawn_index: int, tank_type: str):
         if self._remainingEnemySpawns <= 0:
             return
+        
         enemy_spawns = self.get_enemy_spawns()
-        if len(enemy_spawns) == 0:
+        l = len(enemy_spawns)
+        if l == 0:
             return
+        
         x, y = enemy_spawns[spawn_index]
 
         def occupied_check(obj: GameObject) -> bool:
@@ -278,7 +291,7 @@ class Stage():
                     if obj.main_can_collide(other) and other.main_can_collide(obj):
                         return False
             return True
-        enemy_tank = self.game.tankFactory.tank(x=x, y=y, team="enemy", tank_type=choice(self.game.tankFactory.get_tank_types()),
+        enemy_tank = self.game.tankFactory.tank(x=x, y=y, team="enemy", tank_type=tank_type,
                                                 pre_added = occupied_check)
         if enemy_tank.is_destroyed():
             return
@@ -286,69 +299,50 @@ class Stage():
             game=self.game,
             tank=enemy_tank
         )
-        self._remainingEnemySpawns -= 1
 
         def remove_enemy():
             if enemy not in self._enemies:
                 return
             self._enemies.remove(enemy)
-
-            # powerup spawn
-            enemy_count = self.get_total_enemy_count()
-            if self._maxEnemies > 1 and enemy_count >= 1 and enemy_count <= self._maxEnemies / 2:
-
-                empty_cells: list[Cell] = []
-                for r in range(self.game.r):
-                    for c in range(self.game.c):
-                        cell = self.game[r, c]
-                        if len(cell.get_objects()) == 0:
-                            empty_cells.append(cell)
-
-                if len(empty_cells) > 0:
-                    
-                    chosen_cell = choice(empty_cells)
-                    self.game.powerupFactory.powerup(
-                        x=chosen_cell.x,
-                        y=chosen_cell.y,
-                        powerup_type=choice(self.game.powerupFactory.get_powerup_types()))
-                    
+            self.onEnemyRemoved.fire(enemy)
         enemy.tank.onDestroy.add_listener(remove_enemy)
-        self._enemies.append(enemy)
 
         def remove_listener():
             enemy.tank.onDestroy.remove_listener(remove_enemy)
         self._eventCleanups.append(remove_listener)
+        
+        self._enemies.append(enemy)
+        self._remainingEnemySpawns -= 1
+        self.onEnemyAdded.fire(enemy)
+    
+    def spawn_enemy_delayed(self, spawn_index: int, tank_type: str):
+        self._enemyDelayedSpawns.append({
+            "frames": 0,
+            "spawnIndex": spawn_index,
+            "tankType": tank_type,
+        })
+
 
     def update(self, frame_count: int):
-        # enemy spawn
-        if not(self._remainingEnemySpawns <= 0 or len(self._enemySpawns) == 0):
-            if self._enemySpawnTriggered:
-                if frame_count > (self._enemySpawnDelayFrame + (self.game.FPS * self._enemySpawnDelayInterval)):
-                    self._enemySpawnTriggered = False
-                    self._lastEnemySpawnFrame = frame_count
-
-                    self.spawn_enemy(self._enemySpawnIndex)
-
-            elif frame_count > (self._lastEnemySpawnFrame + (self.game.FPS * self._enemySpawnInterval)):
-                enemy_spawns = self.get_enemy_spawns()
-                self._enemySpawnDelayFrame = frame_count
-                self._enemySpawnTriggered = True
-                self._enemySpawnIndex = randint(0, len(enemy_spawns)-1)
-                
-                # spawn render
-                (x, y) = enemy_spawns[self._enemySpawnIndex]
-                def on_spawn():
+        STAGE_FUNCTIONS[self.name]["update"](self.game, self, frame_count)
+        
+        for data in self._enemyDelayedSpawns.copy():
+            data["frames"] += 1
+            spawn_index = data["spawnIndex"]
+            if data["frames"] > self.game.FPS * self._enemySpawnDelayInterval:
+                self._enemyDelayedSpawns.remove(data)
+                self.spawn_enemy(spawn_index=spawn_index, tank_type=data["tankType"])
+            else:
+                assert isinstance(data["spawnIndex"], int)
+                l = len(self._enemySpawns)
+                if l > 0 and spawn_index < l:
+                    x, y = self._enemySpawns[data["spawnIndex"]]
                     self.game.renderer.render_z(x=self.game.x(x), y=self.game.y(y), index=ASSET_INDEX["Spawning"][0], z_index=-1)
-                self.game.renderer.render_custom(on_spawn,
-                                                 duration=self._enemySpawnDelayInterval, 
-                                                 callback=lambda: self.game.onStateChanged.remove_listener(stop))
+                    
 
-                def stop(state: GameState):
-                    self.game.onStateChanged.remove_listener(stop)
-                    self.game.renderer.stop_render_custom(on_spawn)
-                self.game.onStateChanged.add_listener(stop)
     
     def cleanup(self):
+        STAGE_FUNCTIONS[self.name]["cleanup"](self.game, self)
         [f() for f in self._eventCleanups]
         [obj.destroy() for r in range(self.game.r) for c in range(self.game.c) for obj in self.game[r, c].get_objects()]
 

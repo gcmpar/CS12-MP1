@@ -129,7 +129,7 @@ class GameObject():
         self._lastFrameCount = 0
 
 
-        if pre_added:
+        if pre_added is not None:
             if (not pre_added(self)):
                 self.destroy()
             if self.is_destroyed():
