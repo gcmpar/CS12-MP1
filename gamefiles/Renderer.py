@@ -64,6 +64,7 @@ Renderer
     display_center_text(s: str, col: int, x_offset: int = 0, y_offset: int = 0)
     render_custom(f: Callable[[], None], duration: float)
         - call a per-frame custom renderer function for a certain duration
+        - cleared whenever stage is generated
     stop_render_custom(f: Callable[[], None])
         
     render_z(x: int, y: int, index: tuple[int, int], zIndex: int)
@@ -93,6 +94,12 @@ class Renderer:
                 
         self.game.onObjectAdded.add_listener(initialize)
 
+        def reset(state: GameState):
+            if state != GameState.GENERATING:
+                return
+            self._customRenders = []
+        self.game.onStateChanged.add_listener(reset)
+
     def init_stage(self):
         for r in range(self.game.r):
             for c in range(self.game.c):
@@ -107,8 +114,6 @@ class Renderer:
                     duration = 0.1
                     f = 0
                     def fire_render():
-                        if self.game.get_game_state() == GameState.GENERATING:
-                            return
                         nonlocal f
                         f += 1
                         index = 0 if f <= self.game.FPS * duration/2 else 1
@@ -122,9 +127,6 @@ class Renderer:
             # on destroy
             def scope2(o: GameObject):
                 def render():
-                    if self.game.get_game_state() == GameState.GENERATING:
-                        return
-                    
                     cell = o.get_cell()
                     x, y = cell.x, cell.y
                     self.render_z(x=self.game.x(x), y=self.game.y(y), index=ASSET_INDEX["Explode"][0], z_index=5)

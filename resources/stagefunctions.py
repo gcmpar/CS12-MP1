@@ -69,11 +69,9 @@ def _():
         
         # powerup spawn
         def spawn_powerup(_: EnemyController):
-            if remove_listener in event_cleanups:
-                event_cleanups.remove(remove_listener)
-
             enemy_count = stage.get_total_enemy_count()
-            if stage.get_max_enemies() > 1 and enemy_count >= 1 and enemy_count <= stage.get_max_enemies() / 2:
+            max_enemies = stage.get_max_enemies()
+            if max_enemies > 1 and enemy_count >= 1 and enemy_count <= max_enemies / 2:
 
                 empty_cells: list[Cell] = []
                 for r in range(game.r):
@@ -149,11 +147,9 @@ for d in STAGE_FUNCTIONS.values():
             
             # powerup spawn
             def spawn_powerup(_: EnemyController):
-                if remove_listener in event_cleanups:
-                    event_cleanups.remove(remove_listener)
-
                 enemy_count = stage.get_total_enemy_count()
-                if stage.get_max_enemies() > 1 and enemy_count >= 1 and enemy_count <= stage.get_max_enemies() / 2:
+                max_enemies = stage.get_max_enemies()
+                if max_enemies > 1 and enemy_count >= 1 and enemy_count <= max_enemies / 2:
 
                     empty_cells: list[Cell] = []
                     for r in range(game.r):
