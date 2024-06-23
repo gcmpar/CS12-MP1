@@ -51,7 +51,7 @@ class Cell():
         return self._type
 
     def get_objects(self) -> list[GameObject]:
-        return self._objects
+        return self._objects.copy()
     
     def add_object(self, obj: GameObject):
         if isinstance(obj, Item):

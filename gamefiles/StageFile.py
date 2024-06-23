@@ -194,7 +194,7 @@ class Stage():
         self._lives = lives
 
     def get_homes(self):
-        return self._homes
+        return self._homes.copy()
     
     def get_spawn(self):
         return self._spawnpoint
@@ -236,10 +236,10 @@ class Stage():
 
     
     def get_enemies(self):
-        return self._enemies
+        return self._enemies.copy()
     
     def get_enemy_spawns(self):
-        return self._enemySpawns
+        return self._enemySpawns.copy()
 
     def get_total_enemy_count(self) -> int:
         return len(self.get_enemies()) + (self._remainingEnemySpawns if len(self.get_enemy_spawns()) > 0 else 0)
@@ -247,9 +247,9 @@ class Stage():
     def spawn_enemy(self, spawn_index: int):
         if self._remainingEnemySpawns <= 0:
             return
-        if len(self._enemySpawns) == 0:
-            return
         enemy_spawns = self.get_enemy_spawns()
+        if len(enemy_spawns) == 0:
+            return
         x, y = enemy_spawns[spawn_index]
 
         for obj in self.game[y, x].get_objects():

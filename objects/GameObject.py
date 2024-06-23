@@ -22,7 +22,7 @@ GameObject
     onTouched: Signal[[GameObject], None]
     onDestroy: Signal[[], None]
 
-    modifiers: list[Modifier]
+    _modifiers: list[Modifier]
     onModifierAdded: Signal[[Modifier], None]
     onModifierRemoved: Signal[[Modifier], None]
 
@@ -45,6 +45,7 @@ GameObject
         - disconnects all listeners for onDestroy
     is_destroyed() -> bool
 
+    get_modifiers() -> list[Modifier]
     add_modifier(mod: Modifier)
         - sets modifier and fires onModifierAdded
     remove_modifier(mod: Modifier)
@@ -91,7 +92,7 @@ GameObject
 
 object_id = 0
 class GameObject():
-    modifiers: list[Modifier]
+    _modifiers: list[Modifier]
     _destroyed: bool
     def __init__(self, game: GameField, x: int, y: int):
         if type(self) == GameObject:
@@ -107,7 +108,7 @@ class GameObject():
         self.onTouched = Signal[[GameObject], None](game)
         self.onDestroy = Signal[[], None](game)
 
-        self.modifiers = []
+        self._modifiers = []
         self.onModifierAdded = Signal[[Modifier], None](game)
         self.onModifierRemoved = Signal[[Modifier], None](game)
 
@@ -149,7 +150,7 @@ class GameObject():
         self.onCollision.destroy()
         self.onTouched.destroy()
 
-        [self.remove_modifier(mod) for mod in self.modifiers]
+        [mod.destroy(mod) for mod in self._modifiers]
 
         self.onDestroy.fire()
         self.onDestroy.destroy()
@@ -159,21 +160,22 @@ class GameObject():
     def is_destroyed(self) -> bool:
         return self._destroyed
     
-
+    def get_modifiers(self) -> list[Modifier]:
+        return self._modifiers.copy()
     def add_modifier(self, mod: Modifier):
-        if mod in self.modifiers:
+        if mod in self._modifiers:
             return
-        self.modifiers.append(mod)
-        self.modifiers.sort(key=lambda e: e.priority)
+        self._modifiers.append(mod)
+        self._modifiers.sort(key=lambda e: e.priority)
         mod.init(mod)
         self.onModifierAdded.fire(mod)
         self.main_update(self._lastFrameCount)
 
     def remove_modifier(self, mod: Modifier):
-        if mod not in self.modifiers:
+        if mod not in self._modifiers:
             return
-        self.modifiers.remove(mod)
-        self.modifiers.sort(key=lambda e: e.priority)
+        self._modifiers.remove(mod)
+        self._modifiers.sort(key=lambda e: e.priority)
         mod.destroy(mod)
         self.onModifierRemoved.fire(mod)
         self.main_update(self._lastFrameCount)
@@ -186,24 +188,24 @@ class GameObject():
         # if self.is_destroyed():
         #     return
         self._lastFrameCount = frame_count
-        copy = self.modifiers.copy()
-        for mod in self.modifiers:
+        copy = self._modifiers.copy()
+        for mod in self._modifiers:
             mod.update(mod, frame_count)
-            if self.modifiers != copy:
+            if self._modifiers != copy:
                 return
         self.update(frame_count)
 
     def main_can_collide(self, other: GameObject) -> bool:
-        if len(self.modifiers) != 0:
-            mod = self.modifiers[-1]
+        if len(self._modifiers) != 0:
+            mod = self._modifiers[-1]
             b = mod.can_collide(mod, other)
             if b is not None:
                 return b
         return self.can_collide(other)
 
     def main_can_touch(self, other: GameObject) -> bool:
-        if len(self.modifiers) != 0:
-            mod = self.modifiers[-1]
+        if len(self._modifiers) != 0:
+            mod = self._modifiers[-1]
             b = mod.can_touch(mod, other)
             if b is not None:
                 return b

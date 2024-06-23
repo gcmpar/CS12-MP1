@@ -49,4 +49,4 @@ class TankFactory:
                     )
 
     def get_tank_types(self) -> list[str]:
-        return list(tank_stats.keys())
+        return list(tank_stats)

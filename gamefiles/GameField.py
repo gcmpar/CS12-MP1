@@ -126,7 +126,7 @@ class GameField(PyxelGrid[Cell]):
         self.set_game_state(GameState.GENERATING)
 
         was_destroyed = self.stage.get_player().tank.is_destroyed()
-        modifiers = [mod.copy() for mod in self.stage.get_player().tank.modifiers if mod.stageTransferrable]
+        modifiers = [mod.copy() for mod in self.stage.get_player().tank.get_modifiers() if mod.stageTransferrable]
         self.stage.cleanup()
 
         self.currentStage = stage

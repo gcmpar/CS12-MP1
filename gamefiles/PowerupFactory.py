@@ -125,7 +125,7 @@ def _(game: GameField, tank: Tank):
             if entity.team == "player":
                 return False
             
-        for mod in entity.modifiers:
+        for mod in entity.get_modifiers():
             if mod.type == "TimeStop":
                 return False
             
@@ -253,4 +253,4 @@ class PowerupFactory:
         )
         
     def get_powerup_types(self) -> list[str]:
-        return list(powerups.keys())
+        return list(powerups)

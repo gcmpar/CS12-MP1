@@ -173,7 +173,7 @@ class Renderer:
                     index = index[offset + get_args(Orientation).index(obj.orientation)]
                     z_index = 1
                     has_mirage: bool = False
-                    for mod in obj.modifiers:
+                    for mod in obj.get_modifiers():
                         if mod.type == "Mirage":
                             self._zOrder.append({
                                 "x": x,
