@@ -64,7 +64,7 @@ class God:
                     homes = stage.get_homes()
                     for home in homes:
                         if home.is_destroyed():
-                            homes.remove(home)
+                            stage.remove_home(home)
 
                     self.game.set_game_state(GameState.ONGOING)
             else:

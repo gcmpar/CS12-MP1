@@ -196,6 +196,11 @@ class Stage():
     def get_homes(self):
         return self._homes.copy()
     
+    def add_home(self, home: Home):
+        self._homes.append(home)
+    def remove_home(self, home: Home):
+        self._homes.remove(home)
+    
     def get_spawn(self):
         return self._spawnpoint
     
