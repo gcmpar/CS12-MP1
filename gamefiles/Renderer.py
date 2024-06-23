@@ -19,7 +19,7 @@ from misc.util import Orientation, GameState
 
 from resources.assetindex import ASSET_INDEX
 from resources.stageparams import STAGE_PARAMS
-from resources.controls import CONTROLS
+from resources.controls import CONTROLS, DEBUG_CONTROLS
 
 '''
 Singleton for rendering
@@ -304,7 +304,7 @@ class Renderer:
 
                 self.display_center_text(f"Press {CONTROLS["restart"]["name"]} to Restart", 11, 0, pyxel.FONT_HEIGHT * 2.5)
             
-            if pyxel.btn(pyxel.KEY_CTRL):
+            if pyxel.btn(DEBUG_CONTROLS["debug"]["btn"]):
                 debug_text = "DEBUG"
                 pyxel.text(1,pyxel.height-pyxel.FONT_HEIGHT-1,debug_text,8)
         
