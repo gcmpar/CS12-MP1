@@ -46,6 +46,7 @@ GameObject
     is_destroyed() -> bool
 
     get_modifiers() -> list[Modifier]
+    has_modifier(mod: Modifier) -> bool
     add_modifier(mod: Modifier)
         - sets modifier and fires onModifierAdded
     remove_modifier(mod: Modifier)
@@ -162,6 +163,8 @@ class GameObject():
     
     def get_modifiers(self) -> list[Modifier]:
         return self._modifiers.copy()
+    def has_modifier(self, mod: Modifier):
+        return mod in self._modifiers
     def add_modifier(self, mod: Modifier):
         if mod in self._modifiers:
             return
