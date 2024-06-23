@@ -18,7 +18,7 @@ loseTextColor
 STAGE_PARAMS: dict[str, dict[str, Any]] = {
     "1": {
         "lives": 2,
-        "remainingEnemySpawns": 5,
+        "remainingEnemySpawns": 1,
 
         "winText": "VICTORY",
     },
