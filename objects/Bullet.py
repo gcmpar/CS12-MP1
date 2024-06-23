@@ -15,7 +15,7 @@ from objects.Water import Water
 '''
 Bullet:
     orientation: Orientation
-    speed: int
+    speed: float
 
 
     owner: Tank
