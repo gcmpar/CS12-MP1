@@ -18,7 +18,7 @@ loseTextColor
 STAGE_PARAMS: dict[str, dict[str, Any]] = {
     "1": {
         "lives": 2,
-        "remainingEnemySpawns": 1,
+        "remainingEnemySpawns": 5,
 
         "winText": "VICTORY",
     },
@@ -40,7 +40,7 @@ STAGE_PARAMS: dict[str, dict[str, Any]] = {
     },
     "kaRMa": {
         "lives": 1,
-        "remainingEnemySpawns": 10,
+        "remainingEnemySpawns": 15,
 
         "winText": "- The Limitless Garden. -",
         "winTextColor": 8,
@@ -49,6 +49,10 @@ STAGE_PARAMS: dict[str, dict[str, Any]] = {
 
         "loseText": "- The Limitless Garden. -",
     },
+    "_TEST": {
+        "lives": 999,
+        "remainingEnemySpawns": 999,
+    }
 }
 
 

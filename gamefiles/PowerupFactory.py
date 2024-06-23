@@ -32,7 +32,6 @@ POWERUPS: dict[str, Callable[[GameField, Tank], None]] = {}
 def create(powerup_type: str):
     def i(f: Callable[[GameField, Tank], None]):
         POWERUPS[powerup_type] = f
-        return f
     return i
 
 

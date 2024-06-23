@@ -1,5 +1,6 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
+from collections.abc import Callable
 from random import choice
 
 import pyxel
@@ -41,16 +42,92 @@ God
 
 '''
 
+DEBUG_FUNCTIONS: dict[str, Callable[[GameField], None]] = {}
+def create(c: str):
+    def i(f: Callable[[GameField], None]):
+        debounce = False
+        def d_func(game: GameField):
+            nonlocal debounce
+            if pyxel.btn(DEBUG_CONTROLS[c]["btn"]):
+                if not debounce:
+                    debounce = True
+                    f(game)
+            else:
+                debounce = False
+        DEBUG_FUNCTIONS[c] = d_func
+    return i
+
+@create(c="life")
+def _(game: GameField):
+    stage = game.stage
+    current_lives = stage.get_lives()
+    
+    stage.set_lives(current_lives+1)
+    if stage.get_player().tank.is_destroyed():
+        stage.spawn_player()
+
+    homes = stage.get_homes()
+    for home in homes:
+        if home.is_destroyed():
+            stage.remove_home(home)
+
+    game.set_game_state(GameState.ONGOING)
+
+
+@create(c="smite")
+def _(game: GameField):
+    for r in range(game.r):
+        for c in range(game.c):
+            cell = game[r, c]
+            for obj in cell.get_objects():
+
+                if isinstance(obj, Tank):
+                    if obj.team == "enemy":
+                        obj.destroy()
+
+@create(c="win")
+def _(game: GameField):
+    game.set_game_state(GameState.WIN)
+
+def _(game: GameField):
+    game.stage.get_player().tank.destroy()
+
+@create(c="powerup")
+def _(game: GameField):
+    empty_cells: list[Cell] = []
+    for r in range(game.r):
+        for c in range(game.c):
+            cell = game[r, c]
+            if len(cell.get_objects()) == 0:
+                empty_cells.append(cell)
+
+    if len(empty_cells) > 0:
+        chosen_cell = choice(empty_cells)
+        game.powerupFactory.powerup(x=chosen_cell.x, y=chosen_cell.y, powerup_type=choice(game.powerupFactory.get_powerup_types()))
+
+
+@create(c="test")
+def _(game: GameField):
+    game.start_stage("_TEST")
+
+
+
+
+
+    
+
+@create(c="???")
+def _(game: GameField):
+    game.start_stage("kaRMa")
+
+
+
+
+
 class God:
     def __init__(self, game: GameField):
         self.game = game
 
-        self._lifeDebounce = False
-        self._LTGDebounce = False
-        self._powerupDebounce = False
-
-        self._karmaDebounce = False
-    
     def init(self):
         pass
 
@@ -58,68 +135,5 @@ class God:
         if self.game.get_game_state() == GameState.READY or self.game.get_game_state() == GameState.GENERATING:
             return
         
-        if pyxel.btn(DEBUG_CONTROLS["debug"]["btn"]):
-
-            if pyxel.btn(DEBUG_CONTROLS["life"]["btn"]):
-                if not self._lifeDebounce:
-                    self._lifeDebounce = True
-
-                    stage = self.game.stage
-                    current_lives = stage.get_lives()
-                    
-                    stage.set_lives(current_lives+1)
-                    if stage.get_player().tank.is_destroyed():
-                        stage.spawn_player()
-
-                    homes = stage.get_homes()
-                    for home in homes:
-                        if home.is_destroyed():
-                            stage.remove_home(home)
-
-                    self.game.set_game_state(GameState.ONGOING)
-            else:
-                self._lifeDebounce = False
-            
-            if pyxel.btn(DEBUG_CONTROLS["smite"]["btn"]):
-                for r in range(self.game.r):
-                    for c in range(self.game.c):
-                        cell = self.game[r, c]
-                        for obj in cell.get_objects():
-
-                            if isinstance(obj, Tank):
-                                if obj.team == "enemy":
-                                    obj.destroy()
-
-            if pyxel.btn(DEBUG_CONTROLS["win"]["btn"]):
-                self.game.set_game_state(GameState.WIN)
-            if pyxel.btn(DEBUG_CONTROLS["safe"]["btn"]):
-                if not self._LTGDebounce:
-                    self._LTGDebounce = True
-                    self.game.stage.get_player().tank.destroy()
-            else:
-                self._LTGDebounce = False
-            
-            if pyxel.btn(DEBUG_CONTROLS["powerup"]["btn"]):
-                if not self._powerupDebounce:
-                    self._powerupDebounce = True
-                    empty_cells: list[Cell] = []
-                    for r in range(self.game.r):
-                        for c in range(self.game.c):
-                            cell = self.game[r, c]
-                            if len(cell.get_objects()) == 0:
-                                empty_cells.append(cell)
-
-                    if len(empty_cells) > 0:
-                        
-                        chosen_cell = choice(empty_cells)
-                        self.game.powerupFactory.powerup(x=chosen_cell.x, y=chosen_cell.y, powerup_type=choice(self.game.powerupFactory.get_powerup_types()))
-            else:
-                self._powerupDebounce = False
-            
-            if pyxel.btn(DEBUG_CONTROLS["???"]["btn"]):
-                if not self._karmaDebounce:
-                    self._karmaDebounce = True
-                    
-                    self.game.start_stage("kaRMa")
-            else:
-                self._karmaDebounce = False
+        for f in DEBUG_FUNCTIONS.values():
+            f(self.game)

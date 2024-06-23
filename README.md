@@ -44,16 +44,16 @@
 
 ## GOD Commands (DEBUG MODE):
 ***NOTE: Hold CTRL for all keys below***
-+ **L**
++ **L** - L I F E
     - Extra life
     - Respawns player (if dead) and continues game even if win/lose
-+ **K**
++ **K** - S M I T E
     - Smites all enemies present on field
-+ **Z**
++ **Z** - W I N
     - Automatically win the game
-+ **P**
++ **P** - S A F E
     - Keep yourself safe
-+ **X**
++ **X** - P O W E R U P
     - Spawn a random powerup
 
 + **M**
