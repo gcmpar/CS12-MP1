@@ -55,6 +55,8 @@
     - Keep yourself safe
 + **X** - P O W E R U P
     - Spawn a random powerup
++ **T** - T E S T
+    - Warp to test stage
 
 + **M**
     - ???
