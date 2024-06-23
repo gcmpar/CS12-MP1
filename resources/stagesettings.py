@@ -15,7 +15,7 @@ loseText
 loseTextColor
 '''
 
-STAGE_PARAMS: dict[str, dict[str, Any]] = {
+STAGE_SETTINGS: dict[str, dict[str, Any]] = {
     "1": {
         "lives": 2,
         "enemySpawns": 1,
@@ -69,7 +69,7 @@ STAGE_PARAMS: dict[str, dict[str, Any]] = {
 }
 
 
-for d in STAGE_PARAMS.values():
+for d in STAGE_SETTINGS.values():
     d.setdefault("winText", "STAGE FINISHED")
     d.setdefault("winTextColor", 12)
 

@@ -252,8 +252,11 @@ A **newline** for each **ROW**<br>
 `controls` [controls](resources/controls.py)
 - Contains player and debug controls
 
-`stageparams` [stageparams](resources/stageparams.py)
+`stagesettings` [stagesettings](resources/stagesettings.py)
 - Contains stage parameters and settings
+
+`stagefunctions` [stagefunctions](resources/stagefunctions.py)
+- Contains custom stage function specifications (init, update, cleanup)
 
 `stages Folder` [stages](resources/stages)
 - Container for all stage .txt files

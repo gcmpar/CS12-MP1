@@ -19,7 +19,7 @@ from gamefiles.Signal import Signal
 
 from objects.GameObject import GameObject
 
-from resources.stageparams import STAGE_PARAMS
+from resources.stagesettings import STAGE_SETTINGS
 from resources.controls import CONTROLS
 
 
@@ -53,7 +53,7 @@ GameField
                 copy_modifiers: bool = False)
         - cleans the game field up
         - loads the stage with path "resources/stages/{stage}.txt"
-        - stage settings is based on STAGE_PARAMS by default, but can be overriden
+        - stage settings is based on STAGE_SETTINGS by default, but can be overriden
         - copy_modifiers is False by default, but can be overriden
         - sets GameState to ONGOING
     
@@ -137,7 +137,7 @@ class GameField(PyxelGrid[Cell]):
         self.onStateChanged.fire(state)
     
     def start_stage(self, stage: str, lives: int | None = None, remaining_enemy_spawns: int| None = None, copy_modifiers: bool = False):
-        if stage not in STAGE_PARAMS.keys():
+        if stage not in STAGE_SETTINGS.keys():
             raise ValueError(f"Please specify stage settings for {stage}!")
 
         self.set_game_state(GameState.GENERATING)
@@ -147,8 +147,8 @@ class GameField(PyxelGrid[Cell]):
         self.stage.cleanup()
 
         self.stage.generate_stage(stage,
-                                  lives=lives if lives is not None else STAGE_PARAMS[stage]["lives"],
-                                  remaining_enemy_spawns=remaining_enemy_spawns if remaining_enemy_spawns is not None else STAGE_PARAMS[stage]["enemySpawns"])
+                                  lives=lives if lives is not None else STAGE_SETTINGS[stage]["lives"],
+                                  remaining_enemy_spawns=remaining_enemy_spawns if remaining_enemy_spawns is not None else STAGE_SETTINGS[stage]["enemySpawns"])
 
         if copy_modifiers and not was_destroyed:
             player_tank = self.stage.get_player().tank
@@ -173,12 +173,12 @@ class GameField(PyxelGrid[Cell]):
     def next_stage(self):
         stage = self.stage.name
         if not str.isdecimal(stage):
-            lives = STAGE_PARAMS[stage]["lives"]
+            lives = STAGE_SETTINGS[stage]["lives"]
             copy_modifiers = False
         else:
             stage_number = min(int(stage) + 1, self.maxStages)
             if str(stage_number) == stage:
-                lives = STAGE_PARAMS[stage]["lives"]
+                lives = STAGE_SETTINGS[stage]["lives"]
                 copy_modifiers = False
             else:
                 # carry over

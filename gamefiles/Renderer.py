@@ -18,7 +18,7 @@ from objects.Mirror import Mirror
 from misc.util import Orientation, GameState
 
 from resources.assetindex import ASSET_INDEX
-from resources.stageparams import STAGE_PARAMS
+from resources.stagesettings import STAGE_SETTINGS
 from resources.controls import CONTROLS, DEBUG_CONTROLS
 
 '''
@@ -292,7 +292,7 @@ class Renderer:
             pyxel.text(pyxel.width-(len(stage_display)*pyxel.FONT_WIDTH)-1,pyxel.height-pyxel.FONT_HEIGHT-1,stage_display,7)
 
             if current_state == GameState.WIN or current_state == GameState.LOSE:
-                params = STAGE_PARAMS[current_stage]
+                params = STAGE_SETTINGS[current_stage]
                 if current_state == GameState.WIN:
                     self.display_center_text(params["winText"], params["winTextColor"], 0, -pyxel.FONT_HEIGHT*2)
                     self.display_center_text(f"Press {CONTROLS["next"]["name"]} to {params["nextText"]}", params["nextTextColor"], 0, pyxel.FONT_HEIGHT)
