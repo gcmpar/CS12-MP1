@@ -324,6 +324,6 @@ class Stage():
     
     def cleanup(self):
         [f() for f in self._eventCleanups]
-        [obj.destroy() for r in range(self.game.r) for c in range(self.game.c) for obj in self.game[c, r].get_objects()]
+        [obj.destroy() for r in range(self.game.r) for c in range(self.game.c) for obj in self.game[r, c].get_objects()]
 
 

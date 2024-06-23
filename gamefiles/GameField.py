@@ -85,7 +85,7 @@ class GameField(PyxelGrid[Cell]):
         # internals
         for r in range(self.r):
             for c in range(self.c):
-                Cell(self, c, r)
+                Cell(self, r, c)
         self._signalDestroyQueue = list[Callable[[], None]]()
         self._restartDebounce = False
 
@@ -217,7 +217,7 @@ class GameField(PyxelGrid[Cell]):
         self.onPreObjectUpdate.fire(pyxel.frame_count)
 
         # 4 game objects
-        [obj.main_update(pyxel.frame_count) for r in range(self.r) for c in range(self.c) for obj in self[c, r].get_objects()]
+        [obj.main_update(pyxel.frame_count) for r in range(self.r) for c in range(self.c) for obj in self[r, c].get_objects()]
 
         self.onPostObjectUpdate.fire(pyxel.frame_count)
 
