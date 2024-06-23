@@ -56,6 +56,9 @@
 + **X**
     - Spawn a random powerup
 
++ **M**
+    - ???
+
 
 ## Stage File Format
 
