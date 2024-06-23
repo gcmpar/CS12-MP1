@@ -222,7 +222,6 @@ class Stage():
                     if obj == other:
                         continue
                     if obj.main_can_collide(other) and other.main_can_collide(obj):
-                        obj.destroy()
                         return False
             return True
         player = PlayerController(
@@ -275,7 +274,6 @@ class Stage():
                     if obj == other:
                         continue
                     if obj.main_can_collide(other) and other.main_can_collide(obj):
-                        obj.destroy()
                         return False
             return True
         enemy_tank = self.game.tankFactory.tank(x=x, y=y, team="enemy", tank_type=choice(self.game.tankFactory.get_tank_types()),
