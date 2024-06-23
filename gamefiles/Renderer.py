@@ -213,10 +213,6 @@ class Renderer:
         self._zOrder = list[dict[str, Any]]()
     
     def post_draw_grid(self):
-        if pyxel.btn(pyxel.KEY_CTRL):
-            debug_text = "DEBUG"
-            pyxel.text(1,pyxel.height-pyxel.FONT_HEIGHT-1,debug_text,8)
-
         current_state = self.game.get_game_state()
         if current_state == GameState.READY:
             self.display_center_text("Press 1 to Start", 11)
@@ -287,6 +283,10 @@ class Renderer:
                 self.display_center_text("HOME CELL WAS DESTROYED" if True in {h.is_destroyed() for h in self.game.stage.get_homes()} else "YOU DIED", 8)
 
             self.display_center_text("Press 1 to Restart", 11, 0, pyxel.FONT_HEIGHT * 3)
+        
+        if pyxel.btn(pyxel.KEY_CTRL):
+            debug_text = "DEBUG"
+            pyxel.text(1,pyxel.height-pyxel.FONT_HEIGHT-1,debug_text,8)
             
     def display_center_text(self, s: str, col: int, x_offset: int = 0, y_offset: int = 0):
         pyxel.text((pyxel.width - (len(s) * pyxel.FONT_WIDTH)) / 2 + x_offset, (pyxel.height / 2) + y_offset, s, col)
