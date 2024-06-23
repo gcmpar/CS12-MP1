@@ -1,15 +1,15 @@
-MirrorNE|CrackedBrick|CrackedBrick|CrackedBrick|CrackedBrick|CrackedBrick|CrackedBrick|CrackedBrick|CrackedBrick|CrackedBrick|CrackedBrick|CrackedBrick|CrackedBrick|Brick|MirrorSE
-CrackedBrick|CrackedBrick|MirrorNE|CrackedBrick|CrackedBrick|MirrorSE|Brick|EnemySpawn|CrackedBrick|CrackedBrick|CrackedBrick|MirrorNE|Brick|CrackedBrick|CrackedBrick
-CrackedBrick|Brick|CrackedBrick|CrackedBrick|Brick|CrackedBrick|Brick|CrackedBrick|CrackedBrick|CrackedBrick|CrackedBrick|Brick|Brick|MirrorSE|CrackedBrick
-CrackedBrick|MirrorSE|CrackedBrick|CrackedBrick|CrackedBrick|CrackedBrick|CrackedBrick|MirrorNE|CrackedBrick|CrackedBrick|MirrorNE|CrackedBrick|Brick|CrackedBrick|CrackedBrick
-CrackedBrick|Brick|CrackedBrick|MirrorSE|CrackedBrick|CrackedBrick|MirrorNE|CrackedBrick|CrackedBrick|CrackedBrick|CrackedBrick|CrackedBrick|MirrorNE|CrackedBrick|CrackedBrick
-CrackedBrick|CrackedBrick|Brick|CrackedBrick|CrackedBrick|Brick|Brick|Brick|Brick|Brick|CrackedBrick|Brick|CrackedBrick|Brick|CrackedBrick
-CrackedBrick|MirrorSE|CrackedBrick|CrackedBrick|CrackedBrick|Brick|MirrorNE|CrackedBrick|MirrorSE|Brick|CrackedBrick|CrackedBrick|CrackedBrick|CrackedBrick|CrackedBrick
-CrackedBrick|EnemySpawn|CrackedBrick|MirrorSE|CrackedBrick|Brick|CrackedBrick|Home|CrackedBrick|Brick|CrackedBrick|CrackedBrick|MirrorNE|EnemySpawn|CrackedBrick
-CrackedBrick|CrackedBrick|CrackedBrick|CrackedBrick|CrackedBrick|Brick|MirrorSE|CrackedBrick|MirrorNE|Brick|CrackedBrick|CrackedBrick|CrackedBrick|CrackedBrick|CrackedBrick
-CrackedBrick|Brick|CrackedBrick|MirrorSE|CrackedBrick|Brick|Brick|Brick|Brick|Brick|Brick|MirrorSE|CrackedBrick|CrackedBrick|CrackedBrick
-CrackedBrick|CrackedBrick|CrackedBrick|CrackedBrick|CrackedBrick|CrackedBrick|CrackedBrick|CrackedBrick|CrackedBrick|Brick|CrackedBrick|CrackedBrick|CrackedBrick|Brick|CrackedBrick
-CrackedBrick|MirrorNE|CrackedBrick|Brick|CrackedBrick|MirrorNE|CrackedBrick|MirrorSE|CrackedBrick|CrackedBrick|MirrorSE|CrackedBrick|Brick|MirrorNE|CrackedBrick
-CrackedBrick|CrackedBrick|CrackedBrick|CrackedBrick|CrackedBrick|CrackedBrick|CrackedBrick|CrackedBrick|MirrorSE|CrackedBrick|CrackedBrick|CrackedBrick|CrackedBrick|CrackedBrick|CrackedBrick
-CrackedBrick|CrackedBrick|MirrorSE|CrackedBrick|CrackedBrick|CrackedBrick|Brick|Spawn|CrackedBrick|CrackedBrick|CrackedBrick|MirrorNE|CrackedBrick|CrackedBrick|CrackedBrick
-MirrorSE|CrackedBrick|CrackedBrick|CrackedBrick|CrackedBrick|Brick|CrackedBrick|Brick|CrackedBrick|CrackedBrick|CrackedBrick|CrackedBrick|CrackedBrick|CrackedBrick|MirrorNE
+MirrorNE|1|2|3|4|5|6|7|8|9|10|11|12|CrackedBrick|MirrorSE
+1|2|MirrorNE|1|2|MirrorSE|CrackedBrick|EnemySpawn|1|2|3|MirrorNE|CrackedBrick|2|3
+ |CrackedBrick| | |CrackedBrick| |CrackedBrick| | | | |CrackedBrick|CrackedBrick|MirrorSE| 
+1|MirrorSE|1|2|3|4|5|MirrorNE|1|2|MirrorNE|1|CrackedBrick|3|4
+1|CrackedBrick|3|MirrorSE|1|2|MirrorNE|1|2|3|4|5|MirrorNE|1|2
+ | |CrackedBrick| | | |Brick|Brick|Brick| | |CrackedBrick| |CrackedBrick| 
+1|MirrorSE|1|2|3|Brick|MirrorNE|CrackedBrick|MirrorSE|Brick|2|3|4|5|6
+1|EnemySpawn|1|MirrorSE|1|Brick|CrackedBrick|Home|CrackedBrick|Brick|2|3|MirrorNE|EnemySpawn|1
+1|2|3|4|5|Brick|MirrorSE|CrackedBrick|MirrorNE|Brick|2|3|4|5|6
+1|CrackedBrick|3|MirrorSE|1| |Brick|Brick|Brick|CrackedBrick|CrackedBrick|MirrorSE|1|2|3
+ | | | | | | | | |CrackedBrick| | | |CrackedBrick| 
+1|MirrorNE|1|CrackedBrick|3|MirrorNE|1|MirrorSE|1|2|MirrorSE|1|CrackedBrick|MirrorNE|1
+1|2|3|4|5|6|7|8|MirrorSE|1|2|3|4|5|6
+1|2|MirrorSE|1|2|3|CrackedBrick|Spawn|1|2|3|MirrorNE|1|2|3
+MirrorSE| | | | |CrackedBrick| |CrackedBrick| | | | | | |MirrorNE

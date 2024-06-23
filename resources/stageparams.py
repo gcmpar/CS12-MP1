@@ -40,7 +40,7 @@ STAGE_PARAMS: dict[str, dict[str, Any]] = {
     },
     "_kaRMa": {
         "lives": 1,
-        "remainingEnemySpawns": 15,
+        "remainingEnemySpawns": 13,
 
         "winText": "- The Limitless Garden. -",
         "winTextColor": 8,
