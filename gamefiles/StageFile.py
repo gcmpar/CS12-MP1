@@ -219,6 +219,8 @@ class Stage():
         (x, y) = self._spawnpoint
         def occupied_check(obj: GameObject) -> bool:
             for other in self.game[y, x].get_objects():
+                    if obj == other:
+                        continue
                     if obj.main_can_collide(other) and other.main_can_collide(obj):
                         obj.destroy()
                         return False
@@ -270,6 +272,8 @@ class Stage():
 
         def occupied_check(obj: GameObject) -> bool:
             for other in self.game[y, x].get_objects():
+                    if obj == other:
+                        continue
                     if obj.main_can_collide(other) and other.main_can_collide(obj):
                         obj.destroy()
                         return False
