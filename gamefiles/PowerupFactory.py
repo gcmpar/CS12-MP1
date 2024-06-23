@@ -124,11 +124,11 @@ def _(game: GameField, tank: Tank):
         if isinstance(entity, Tank):
             if entity.team == "player":
                 return False
-            
-        if entity in record.keys():
-            return False
-
+        
         if entity == tank:
+            return False
+        
+        if entity in record.keys():
             return False
             
         for mod in entity.get_modifiers():
