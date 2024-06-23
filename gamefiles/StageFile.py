@@ -229,6 +229,8 @@ class Stage():
             tank=self.game.tankFactory.tank(x=x, y=y, team="player", tank_type="Normal",
                                             pre_added=occupied_check),
         )
+        if player.tank.is_destroyed():
+            return
         self._player = player
         
         def decrease_life():
@@ -277,7 +279,9 @@ class Stage():
                         return False
             return True
         enemy_tank = self.game.tankFactory.tank(x=x, y=y, team="enemy", tank_type=choice(self.game.tankFactory.get_tank_types()),
-                                                pre_added = occupied_check) 
+                                                pre_added = occupied_check)
+        if enemy_tank.is_destroyed():
+            return
         enemy = EnemyController(
             game=self.game,
             tank=enemy_tank
