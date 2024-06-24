@@ -19,7 +19,7 @@ TankFactory:
     - get_tank_types() -> list[str]
 '''
 
-TANK_TYPES: dict[str, dict[str, float]]  = {
+TANK_TYPES: dict[str, dict[str, float]] = {
     "Normal": {
         "health": 1,
         "movementSpeed": 5,

@@ -18,7 +18,7 @@ from objects.Mirror import Mirror
 from gamefiles.Signal import Signal
 
 from resources.assetindex import ASSET_INDEX
-from resources.stagefunctions import STAGE_FUNCTIONS
+from resources.stagesettings import STAGE_SETTINGS
 
 
 '''
@@ -192,7 +192,7 @@ class Stage():
 
         self.spawn_player()
         self.onStageGenerated.fire()
-        STAGE_FUNCTIONS[self.name]["init"](self.game, self)
+        STAGE_SETTINGS[self.name]["init"](self.game, self)
 
     def get_lives(self):
         return self._lives
@@ -319,7 +319,7 @@ class Stage():
 
 
     def update(self, frame_count: int):
-        STAGE_FUNCTIONS[self.name]["update"](self.game, self, frame_count)
+        STAGE_SETTINGS[self.name]["update"](self.game, self, frame_count)
         
         for data in self._enemyDelayedSpawns.copy():
             data["frames"] += 1
@@ -337,7 +337,7 @@ class Stage():
 
     
     def cleanup(self):
-        STAGE_FUNCTIONS[self.name]["cleanup"](self.game, self)
+        STAGE_SETTINGS[self.name]["cleanup"](self.game, self)
         [f() for f in self._eventCleanups]
         [obj.destroy() for r in range(self.game.r) for c in range(self.game.c) for obj in self.game[r, c].get_objects()]
 

@@ -254,8 +254,6 @@ A **newline** for each **ROW**<br>
 
 `stagesettings` [stagesettings](resources/stagesettings.py)
 - Contains stage parameters and settings
-
-`stagefunctions` [stagefunctions](resources/stagefunctions.py)
 - Contains custom stage function specifications (init, update, cleanup)
 
 `stages Folder` [stages](resources/stages)
