@@ -71,7 +71,7 @@ class Tank(Entity):
 
 
 
-        self._lastFireFrame = 0
+        self._lastFireFrame = -6969
         self._bulletFired = False
         self._canFireBullet = True
 
