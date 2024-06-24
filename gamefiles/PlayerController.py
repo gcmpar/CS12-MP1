@@ -80,10 +80,7 @@ class PlayerController():
         
         # fire
         if pyxel.btn(CONTROLS["fire"]["btn"]):
-            allow = self._bullet is None
-            for mod in self.tank.get_modifiers():
-                if mod.type == "TimeStopBuff":
-                    allow = True
+            allow = self._bullet is None or self.tank.has_modifier_type("TimestopBuff")
             if allow:
                 self._bullet = self.tank.fire_bullet()
             

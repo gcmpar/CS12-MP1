@@ -55,6 +55,7 @@ GameObject
 
     get_modifiers() -> list[Modifier]
     has_modifier(mod: Modifier) -> bool
+    has_modifier_type(type: str) -> bool
     add_modifier(mod: Modifier)
         - sets modifier and fires onModifierAdded
     remove_modifier(mod: Modifier)
@@ -182,8 +183,13 @@ class GameObject():
     
     def get_modifiers(self) -> list[Modifier]:
         return self._modifiers.copy()
-    def has_modifier(self, mod: Modifier):
+    def has_modifier(self, mod: Modifier) -> bool:
         return mod in self._modifiers
+    def has_modifier_type(self, type: str) -> bool:
+        for mod in self._modifiers:
+            if mod.type == type:
+                return True
+        return False
     def add_modifier(self, mod: Modifier):
         if mod in self._modifiers:
             return

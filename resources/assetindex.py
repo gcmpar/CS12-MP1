@@ -12,12 +12,14 @@ from objects.Mirror import Mirror
 from objects.Powerup import Powerup
 
 ASSET_INDEX: dict[Type[GameObject] | str, Sequence[tuple[int, int]]] = {
-    Tank: [(0, y) for y in range(4)]
+    Tank: [(0, y) for y in range(4)] # player
         + [(1, y) for y in range(4)] # enemy
         + [(0, y) for y in range(4, 8)] # Light
         + [(1, y) for y in range(4, 8)] # Armored
     ,
-    Bullet: [(2, y) for y in range(4)],
+    Bullet: [(2, y) for y in range(4)] # orientations
+        + [(2, 4)] # midair
+    ,
     Brick: [(3, 0), (3, 1)],
     Stone: [(3, 2)],
     Water: [(3, 3)],

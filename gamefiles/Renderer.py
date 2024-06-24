@@ -179,21 +179,21 @@ class Renderer:
                         offset = 4
                     index = index[offset + get_args(Orientation).index(obj.orientation)]
                     z_index = 1
-                    has_mirage: bool = False
-                    for mod in obj.get_modifiers():
-                        if mod.type == "Mirage":
-                            self._zOrder.append({
+
+                    if obj.has_modifier_type("Mirage"):
+                        self._zOrder.append({
                                 "x": x,
                                 "y": y,
                                 "index": ASSET_INDEX["Mirage"][0],
                                 "zIndex": -3,
                             })
-                            has_mirage = True
-                            break
-                    if has_mirage:
                         continue
+                    
                 elif isinstance(obj, Bullet):
-                    index = index[get_args(Orientation).index(obj.orientation)]
+                    if obj.has_modifier_type("_midair"):
+                        index = index[4]
+                    else:
+                        index = index[get_args(Orientation).index(obj.orientation)]
                     z_index = 4
                 else:
                     index = index[0]

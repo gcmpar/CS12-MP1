@@ -127,10 +127,9 @@ def _(game: GameField, tank: Tank):
         
         if entity in record.keys():
             return False
-            
-        for mod in entity.get_modifiers():
-            if mod.type == "TimeStop":
-                return False
+        
+        if entity.has_modifier_type("TimeStop"):
+            return False
 
         return True
         

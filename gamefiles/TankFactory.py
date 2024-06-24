@@ -118,9 +118,8 @@ def _():
 
                 if isinstance(other, Bullet):
                     if other.owner.team == owner.owner.team:
-                        for other_mod in other.get_modifiers():
-                            if other_mod.type == "_midair":
-                                return False
+                        if other.has_modifier_type("_midair"):
+                            return False
                 return owner.can_collide(other)
 
             mod = Modifier(
