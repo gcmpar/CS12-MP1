@@ -148,5 +148,6 @@ class God:
         if self.game.get_game_state() == GameState.READY or self.game.get_game_state() == GameState.GENERATING:
             return
         
-        for f in DEBUG_FUNCTIONS.values():
-            f(self.game)
+        if pyxel.btn(DEBUG_CONTROLS["debug"]["btn"]):
+            for f in DEBUG_FUNCTIONS.values():
+                f(self.game)
