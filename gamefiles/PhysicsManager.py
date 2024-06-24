@@ -111,8 +111,11 @@ class PhysicsManager:
         # move if none
         collision_pairs: list[set[GameObject]] = []
         moved_entities: dict[Entity, Cell] = {}
+        moved_adjacent: dict[Entity, list[Entity]] = {}
         for entity, target_cell in target_cell_map.items():
             can_move: bool = True
+            current_cell = entity.get_cell()
+            adjacent_entities: list[Entity] = []
             for other in target_cell.get_objects():
                 if entity.main_can_collide(other) and other.main_can_collide(entity):
                     pair = {entity, other}
@@ -121,20 +124,41 @@ class PhysicsManager:
                         entity.main_collided_with(other)
                         other.main_collided_with(entity)
                     can_move = False
+
+                # (**special) CHECK FOR ADJACENCY
+                if isinstance(other, Entity) and other in target_cell_map.keys():
+                    if target_cell_map[other] == current_cell: # if moving towards each other
+                        adjacent_entities.append(other)
             
             if can_move:
                 entity.move_to(target_cell.x, target_cell.y)
                 self._entities[entity]["lastMoveFrame"] = frame_count
                 moved_entities[entity] = target_cell
-        
+                moved_adjacent[entity] = adjacent_entities
+
+        # (**special) TRIGGER TOUCHED
+        touched_pairs: list[set[GameObject]] = []
+        for entity, adjacent_entities in moved_adjacent.items():
+            for other in adjacent_entities:
+                if entity.main_can_touch(other) and other.main_can_touch(entity):
+                    pair: set[GameObject] = {entity, other}
+                    if pair not in touched_pairs:
+                        touched_pairs.append(pair)
+                        entity.main_touched(other)
+                        other.main_touched(entity)
+
+
         # trigger touched
         for entity, target_cell in moved_entities.items():
             for other in target_cell.get_objects():
                 if other == entity:
                     continue
                 if entity.main_can_touch(other) and other.main_can_touch(entity):
-                    entity.main_touched(other)
-                    other.main_touched(entity)
+                    pair = {entity, other}
+                    if pair not in touched_pairs:
+                        touched_pairs.append(pair)
+                        entity.main_touched(other)
+                        other.main_touched(entity)
                     
 
         

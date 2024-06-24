@@ -63,7 +63,7 @@ def _():
 @create(name="_kaRMa")
 def _():
     last_spawn_frame = -6969
-    spawn_interval = 3.5
+    spawn_interval = 7
     event_cleanups: list[Callable[[], None]] = []
     def init(game: GameField, stage: Stage):
         
