@@ -35,7 +35,7 @@ class Powerup(GameObject):
         return False
     
     def can_touch(self, other: GameObject):
-        if not isinstance(other, Tank):
+        if isinstance(other, Tank):
             return True
         return False
     
