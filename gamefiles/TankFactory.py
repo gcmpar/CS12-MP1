@@ -154,7 +154,7 @@ class TankFactory:
     def tank(self, x: int, y: int,
              team: Team, tank_type: str,
              pre_added: Callable[[GameObject], bool] | None = None) -> Tank:
-        tank_type="Light"
+        
         data = TANK_TYPES[tank_type]
         stats = data["stats"]
         
