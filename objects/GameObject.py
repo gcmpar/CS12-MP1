@@ -150,6 +150,8 @@ class GameObject():
         
         current_cell = self.get_cell()
         target_cell = self.game[y, x]
+        if current_cell == target_cell:
+            return
         
         current_cell.remove_object(self)
         target_cell.add_object(self)

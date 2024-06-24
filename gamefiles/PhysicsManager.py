@@ -6,7 +6,6 @@ if TYPE_CHECKING:
     from objects.GameObject import GameObject
 
 from objects.Entity import Entity
-from objects.Tank import Tank
 from gamefiles.Cell import Cell
 
 '''
@@ -26,8 +25,8 @@ update()
         
         - MOVEMENT COLLISION
             - store entities that need to move (+ trigger OOB)
-            - store entities that CAN move (+ trigger collision if can't)
-            - move entities that can move (+ trigger touched for each)
+            - store entities that CAN move, and move them (+ trigger collision if can't)
+            - trigger touched after all
 
 
 
@@ -77,7 +76,6 @@ class PhysicsManager:
         
         # movement collision
         target_cell_map: dict[Entity, Cell] = {}
-        moved_entities: dict[Entity, Cell] = {}
 
         # store entities that are supposed to move (+ trigger OOB)
         for entity in list(self._entities):
@@ -108,57 +106,41 @@ class PhysicsManager:
             
             new_cell = self.game[new_y, new_x]
             target_cell_map[entity] = new_cell
-
-        # store entities that CAN move (+ trigger collision if can't)
-        collision_pairs: list[set[GameObject]] = []
-        touched_pairs: list[set[GameObject]] = []
-        for entity, new_cell in target_cell_map.items():
-            can_move_to: bool = True
-            cell = entity.get_cell()
-            for other in new_cell.get_objects():
-                if entity.main_can_collide(other) and other.main_can_collide(entity):
-                    entity.main_collided_with(other)
-                    other.main_collided_with(entity)
-                    collision_pairs.append({entity, other})
-                    can_move_to = False
-            
-            if can_move_to:
-                moved_entities[entity] = new_cell
         
-        # move entities that can move (+ trigger touched for each)
-        sorted = list[tuple[Entity, Cell]]()
-        for entity, new_cell in moved_entities.items():
-            sorted.append((entity, new_cell))
-
-        # grr
-        def key(e: tuple[Entity, Cell]):
-            return 1 if isinstance(e[0], Tank) else 0
-        sorted.sort(key=key)
-        for (entity, new_cell) in sorted:
-            can_move_to: bool = True
-            for other in new_cell.get_objects():
-                if other == entity:
-                    continue
+        # check collision for each
+        # move if none
+        collision_pairs: list[set[GameObject]] = []
+        moved_entities: dict[Entity, Cell] = {}
+        for entity, target_cell in target_cell_map.items():
+            can_move: bool = True
+            for other in target_cell.get_objects():
                 if entity.main_can_collide(other) and other.main_can_collide(entity):
-                    if {entity, other} not in collision_pairs:
+                    pair = {entity, other}
+                    if pair not in collision_pairs:
+                        collision_pairs.append(pair)
                         entity.main_collided_with(other)
                         other.main_collided_with(entity)
-                        collision_pairs.append({entity, other})
-                    can_move_to = False
-
-            if not can_move_to:
-                continue
-            entity.move_to(new_cell.x, new_cell.y)
-            self._entities[entity]["lastMoveFrame"] = frame_count
-
-            for other in new_cell.get_objects():
+                    can_move = False
+            
+            if can_move:
+                entity.move_to(target_cell.x, target_cell.y)
+                self._entities[entity]["lastMoveFrame"] = frame_count
+                moved_entities[entity] = target_cell
+        
+        # trigger touched
+        for entity, target_cell in moved_entities.items():
+            for other in target_cell.get_objects():
                 if other == entity:
                     continue
                 if entity.main_can_touch(other) and other.main_can_touch(entity):
-                    if {entity, other} not in touched_pairs:
-                        entity.main_touched(other)
-                        other.main_touched(entity)
-                        touched_pairs.append({entity, other})
+                    entity.main_touched(other)
+                    other.main_touched(entity)
+                    
+
+        
+
+
+
 
         
         
