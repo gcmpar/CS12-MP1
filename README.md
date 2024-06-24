@@ -63,6 +63,7 @@
 
 + **M**
     - ???
++ **B**
 
 
 ## Stage File Format
@@ -232,6 +233,9 @@ A **newline** for each **ROW**<br>
 `Mirror` [Mirror](objects/Mirror.py)
 - Reflects bullets
 - Can reflect northeast or southeast
+
+`Powerup` [Powerup](objects/Powerup.py)
+- A collectible object
 
 **Miscellaneous:**
 

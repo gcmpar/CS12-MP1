@@ -4,13 +4,15 @@ from collections.abc import Callable
 
 if TYPE_CHECKING:
     from gamefiles.GameField import GameField
-    from misc.util import Orientation
     from objects.Tank import Tank
-    
+
+from misc.util import Orientation, ReflectOrientation, orientation_to_ref_vector, flip_orientation
+
 from objects.GameObject import GameObject
 from objects.Entity import Entity
 from objects.Mirror import Mirror
 from objects.Water import Water
+from objects.Karma import Karma
 
 '''
 Bullet:
@@ -19,31 +21,24 @@ Bullet:
 
 
     owner: Tank
-        - tank who fired the bullet
+        - tag for tank who fired the bullet
+        - can be changed
 '''
-
-# maps Orientation to vector
-ref_map: dict[Orientation, tuple[int, int]] = {
-                "east": (1, 0),
-                "north": (0, -1),
-                "west": (-1, 0),
-                "south": (0, 1)
-}
-# maps vector to Orientation (inverse of above)
-ref_map_inv: dict[tuple[int, int], Orientation] = {v: k for k, v in ref_map.items()}
 
 
 class Bullet(Entity):
-    orientation: Orientation
+    owner: Tank | None
     _lastMirrorHit: Mirror | None
+    _lastKarmaHit: Karma | None
     def __init__(self, game: GameField, x: int, y: int,
                  ori: Orientation, speed: float,
-                 owner: Tank,
-                 
+                 owner: Tank | None = None,
                  pre_added: Callable[[GameObject], bool] | None = None
                  ):
-        self._lastMirrorHit = None
         self.owner = owner
+
+        self._lastMirrorHit = None
+        self._lastKarmaHit = None
 
         super().__init__(game=game, x=x, y=y, pre_added=pre_added, ori=ori, speed=speed)
         def on_move(x: int, y: int):
@@ -51,6 +46,9 @@ class Bullet(Entity):
             if self._lastMirrorHit is not None:
                 if self._lastMirrorHit not in cell.get_objects():
                     self._lastMirrorHit = None
+            if self._lastKarmaHit is not None:
+                if self._lastKarmaHit not in cell.get_objects():
+                    self._lastKarmaHit = None
 
         self.onMove.add_listener(on_move)
 
@@ -62,15 +60,15 @@ class Bullet(Entity):
             if self._lastMirrorHit != other: # debounce
                 self._lastMirrorHit = other
 
-                ref_ori = other.reflectOrientation
-                
-                c = ref_map[self.orientation]
-                c = (c[1], c[0])
-                if ref_ori == "northeast":
-                    c = (-c[0], -c[1])
+                ori = self.orientation
+                ref_ori: ReflectOrientation = other.reflectOrientation
+                new_ori = orientation_to_ref_vector(ori, ref_ori)
 
-                new_ori = ref_map_inv[c]
                 self.set_orientation(new_ori)
+        elif isinstance(other, Karma):
+            if self._lastKarmaHit != other: # debounce
+                self._lastKarmaHit = other
+                self.set_orientation(flip_orientation(self.orientation))
         elif not isinstance(other, Water):
             self.destroy()
     

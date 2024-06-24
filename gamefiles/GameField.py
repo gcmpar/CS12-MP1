@@ -153,7 +153,6 @@ class GameField(PyxelGrid[Cell]):
         if copy_modifiers and not was_destroyed:
             player_tank = self.stage.get_player().tank
             for mod in modifiers:
-                    mod.owner = player_tank
                     player_tank.add_modifier(mod)
 
         self.renderer.init_stage()

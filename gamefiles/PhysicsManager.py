@@ -8,6 +8,8 @@ if TYPE_CHECKING:
 from objects.Entity import Entity
 from gamefiles.Cell import Cell
 
+from misc.util import orientation_to_move_vector
+
 '''
 Singleton for managing physics and Entity movement
 Entity speed/movement is one cell every certain number of frames
@@ -47,6 +49,7 @@ class PhysicsManager:
         
         # same-cell collision
         collision_pairs: list[set[GameObject]] = []
+        touched_pairs: list[set[GameObject]] = []
         for r in range(self.game.r):
             for c in range(self.game.c):
                 cell = self.game[r, c]
@@ -63,16 +66,17 @@ class PhysicsManager:
                         if other == obj:
                             continue
                         pair = {obj, other}
-                        if pair in collision_pairs:
-                            continue
-                        collision_pairs.append(pair)
 
                         if obj.main_can_collide(other) and other.main_can_collide(obj):
-                            obj.main_collided_with(other)
-                            other.main_collided_with(obj)
+                            if pair not in collision_pairs:
+                                collision_pairs.append(pair)
+                                obj.main_collided_with(other)
+                                other.main_collided_with(obj)
                         if obj.main_can_touch(other) and other.main_can_touch(obj):
-                            obj.main_touched(other)
-                            other.main_touched(obj)
+                            if pair not in touched_pairs:
+                                touched_pairs.append(pair)
+                                obj.main_touched(other)
+                                other.main_touched(obj)
         
         # movement collision
         target_cell_map: dict[Entity, Cell] = {}
@@ -93,8 +97,7 @@ class PhysicsManager:
                 continue
             
             ori = entity.orientation
-            x_move = 1 if ori == "east" else -1 if ori == "west" else 0
-            y_move = 1 if ori == "south" else -1 if ori == "north" else 0
+            x_move, y_move = orientation_to_move_vector(ori)
 
             new_x = cell.x + x_move
             new_y = cell.y + y_move
@@ -109,7 +112,6 @@ class PhysicsManager:
         
         # check collision for each
         # move if none
-        collision_pairs: list[set[GameObject]] = []
         moved_entities: dict[Entity, Cell] = {}
         moved_adjacent: dict[Entity, list[Entity]] = {}
         for entity, target_cell in target_cell_map.items():
@@ -137,7 +139,6 @@ class PhysicsManager:
                 moved_adjacent[entity] = adjacent_entities
 
         # (**special) TRIGGER TOUCHED
-        touched_pairs: list[set[GameObject]] = []
         for entity, adjacent_entities in moved_adjacent.items():
             for other in adjacent_entities:
                 if entity.main_can_touch(other) and other.main_can_touch(entity):

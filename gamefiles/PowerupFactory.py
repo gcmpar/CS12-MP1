@@ -212,6 +212,7 @@ def _(game: GameField, tank: Tank):
         self.data["f"] = 0
     def update(self: Modifier, frame_count: int):
         nonlocal f
+        f += 1
         self.data["f"] += 1
         f = self.data["f"]
         if self.data["f"] > game.FPS * duration:
@@ -229,6 +230,17 @@ def _(game: GameField, tank: Tank):
         stage_transferrable=False
     )
     tank.add_modifier(mod)
+
+    def stop():
+        tank.onDestroy.remove_listener(stop)
+        game.onStateChanged.remove_listener(stop_listener)
+
+        game.renderer.stop_render_custom(text)
+
+    def stop_listener(state: GameState):
+        stop()
+    tank.onDestroy.add_listener(stop)
+    game.onStateChanged.add_listener(stop_listener)
 
 
 class PowerupFactory:

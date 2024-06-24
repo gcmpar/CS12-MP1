@@ -9,10 +9,12 @@ if TYPE_CHECKING:
     from gamefiles.GameField import GameField
     from gamefiles.Cell import Cell
 
-from misc.util import GameState
+from misc.util import GameState, orientation_to_move_vector
 from objects.Tank import Tank
 
 from resources.controls import DEBUG_CONTROLS
+
+from misc.K import K
 
 '''
 Singleton for Debug mode and cheat codes
@@ -89,6 +91,7 @@ def _(game: GameField):
 def _(game: GameField):
     game.set_game_state(GameState.WIN)
 
+@create(c="safe")
 def _(game: GameField):
     game.stage.get_player().tank.destroy()
 
@@ -115,11 +118,20 @@ def _(game: GameField):
 
 
 
+
 # ,..reviR derorriM
 # .dlrow derorrim
 @create(c="???")
 def _(game: GameField):
     game.start_stage("_kaRMa")
+@create(c="K")
+def _(game: GameField):
+    if game.stage.name == "_kaRMa":
+        return
+    tank = game.stage.get_player().tank
+    cell = tank.get_cell()
+    x_move, y_move = orientation_to_move_vector(tank.orientation)
+    K(game=game, x=cell.x + x_move, y=cell.y + y_move, ori=tank.orientation)
 
 
 

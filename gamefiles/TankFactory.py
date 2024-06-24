@@ -53,7 +53,7 @@ def create(tank_type: str):
 
 @create(tank_type="Normal")
 def _():
-    data = {
+    settings = {
         "stats": {
             "health": 1,
             "movementSpeed": 5,
@@ -61,12 +61,12 @@ def _():
             "bulletSpeed": 15,
         }
     }
-    return data
+    return settings
 
 
 @create(tank_type="Armored")
 def _():
-    data = {
+    settings = {
         "stats": {
             "health": 5,
             "movementSpeed": 3,
@@ -74,11 +74,11 @@ def _():
             "bulletSpeed": 15,
         }
     }
-    return data
+    return settings
 
 @create(tank_type="Light")
 def _():
-    data: dict[str, Any] = {
+    settings: dict[str, Any] = {
         "stats": {
             "health": 2,
             "movementSpeed": 8,
@@ -116,8 +116,8 @@ def _():
                 owner = self.owner
                 assert isinstance(owner, Bullet)
 
-                if isinstance(other, Bullet):
-                    if other.owner.team == owner.owner.team:
+                if owner.owner is not None and isinstance(other, Bullet):
+                    if other.owner is not None and other.owner.team == owner.owner.team:
                         if other.has_modifier_type("_midair"):
                             return False
                 return owner.can_collide(other)
@@ -135,8 +135,8 @@ def _():
             bullet.add_modifier(mod)
         tank.onBulletFired.add_listener(mid_air)
 
-    data["init"] = init
-    return data
+    settings["init"] = init
+    return settings
 
 
 

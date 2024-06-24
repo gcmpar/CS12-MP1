@@ -15,6 +15,7 @@ Modifier
     game: GameField
     owner: GameObject
         - set by the object when added
+        - ONLY used by modifier functions for reference
     type: str
         - descriptor for rendering or other managers
     priority: int
@@ -22,6 +23,9 @@ Modifier
     stageTranferrable: bool = True
         - for GameField use
         - if can be transferred to next stage
+
+    _o: GameObject | None
+        - internal owner ref on initialization
     
     data: dict[str, Any]
         - where modifier's functions can store its any data it needs throughout its lifetime
@@ -32,6 +36,9 @@ Modifier
     copy() -> Modifier
         - returns a copy of the modifier
     
+    ---------------------------------
+    INTENDED TO BE SPECIFIED ON CREATION:
+
     init()
         - called whenever added to an object
 
@@ -55,6 +62,9 @@ class Modifier:
     destroy: Callable[[Modifier], None]
     can_collide: Callable[[Modifier, GameObject], bool | None]
     can_touch: Callable[[Modifier, GameObject], bool | None]
+
+    _o: GameObject | None
+
     def __init__(self, game: GameField, type: str, priority: int | None = None, stage_transferrable: bool = True,
                  init: Callable[[Modifier], None] | None = None,
                  update: Callable[[Modifier, int], None] | None = None,
@@ -74,6 +84,8 @@ class Modifier:
         self.destroy = destroy if destroy is not None else lambda _: None
         self.can_collide = can_collide if can_collide is not None else lambda _, o: None
         self.can_touch = can_touch if can_touch is not None else lambda _, o: None
+
+        self._o = None
     
     def copy(self):
         return Modifier(
@@ -86,6 +98,12 @@ class Modifier:
             can_collide=self.can_collide,
             can_touch=self.can_touch,
         )
+    
+    def tag_owner(self, owner: GameObject):
+        if self._o is not None:
+            raise ValueError("Modifier is already owned!")
+        self._o = owner
+        self.owner = owner # initialize attr
 
 
 

@@ -193,11 +193,14 @@ class GameObject():
     def add_modifier(self, mod: Modifier):
         if mod in self._modifiers:
             return
+        
         self._modifiers.append(mod)
         self._modifiers.sort(key=lambda e: e.priority)
-        setattr(mod, "owner", self)
+
+        mod.tag_owner(self)
         mod.init(mod)
         self.onModifierAdded.fire(mod)
+
         self.main_update(self._lastFrameCount)
 
     def remove_modifier(self, mod: Modifier):

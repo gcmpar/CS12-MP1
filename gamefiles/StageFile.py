@@ -189,10 +189,11 @@ class Stage():
         self._enemySpawnDelayInterval = 0.75
 
         self._eventCleanups = list[Callable[[], None]]()
+        self._data: dict[str, Any] = {}
 
         self.spawn_player()
         self.onStageGenerated.fire()
-        STAGE_SETTINGS[self.name]["init"](self.game, self)
+        STAGE_SETTINGS[self.name]["init"](self.game, self, self._data)
 
     def get_lives(self):
         return self._lives
@@ -319,7 +320,7 @@ class Stage():
 
 
     def update(self, frame_count: int):
-        STAGE_SETTINGS[self.name]["update"](self.game, self, frame_count)
+        STAGE_SETTINGS[self.name]["update"](self.game, self, self._data, frame_count)
         
         for data in self._enemyDelayedSpawns.copy():
             data["frames"] += 1
@@ -337,7 +338,7 @@ class Stage():
 
     
     def cleanup(self):
-        STAGE_SETTINGS[self.name]["cleanup"](self.game, self)
+        STAGE_SETTINGS[self.name]["cleanup"](self.game, self, self._data)
         [f() for f in self._eventCleanups]
         [obj.destroy() for r in range(self.game.r) for c in range(self.game.c) for obj in self.game[r, c].get_objects()]
 

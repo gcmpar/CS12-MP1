@@ -7,11 +7,10 @@ if TYPE_CHECKING:
     from objects.GameObject import GameObject
 
 from objects.GameObject import GameObject
-from objects.Item import Item
 from objects.Tank import Tank
 
 '''
-A collectible Item
+A collectible object
 
 Powerup
     type: str
@@ -21,7 +20,7 @@ Powerup
 
 '''
 
-class Powerup(Item):
+class Powerup(GameObject):
     execute: Callable[[Tank], None]
     def __init__(self, game: GameField, x: int, y: int,
                  type: str, execute: Callable[[Tank], None],

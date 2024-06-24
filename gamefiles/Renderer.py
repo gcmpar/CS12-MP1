@@ -61,6 +61,8 @@ Renderer
         - draws all objects in the draw_cell() dictionary, sorted by zIndex
         - draws all custom renders
     
+    display_text(x: float, y: float, s: str, col: int)
+        - calls pyxel.text
     display_center_text(s: str, col: int, x_offset: int = 0, y_offset: int = 0)
     render_custom(f: Callable[[], None], duration: float)
         - call a per-frame custom renderer function for a certain duration
@@ -82,6 +84,8 @@ class Renderer:
         self._zOrder = list[dict[str, Any]]()
         self._customRenders = dict[Callable[[], None], dict[str, Any]]()
         self._zOrderQueue = list[dict[str, Any]]()
+
+        self._customTexts = list[dict[str, Any]]()
         self._centerTexts = list[dict[str, Any]]()
 
         self._karmaDebounce = 0
@@ -292,17 +296,17 @@ class Renderer:
             pyxel.text(pyxel.width-(len(stage_display)*pyxel.FONT_WIDTH)-1,pyxel.height-pyxel.FONT_HEIGHT-1,stage_display,7)
 
             if current_state == GameState.WIN or current_state == GameState.LOSE:
-                data = STAGE_SETTINGS[current_stage]
+                settings = STAGE_SETTINGS[current_stage]
                 if current_state == GameState.WIN:
-                    self.display_center_text(data["winText"], data["winTextColor"], 0, -pyxel.FONT_HEIGHT*2)
-                    self.display_center_text(f"Press {CONTROLS["next"]["name"]} to {data["nextText"]}", data["nextTextColor"], 0, pyxel.FONT_HEIGHT)
+                    self.display_center_text(settings["winText"], settings["winTextColor"], 0, -pyxel.FONT_HEIGHT*2)
+                    self.display_center_text(f"Press {CONTROLS["next"]["name"]} to {settings["nextText"]}", settings["nextTextColor"], 0, pyxel.FONT_HEIGHT)
 
                 else:
-                    if "loseText" in data.keys():
-                        lose_text = data["loseText"]
+                    if "loseText" in settings.keys():
+                        lose_text = settings["loseText"]
                     else:
                         lose_text = "HOME CELL WAS DESTROYED" if True in {h.is_destroyed() for h in self.game.stage.get_homes()} else "YOU DIED"
-                    self.display_center_text(lose_text, data["loseTextColor"])
+                    self.display_center_text(lose_text, settings["loseTextColor"])
 
                 self.display_center_text(f"Press {CONTROLS["restart"]["name"]} to Restart", 11, 0, pyxel.FONT_HEIGHT * 2.5)
             
@@ -310,6 +314,10 @@ class Renderer:
                 debug_text = "DEBUG"
                 pyxel.text(1,pyxel.height-pyxel.FONT_HEIGHT-1,debug_text,8)
         
+
+        for data in self._customTexts:
+            pyxel.text(data["x"], data["y"], data["s"], data["col"])
+
         if len(self._centerTexts) > 0:
             # draw bg first
             padding = 2
@@ -318,8 +326,16 @@ class Renderer:
             for data in self._centerTexts:
                 pyxel.text(data["x"], data["y"], data["s"], data["col"])
 
+        self._customTexts = []
         self._centerTexts = []
-            
+    
+    def display_text(self, x: float, y: float, s: str, col: int):
+        self._customTexts.append({
+            "x": x,
+            "y": y,
+            "s": s,
+            "col": col,
+        })
     def display_center_text(self, s: str, col: int, x_offset: float = 0, y_offset: float = 0):
 
         text_width = (len(s) * pyxel.FONT_WIDTH)
@@ -351,7 +367,7 @@ class Renderer:
         del self._customRenders[f]
         c()
 
-    def render_z(self, x: int, y: int, index: tuple[int, int], z_index: int):
+    def render_z(self, x: float, y: float, index: tuple[int, int], z_index: int):
         self._zOrderQueue.append({
             "x": x,
             "y": y,

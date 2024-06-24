@@ -3,11 +3,21 @@ from typing import TYPE_CHECKING, Any
 from collections.abc import Callable
 from random import choice, randint
 
+import pyxel
+
 if TYPE_CHECKING:
     from gamefiles.GameField import GameField
     from gamefiles.StageFile import Stage
     from gamefiles.Cell import Cell
     from gamefiles.EnemyController import EnemyController
+
+from objects.Mirror import Mirror
+from objects.Karma import Karma
+
+from resources.controls import DEBUG_CONTROLS
+from misc.util import orientation_to_move_vector
+from misc.K import K
+
 '''
 SETTINGS:
     REQUIRED:
@@ -19,27 +29,30 @@ SETTINGS:
         winTextColor
         nextText
         nextTextColor
+        restartText
+        restartTextColor
 
     loseText
         - will default to detecting if home cell was destroyed/if player died
     loseTextColor
 
 FUNCTIONS (optional):
-    init()
-    update()
-    cleanup()
+    init
+    update
+    cleanup
 
 ---------------------------------
 FORMAT:
+NOTE: data is intended for passing around variables instead of using the current scope
 @create(name={STAGE NAME})
 def _():
-    def init(game: GameField, stage: Stage):
+    def init(game: GameField, stage: Stage, data: dict[str, Any]):
         ...
 
-    def update(game: GameField, stage: Stage, frame_count: int):
+    def update(game: GameField, stage: Stage, data: dict[str, Any], frame_count: int):
         ...
 
-    def cleanup(game: GameField, stage: Stage)
+    def cleanup(game: GameField, stage: Stage, data: dict[str, Any])
         ...
 
     return {
@@ -48,12 +61,11 @@ def _():
         ...
         ...
 
-        "init": Callable[[GameField, Stage], None],
-        "update": Callable[[GameField, Stage, int], None],
-        "cleanup": Callable[[GameField, Stage], None],
+        "init": init,
+        "update": update,
+        "cleanup": cleanup,
     }
 
-NOTE: can use this scope for any variables needed to be passed around
 '''
 
 
@@ -100,7 +112,7 @@ def _():
 
 @create(name="_kaRMa")
 def _():
-    data: dict[str, Any] = {
+    settings: dict[str, Any] = {
         "lives": 1,
         "enemySpawns": 13,
 
@@ -108,23 +120,24 @@ def _():
         "winTextColor": 8,
 
         "nextText": "Suffer.",
-
         "loseText": "- The Limitless Garden. -",
+        "restartText": "Escape."
     }
 
+    def init(game: GameField, stage: Stage, data: dict[str, Any]):
+        data["lastSpawnFrame"] = -6969
+        data["spawnInterval"] = 7
+        data["eventCleanups"] = list[Callable[[], None]]()
+        data["karmaDebounce"] = False
+        data["kUses"] = 3
 
 
-    last_spawn_frame = -6969
-    spawn_interval = 7
-    event_cleanups: list[Callable[[], None]] = []
-    def init(game: GameField, stage: Stage):
-        
-        # powerup spawn
-        def spawn_powerup(_: EnemyController):
+        # powerup and karma spawn
+        def spawn(_: EnemyController):
             enemy_count = stage.get_total_enemy_count()
             max_enemies = stage.get_max_enemies()
-            if max_enemies > 1 and enemy_count >= 1 and enemy_count <= max_enemies / 2:
-
+            
+            if max_enemies > 1 and enemy_count >= 1 and enemy_count <= max_enemies * 0.75:
                 empty_cells: list[Cell] = []
                 for r in range(game.r):
                     for c in range(game.c):
@@ -139,20 +152,40 @@ def _():
                         x=chosen_cell.x,
                         y=chosen_cell.y,
                         powerup_type=choice(game.powerupFactory.get_powerup_types()))
+                
+                karma_count = 1
+                if max_enemies < 0.35:
+                    karma_count = 2
+                mirrors: list[Mirror] = []
+                for r in range(game.r):
+                    for c in range(game.c):
+                        cell = game[r, c]
+                        for obj in cell.get_objects():
+                            if not isinstance(obj, Mirror):
+                                continue
+                            if r == 0 or r == game.r-1:
+                                continue
+                            if c == 0 or c == game.c-1:
+                                continue
+                            mirrors.append(obj)
+                if len(mirrors) > 0:
+                    for _ in range(karma_count):
+                        mirror = choice(mirrors)
+                        cell = mirror.get_cell()
+                        mirror.destroy()
+                        Karma(game=game, x=cell.x, y=cell.y)
         
-        stage.onEnemyRemoved.add_listener(spawn_powerup)
+        stage.onEnemyRemoved.add_listener(spawn)
         def remove_listener():
-            stage.onEnemyRemoved.remove_listener(spawn_powerup)
-        event_cleanups.append(remove_listener)
+            stage.onEnemyRemoved.remove_listener(spawn)
+        data["eventCleanups"].append(remove_listener)
 
-    def update(game: GameField, stage: Stage, frame_count: int):
-        nonlocal last_spawn_frame
-
+    def update(game: GameField, stage: Stage, data: dict[str, Any], frame_count: int):
         enemy_spawns = stage.get_enemy_spawns()
         l = len(enemy_spawns) 
         if l > 0:
-            if frame_count > (last_spawn_frame + (game.FPS * spawn_interval)):
-                last_spawn_frame = frame_count
+            if frame_count > (data["lastSpawnFrame"] + (game.FPS * data["spawnInterval"])):
+                data["lastSpawnFrame"] = frame_count
 
                 enemy_count = stage.get_total_enemy_count()
                 max_enemies = stage.get_max_enemies()
@@ -165,22 +198,38 @@ def _():
                     tank_type = "Light"
                 stage.spawn_enemy_delayed(spawn_index=randint(0, l-1), tank_type=tank_type)
 
-    def cleanup(game: GameField, stage: Stage):
-        [f() for f in event_cleanups]
+        if data["kUses"] > 0:
+            if pyxel.btn(DEBUG_CONTROLS["K"]["btn"]):
+                if not data["karmaDebounce"]:
+                    data["karmaDebounce"] = True
+                    data["kUses"] -= 1
 
-    data["init"] = init
-    data["update"] = update
-    data["cleanup"] = cleanup
-    return data
+                    tank = game.stage.get_player().tank
+                    cell = tank.get_cell()
+                    x_move, y_move = orientation_to_move_vector(tank.orientation)
+                    K(game=game, x=cell.x + x_move, y=cell.y + y_move, ori=tank.orientation)
+            else:
+                data["karmaDebounce"] = False
+
+        game.renderer.display_text(1,1+pyxel.FONT_HEIGHT*3,f"K{data["kUses"]}",3)
+        
+
+    def cleanup(game: GameField, stage: Stage, data: dict[str, Any]):
+        [f() for f in data["eventCleanups"]]
+
+    settings["init"] = init
+    settings["update"] = update
+    settings["cleanup"] = cleanup
+    return settings
 
 
 @create(name="_empty")
 def _():
-    def init(game: GameField, stage: Stage):
+    def init(game: GameField, stage: Stage, data: dict[str, Any]):
         pass
-    def update(game: GameField, stage: Stage, frame_count: int):
+    def update(game: GameField, stage: Stage, data: dict[str, Any], frame_count: int):
         pass
-    def cleanup(game: GameField, stage: Stage):
+    def cleanup(game: GameField, stage: Stage, data: dict[str, Any]):
         pass
     return {
         "lives": 1,
@@ -192,11 +241,11 @@ def _():
     }
 @create(name="_TEST")
 def _():
-    def init(game: GameField, stage: Stage):
+    def init(game: GameField, stage: Stage, data: dict[str, Any]):
         pass
-    def update(game: GameField, stage: Stage, frame_count: int):
+    def update(game: GameField, stage: Stage, data: dict[str, Any], frame_count: int):
         pass
-    def cleanup(game: GameField, stage: Stage):
+    def cleanup(game: GameField, stage: Stage, data: dict[str, Any]):
         pass
     return {
         "lives": 999,
@@ -224,14 +273,17 @@ for d in STAGE_SETTINGS.values():
 
     d.setdefault("loseTextColor", 8)
 
+    d.setdefault("restartText", "Restart")
+    d.setdefault("restartTextColor", 8)
+
 
     # FUNCTIONS
     def scope():
-        last_spawn_frame = -6969
-        spawn_interval = 3.5
-        event_cleanups: list[Callable[[], None]] = []
-        def default_init(game: GameField, stage: Stage):
-            
+        def default_init(game: GameField, stage: Stage, data: dict[str, Any]):
+            data["lastSpawnFrame"] = -6969
+            data["spawnInterval"] = 3.5
+            data["eventCleanups"] = list[Callable[[], None]]()
+
             # powerup spawn
             def spawn_powerup(_: EnemyController):
                 enemy_count = stage.get_total_enemy_count()
@@ -256,20 +308,18 @@ for d in STAGE_SETTINGS.values():
             stage.onEnemyRemoved.add_listener(spawn_powerup)
             def remove_listener():
                 stage.onEnemyRemoved.remove_listener(spawn_powerup)
-            event_cleanups.append(remove_listener)
+            data["eventCleanups"].append(remove_listener)
 
-        def default_update(game: GameField, stage: Stage, frame_count: int):
-            nonlocal last_spawn_frame
-
+        def default_update(game: GameField, stage: Stage, data: dict[str, Any], frame_count: int):
             enemy_spawns = stage.get_enemy_spawns()
             l = len(enemy_spawns) 
             if l > 0:
-                if frame_count > (last_spawn_frame + (game.FPS * spawn_interval)):
-                    last_spawn_frame = frame_count
+                if frame_count > (data["lastSpawnFrame"] + (game.FPS * data["spawnInterval"])):
+                    data["lastSpawnFrame"] = frame_count
                     stage.spawn_enemy_delayed(spawn_index=randint(0, l-1), tank_type=choice(game.tankFactory.get_tank_types()))
 
-        def default_cleanup(game: GameField, stage: Stage):
-            [f() for f in event_cleanups]
+        def default_cleanup(game: GameField, stage: Stage, data: dict[str, Any]):
+            [f() for f in data["eventCleanups"]]
 
         d.setdefault("init", default_init)
         d.setdefault("update", default_update)

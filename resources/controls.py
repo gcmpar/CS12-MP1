@@ -76,5 +76,9 @@ DEBUG_CONTROLS: dict[str, dict[str, Any]] = {
     "???": {
         "name": "M",
         "btn": pyxel.KEY_M,
+    },
+    "K": {
+        "name": "B",
+        "btn": pyxel.KEY_B
     }
 }

@@ -10,6 +10,7 @@ from objects.Forest import Forest
 from objects.Home import Home
 from objects.Mirror import Mirror
 from objects.Powerup import Powerup
+from objects.Karma import Karma
 
 ASSET_INDEX: dict[Type[GameObject] | str, Sequence[tuple[int, int]]] = {
     Tank: [(0, y) for y in range(4)] # player
@@ -32,7 +33,22 @@ ASSET_INDEX: dict[Type[GameObject] | str, Sequence[tuple[int, int]]] = {
     "Spawning": [(5, 2)],
     "Explode": [(6, 0), (6, 1)],
 
-    "Mirage": [(4, 4)]
+    "Mirage": [(4, 4)],
 
+
+
+
+
+
+
+
+
+
+    Karma: [(7, 7)],
+    "K": [(4, 6), (4, 7)]
+        + [(5, 6), (5, 7)]
+        + [(6, 6), (6, 7)]
+        + [(4, 5), (5, 5), (6, 5)]
+    ,
     
 }

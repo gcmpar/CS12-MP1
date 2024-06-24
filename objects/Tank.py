@@ -4,7 +4,9 @@ from collections.abc import Callable
 
 if TYPE_CHECKING:
     from gamefiles.GameField import GameField
-    from misc.util import Team
+
+
+from misc.util import Team, orientation_to_move_vector
 
 from objects.Entity import Entity
 from objects.GameObject import GameObject
@@ -91,8 +93,7 @@ class Tank(Entity):
 
         cell = self.get_cell()
         ori = self.orientation
-        x_move = 1 if ori == "east" else -1 if ori == "west" else 0
-        y_move = 1 if ori == "south" else -1 if ori == "north" else 0
+        x_move, y_move = orientation_to_move_vector(ori)
         bullet_x = cell.x + x_move
         bullet_y = cell.y + y_move
 
@@ -106,9 +107,9 @@ class Tank(Entity):
 
         bullet = Bullet(
             game=self.game,
+            owner=self,
             x=self.get_cell().x + x_move,
             y=self.get_cell().y + y_move,
-            owner=self,
             ori=ori,
             speed=self.stats["bulletSpeed"].current
             )
@@ -137,7 +138,7 @@ class Tank(Entity):
 
     def can_touch(self, other: GameObject):
         if isinstance(other, Bullet):
-            if self.team == "enemy" and other.owner.team == "enemy":
+            if self.team == "enemy" and other.owner is not None and other.owner.team == "enemy":
                 return False
                 
         return True
