@@ -22,8 +22,9 @@ Tank
     onBulletFired: Signal[[Bullet], None]
     stats: {
         "health": Stat
-        "movementSpeed: Stat
-        "fireRate: Stat
+        "movementSpeed": Stat
+        "fireRate": Stat
+        "bulletSpeed": Stat
     }
 
     start_moving()
@@ -51,6 +52,7 @@ class Tank(Entity):
                  health: float,
                  movement_speed: float,
                  fire_rate: float,
+                 bullet_speed: float,
 
                  pre_added: Callable[[GameObject], bool] | None = None
                 
@@ -64,6 +66,7 @@ class Tank(Entity):
             "health": Stat(health),
             "movementSpeed": Stat(movement_speed),
             "fireRate": Stat(fire_rate),
+            "bulletSpeed": Stat(bullet_speed)
         }
 
 
@@ -107,7 +110,7 @@ class Tank(Entity):
             y=self.get_cell().y + y_move,
             owner=self,
             ori=ori,
-            speed=15
+            speed=self.stats["bulletSpeed"].current
             )
         self.onBulletFired.fire(bullet)
         return bullet

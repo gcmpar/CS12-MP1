@@ -55,7 +55,6 @@ def _(game: GameField, tank: Tank):
         
     mod = Modifier(
         game=game,
-        owner=tank,
         type="ExtraSpeed",
         update=update,
         destroy=destroy
@@ -107,7 +106,6 @@ def _(game: GameField, tank: Tank):
 
         mod = Modifier(
                 game=game,
-                owner=entity,
                 type="TimeStop",
                 priority=6969,
                 init=init,
@@ -174,7 +172,6 @@ def _(game: GameField, tank: Tank):
             owner.stats["fireRate"].current = owner.stats["fireRate"].base
     self_mod = Modifier(
         game=game,
-        owner=tank,
         type="TimeStopBuff",
         priority=6969,
         update=mod_update,
@@ -225,7 +222,6 @@ def _(game: GameField, tank: Tank):
     
     mod = Modifier(
         game=game,
-        owner=tank,
         type="Mirage",
         priority=6969,
         init=init,

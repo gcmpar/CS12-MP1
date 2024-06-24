@@ -48,9 +48,9 @@ def _():
         ...
         ...
 
-        "init": init,
-        "update": update,
-        "cleanup": cleanup,
+        "init": Callable[[GameField, Stage], None],
+        "update": Callable[[GameField, Stage, int], None],
+        "cleanup": Callable[[GameField, Stage], None],
     }
 
 NOTE: can use this scope for any variables needed to be passed around
@@ -167,7 +167,7 @@ def _():
 
     def cleanup(game: GameField, stage: Stage):
         [f() for f in event_cleanups]
-    
+
     data["init"] = init
     data["update"] = update
     data["cleanup"] = cleanup
@@ -176,15 +176,34 @@ def _():
 
 @create(name="_empty")
 def _():
+    def init(game: GameField, stage: Stage):
+        pass
+    def update(game: GameField, stage: Stage, frame_count: int):
+        pass
+    def cleanup(game: GameField, stage: Stage):
+        pass
     return {
         "lives": 1,
         "enemySpawns": 0,
+
+        "init": init,
+        "update": update,
+        "cleanup": cleanup,
     }
 @create(name="_TEST")
 def _():
+    def init(game: GameField, stage: Stage):
+        pass
+    def update(game: GameField, stage: Stage, frame_count: int):
+        pass
+    def cleanup(game: GameField, stage: Stage):
+        pass
     return {
         "lives": 999,
         "enemySpawns": 999,
+        "init": init,
+        "update": update,
+        "cleanup": cleanup,
     }
 
 

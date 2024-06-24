@@ -292,17 +292,17 @@ class Renderer:
             pyxel.text(pyxel.width-(len(stage_display)*pyxel.FONT_WIDTH)-1,pyxel.height-pyxel.FONT_HEIGHT-1,stage_display,7)
 
             if current_state == GameState.WIN or current_state == GameState.LOSE:
-                params = STAGE_SETTINGS[current_stage]
+                data = STAGE_SETTINGS[current_stage]
                 if current_state == GameState.WIN:
-                    self.display_center_text(params["winText"], params["winTextColor"], 0, -pyxel.FONT_HEIGHT*2)
-                    self.display_center_text(f"Press {CONTROLS["next"]["name"]} to {params["nextText"]}", params["nextTextColor"], 0, pyxel.FONT_HEIGHT)
+                    self.display_center_text(data["winText"], data["winTextColor"], 0, -pyxel.FONT_HEIGHT*2)
+                    self.display_center_text(f"Press {CONTROLS["next"]["name"]} to {data["nextText"]}", data["nextTextColor"], 0, pyxel.FONT_HEIGHT)
 
                 else:
-                    if "loseText" in params.keys():
-                        lose_text = params["loseText"]
+                    if "loseText" in data.keys():
+                        lose_text = data["loseText"]
                     else:
                         lose_text = "HOME CELL WAS DESTROYED" if True in {h.is_destroyed() for h in self.game.stage.get_homes()} else "YOU DIED"
-                    self.display_center_text(lose_text, params["loseTextColor"])
+                    self.display_center_text(lose_text, data["loseTextColor"])
 
                 self.display_center_text(f"Press {CONTROLS["restart"]["name"]} to Restart", 11, 0, pyxel.FONT_HEIGHT * 2.5)
             

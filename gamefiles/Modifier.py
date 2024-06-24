@@ -14,7 +14,7 @@ NOTE: modifier function must access tank with self.owner !!
 Modifier
     game: GameField
     owner: GameObject
-        - can be transferred!!
+        - set by the object when added
     type: str
         - descriptor for rendering or other managers
     priority: int
@@ -29,7 +29,7 @@ Modifier
             this can instead be used
         - this allows for modifier copying
     
-    copy(copy_data: bool = False) -> Modifier
+    copy() -> Modifier
         - returns a copy of the modifier
     
     init()
@@ -49,12 +49,13 @@ Modifier
 '''
 
 class Modifier:
+    owner: GameObject
     init: Callable[[Modifier], None]
     update: Callable[[Modifier, int], None]
     destroy: Callable[[Modifier], None]
     can_collide: Callable[[Modifier, GameObject], bool | None]
     can_touch: Callable[[Modifier, GameObject], bool | None]
-    def __init__(self, game: GameField, owner: GameObject, type: str, priority: int | None = None, stage_transferrable: bool = True,
+    def __init__(self, game: GameField, type: str, priority: int | None = None, stage_transferrable: bool = True,
                  init: Callable[[Modifier], None] | None = None,
                  update: Callable[[Modifier, int], None] | None = None,
                  destroy: Callable[[Modifier], None] | None = None,
@@ -63,7 +64,6 @@ class Modifier:
                  data: dict[str, Any] | None = None):
         
         self.game = game
-        self.owner = owner
         self.type = type
         self.priority = priority if priority is not None else 0
         self.stageTransferrable = stage_transferrable
@@ -75,10 +75,9 @@ class Modifier:
         self.can_collide = can_collide if can_collide is not None else lambda _, o: None
         self.can_touch = can_touch if can_touch is not None else lambda _, o: None
     
-    def copy(self, copy_data: bool = False):
+    def copy(self):
         return Modifier(
             game=self.game,
-            owner=self.owner,
             type=self.type,
             priority=self.priority,
             init=self.init,
@@ -86,7 +85,6 @@ class Modifier:
             destroy=self.destroy,
             can_collide=self.can_collide,
             can_touch=self.can_touch,
-            data=self.data if copy_data else None
         )
 
 

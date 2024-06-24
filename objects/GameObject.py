@@ -189,6 +189,7 @@ class GameObject():
             return
         self._modifiers.append(mod)
         self._modifiers.sort(key=lambda e: e.priority)
+        setattr(mod, "owner", self)
         mod.init(mod)
         self.onModifierAdded.fire(mod)
         self.main_update(self._lastFrameCount)
