@@ -27,20 +27,20 @@ def orientation_to_move_vector(ori: Orientation):
 
 
 # maps Orientation to reflection vector
-_mirror_map: dict[Orientation, tuple[int, int]] = {
+_MIRROR_MAP: dict[Orientation, tuple[int, int]] = {
                     "east": (1, 0),
                     "north": (0, -1),
                     "west": (-1, 0),
                     "south": (0, 1)
     }
 # maps reflection vector to Orientation (inverse of above)
-_mirror_map_inv: dict[tuple[int, int], Orientation] = {v: k for k, v in _mirror_map.items()}
+_MIRROR_MAP_INV: dict[tuple[int, int], Orientation] = {v: k for k, v in _MIRROR_MAP.items()}
 def orientation_to_ref_vector(ori: Orientation, ref_ori: ReflectOrientation):
-    c = _mirror_map[ori]
+    c = _MIRROR_MAP[ori]
     c = (c[1], c[0])
     if ref_ori == "northeast":
         c = (-c[0], -c[1])
-    return _mirror_map_inv[c]
+    return _MIRROR_MAP_INV[c]
 
 def flip_orientation(ori: Orientation):
     return "south" if ori == "north" \
