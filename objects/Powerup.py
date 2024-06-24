@@ -34,6 +34,11 @@ class Powerup(GameObject):
     def can_collide(self, other: GameObject) -> bool:
         return False
     
+    def can_touch(self, other: GameObject):
+        if not isinstance(other, Tank):
+            return True
+        return False
+    
     def touched(self, other: GameObject):
         if not isinstance(other, Tank):
             return

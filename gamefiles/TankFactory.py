@@ -112,7 +112,7 @@ def _():
                 assert isinstance(owner, Bullet)
                 owner.speed = self.data["origSpeed"]
 
-            def can_collide(self: Modifier, other: GameObject):
+            def can_touch(self: Modifier, other: GameObject):
                 owner = self.owner
                 assert isinstance(owner, Bullet)
 
@@ -120,8 +120,9 @@ def _():
                     if other.owner is not None and other.owner.team == owner.owner.team:
                         if other.has_modifier_type("_midair"):
                             return False
-                return owner.can_collide(other)
-
+                return owner.can_touch(other)
+            
+            # doesn't take into account timestop!!
             mod = Modifier(
                 game=game,
                 type="_midair",
@@ -129,7 +130,7 @@ def _():
                 init=init,
                 update=update,
                 destroy=destroy,
-                can_collide=can_collide,
+                can_touch=can_touch,
                 stage_transferrable=False
             )
             bullet.add_modifier(mod)

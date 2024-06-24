@@ -3,4 +3,8 @@
     "python.analysis.typeCheckingMode": "strict",
     "debug.console.historySuggestions": false,
     "liveshare.anonymousGuestApproval": "accept",
+    "files.exclude": {
+        "**/__pycache__": true,
+        "**/*.pyc": true
+    },
 }
