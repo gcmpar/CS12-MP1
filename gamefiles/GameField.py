@@ -141,7 +141,7 @@ class GameField(PyxelGrid[Cell]):
             raise ValueError(f"Please specify stage settings for {stage}!")
 
         self.set_game_state(GameState.GENERATING)
-        stage="_TEST"
+        
         was_destroyed = self.stage.get_player().tank.is_destroyed()
         modifiers = [mod.copy() for mod in self.stage.get_player().tank.get_modifiers() if mod.stageTransferrable]
         self.stage.cleanup()
@@ -163,15 +163,15 @@ class GameField(PyxelGrid[Cell]):
         # PHYSICS TEST (can remove this ig)
         # # from objects.Stone import Stone
         # # Stone(self, 1, 2)
-        t1 = self.tankFactory.tank(2, 4, "enemy", "Armored")
-        t2 = self.tankFactory.tank(4, 2, "enemy", "Armored")
-        t3 = self.tankFactory.tank(1, 0, "enemy", "Armored")
-        t1.set_orientation("north")
-        t2.set_orientation("west")
-        t3.set_orientation("south")
-        t1.start_moving()
-        t2.start_moving()
-        t3.start_moving()
+        # t1 = self.tankFactory.tank(2, 4, "enemy", "Armored")
+        # t2 = self.tankFactory.tank(4, 2, "enemy", "Armored")
+        # t3 = self.tankFactory.tank(1, 0, "enemy", "Armored")
+        # t1.set_orientation("north")
+        # t2.set_orientation("west")
+        # t3.set_orientation("south")
+        # t1.start_moving()
+        # t2.start_moving()
+        # t3.start_moving()
     
     def next_stage(self):
         stage = self.stage.name

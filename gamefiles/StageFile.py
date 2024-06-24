@@ -16,7 +16,6 @@ from objects.Home import Home
 from objects.Mirror import Mirror
 
 from gamefiles.Signal import Signal
-from misc.util import GameState
 
 from resources.assetindex import ASSET_INDEX
 from resources.stagefunctions import STAGE_FUNCTIONS
@@ -70,6 +69,7 @@ Stage
         - stage's name (without .txt extension)
     onStageGenerated: Signal[[], None]
     onPlayerAdded: Signal[[PlayerController], None]
+    onPlayerRemoved: Signal[[PlayertController], None]
     onLifeChanged: Signal[[int], None]
     onEnemyAdded: Signal[[EnemyController], None]
     onEnemyRemoved: Signal[[EnemyController], None]
@@ -112,6 +112,7 @@ class Stage():
         self.name = ""
         self.onStageGenerated = Signal[[], None](game)
         self.onPlayerAdded = Signal[[PlayerController], None](game)
+        self.onPlayerRemoved = Signal[[PlayerController], None](game)
         self.onLifeChanged = Signal[[int], None](game)
         self.onEnemyAdded = Signal[[EnemyController], None](game)
         self.onEnemyRemoved = Signal[[EnemyController], None](game)
@@ -237,6 +238,7 @@ class Stage():
         
         def decrease_life():
             self.set_lives(self.get_lives()-1)
+            self.onPlayerRemoved.fire(player)
             self.onLifeChanged.fire(self.get_lives())
         self._player.tank.onDestroy.add_listener(decrease_life)
 
@@ -246,15 +248,8 @@ class Stage():
 
         def on_spawn():
             self.game.renderer.render_z(x=self.game.x(x), y=self.game.y(y), index=ASSET_INDEX["Spawning"][0], z_index=-1)
-        self.game.renderer.render_custom(on_spawn,
-                                        duration=0.25, 
-                                        callback=lambda: self.game.onStateChanged.remove_listener(stop))
-
-        def stop(state: GameState):
-            self.game.onStateChanged.remove_listener(stop)
-            self.game.renderer.stop_render_custom(on_spawn)
-        self.game.onStateChanged.add_listener(stop)
-
+        self.game.renderer.render_custom(on_spawn, duration=0.25)
+        
         self.onPlayerAdded.fire(player)
 
     
@@ -332,7 +327,7 @@ class Stage():
             if data["frames"] > self.game.FPS * self._enemySpawnDelayInterval:
                 self._enemyDelayedSpawns.remove(data)
                 self.spawn_enemy(spawn_index=spawn_index, tank_type=data["tankType"])
-            else:
+            elif self.get_remaining_enemy_spawns() > 0:
                 assert isinstance(data["spawnIndex"], int)
                 l = len(self._enemySpawns)
                 if l > 0 and spawn_index < l:
