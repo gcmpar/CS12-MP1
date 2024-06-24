@@ -52,7 +52,7 @@ class SoundManager:
             def on_explode():
                 if self.game.get_game_state() == GameState.GENERATING:
                     return
-                pyxel.play(0, pyxel.sounds[1 if isinstance(obj, Bullet) else 3])
+                pyxel.play(0, pyxel.sounds[1 if isinstance(obj, Bullet) else 2])
             obj.onDestroy.add_listener(on_explode)
 
             if isinstance(obj, Bullet):

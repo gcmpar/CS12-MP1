@@ -1,6 +1,8 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 
+import pyxel
+
 if TYPE_CHECKING:
     from gamefiles.GameField import GameField
     from objects.GameObject import GameObject
@@ -67,4 +69,7 @@ def K(game: GameField, x: int, y: int, ori: Orientation):
         new_y = y + y_move
         rec(new_x, new_y, ori)
     rec()
+    pyxel.stop()
+    pyxel.play(1, pyxel.sounds[3])
+    pyxel.play(2, pyxel.sounds[4])
         
