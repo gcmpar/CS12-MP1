@@ -95,17 +95,17 @@ def _():
 
                 self.data["origSpeed"] = owner.speed
                 self.data["frames"] = 0
-                owner.speed = self.game.FPS / 8
+                owner.speed = 3.5
 
             def update(self: Modifier, frame_count: int):
                 self.data["frames"] += 1
-                if self.data["frames"] > self.game.FPS * 0.65:
+                if self.data["frames"] > self.game.FPS * 0.75:
                     self.owner.remove_modifier(self)
                     return
 
                 owner = self.owner
                 assert isinstance(owner, Bullet)
-                owner.speed = self.game.FPS / 8
+                owner.speed = 3.5
 
             def destroy(self: Modifier):
                 owner = self.owner
