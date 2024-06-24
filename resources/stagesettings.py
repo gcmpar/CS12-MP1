@@ -274,7 +274,7 @@ for d in STAGE_SETTINGS.values():
     d.setdefault("loseTextColor", 8)
 
     d.setdefault("restartText", "Restart")
-    d.setdefault("restartTextColor", 8)
+    d.setdefault("restartTextColor", 11)
 
 
     # FUNCTIONS

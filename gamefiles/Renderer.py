@@ -308,7 +308,7 @@ class Renderer:
                         lose_text = "HOME CELL WAS DESTROYED" if True in {h.is_destroyed() for h in self.game.stage.get_homes()} else "YOU DIED"
                     self.display_center_text(lose_text, settings["loseTextColor"])
 
-                self.display_center_text(f"Press {CONTROLS["restart"]["name"]} to Restart", 11, 0, pyxel.FONT_HEIGHT * 2.5)
+                self.display_center_text(f"Press {CONTROLS["restart"]["name"]} to {settings["restartText"]}", settings["restartTextColor"], 0, pyxel.FONT_HEIGHT * 2.5)
             
             if pyxel.btn(DEBUG_CONTROLS["debug"]["btn"]):
                 debug_text = "DEBUG"
