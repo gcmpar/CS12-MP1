@@ -10,6 +10,6 @@ MirrorNE|1|2|3|4|5|6|7|8|9|10|11|12|CrackedBrick|MirrorSE
 1|CrackedBrick|3|MirrorSE|1| |Brick|Brick|Brick|CrackedBrick|CrackedBrick|MirrorSE|1|2|3
  | | | | | | | | |CrackedBrick| | | |CrackedBrick| 
 1|MirrorNE|1|CrackedBrick|3|MirrorNE|1|MirrorSE|1|2|MirrorSE|1|CrackedBrick|MirrorNE|1
-1|2|3|4|5|6|7|8|MirrorSE|1|2|3|4|5|6
-1|2|MirrorSE|1|2|3|CrackedBrick|Spawn|1|2|3|MirrorNE|1|2|3
-MirrorSE| | | | |CrackedBrick| |CrackedBrick| | | | | | |MirrorNE
+1|2|3|4|5|Brick|7|8|MirrorSE|1|2|3|4|5|6
+1|2|MirrorSE|1|2|3|Brick|Spawn|1|2|3|MirrorNE|1|2|3
+MirrorSE| | | | |Brick| |Brick| | | | | | |MirrorNE
