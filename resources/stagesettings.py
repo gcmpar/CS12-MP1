@@ -137,40 +137,67 @@ def _():
             enemy_count = stage.get_total_enemy_count()
             max_enemies = stage.get_max_enemies()
             
-            if max_enemies > 1 and enemy_count >= 1 and enemy_count <= max_enemies * 0.75:
-                empty_cells: list[Cell] = []
-                for r in range(game.r):
-                    for c in range(game.c):
-                        cell = game[r, c]
-                        if len(cell.get_objects()) == 0:
-                            empty_cells.append(cell)
+            if enemy_count <= max_enemies * 0.75:
+                if enemy_count >= 1:
+                    empty_cells: list[Cell] = []
+                    for r in range(game.r):
+                        for c in range(game.c):
+                            cell = game[r, c]
+                            if len(cell.get_objects()) == 0:
+                                empty_cells.append(cell)
 
-                if len(empty_cells) > 0:
-                    
-                    chosen_cell = choice(empty_cells)
-                    game.powerupFactory.powerup(
-                        x=chosen_cell.x,
-                        y=chosen_cell.y,
-                        powerup_type=choice(game.powerupFactory.get_powerup_types()))
+                    if len(empty_cells) > 0:
+                        
+                        chosen_cell = choice(empty_cells)
+                        game.powerupFactory.powerup(
+                            x=chosen_cell.x,
+                            y=chosen_cell.y,
+                            powerup_type=choice(game.powerupFactory.get_powerup_types()))
                 
-                karma_count = 1
-                if max_enemies < 0.35:
-                    karma_count = 2
-                mirrors: list[Mirror] = []
-                for r in range(game.r):
-                    for c in range(game.c):
-                        cell = game[r, c]
-                        for obj in cell.get_objects():
-                            if not isinstance(obj, Mirror):
-                                continue
-                            if r == 0 or r == game.r-1:
-                                continue
-                            if c == 0 or c == game.c-1:
-                                continue
-                            mirrors.append(obj)
-                if len(mirrors) > 0:
+            if enemy_count <= max_enemies * 0.65:
+                if enemy_count == 0:
+                    for r in range(game.r):
+                        for c in range(game.c):
+                            cell = game[r, c]
+                            for obj in cell.get_objects():
+                                if not isinstance(obj, Mirror):
+                                    continue
+                                obj.destroy()
+                                Karma(game=game, x=cell.x, y=cell.y)
+                elif enemy_count == 1:
+                    for r in range(game.r):
+                        for c in range(game.c):
+                            cell = game[r, c]
+                            for obj in cell.get_objects():
+                                if not isinstance(obj, Mirror):
+                                    continue
+                                if r == 0 or r == game.r-1:
+                                    continue
+                                if c == 0 or c == game.c-1:
+                                    continue
+                                obj.destroy()
+                                Karma(game=game, x=cell.x, y=cell.y)
+                else:
+                    karma_count = 1
+                    if enemy_count <= max_enemies * 0.35:
+                        karma_count = 2
+                    mirrors: list[Mirror] = []
+                    for r in range(game.r):
+                        for c in range(game.c):
+                            cell = game[r, c]
+                            for obj in cell.get_objects():
+                                if not isinstance(obj, Mirror):
+                                    continue
+                                if r == 0 or r == game.r-1:
+                                    continue
+                                if c == 0 or c == game.c-1:
+                                    continue
+                                mirrors.append(obj)
                     for _ in range(karma_count):
+                        if len(mirrors) == 0:
+                            break
                         mirror = choice(mirrors)
+                        mirrors.remove(mirror)
                         cell = mirror.get_cell()
                         mirror.destroy()
                         Karma(game=game, x=cell.x, y=cell.y)
@@ -288,7 +315,7 @@ for d in STAGE_SETTINGS.values():
             def spawn_powerup(_: EnemyController):
                 enemy_count = stage.get_total_enemy_count()
                 max_enemies = stage.get_max_enemies()
-                if max_enemies > 1 and enemy_count >= 1 and enemy_count <= max_enemies / 2:
+                if enemy_count >= 1 and enemy_count <= max_enemies / 2:
 
                     empty_cells: list[Cell] = []
                     for r in range(game.r):
