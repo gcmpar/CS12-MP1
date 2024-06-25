@@ -184,7 +184,7 @@ A **newline** for each **ROW**<br>
 
 `Modifier` [Modifier](gamefiles/Modifier.py)
 - Manipulator of the whole game
-- Inteded for tank stat manipulation, as well as object collision/touch override
+- Intended for tank stat manipulation, as well as object collision/touch override
 - Can also include other external updates
 - Can be transferred between stages
 
